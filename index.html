@@ -6,6 +6,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="mobile-web-app-capable" content="yes"/>
 <title>Mathematical Atelier</title>
+<!-- Firebase SDK (compat per uso senza bundler) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=Work+Sans:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -65,8 +69,48 @@ svg.geo { max-width:100%; height:auto; }
 </head>
 <body class="bg-surface text-on-surface min-h-[100dvh] flex flex-col">
 
+<!-- ═══════════ SCHERMATA AUTH (login/registrazione) ═══════════ -->
+<main id="screen-auth" class="screen active min-h-[100dvh] flex flex-col items-center justify-center px-6 py-12">
+  <div class="w-full max-w-sm">
+    <div class="text-center mb-8">
+      <span class="material-symbols-outlined text-5xl text-primary mb-2">calculate</span>
+      <h1 class="text-2xl font-headline font-extrabold text-primary">Mathematical Atelier</h1>
+      <p class="text-on-surface-variant text-sm mt-1">Accedi per salvare i tuoi progressi</p>
+    </div>
+    <!-- Toggle login/registrazione -->
+    <div class="flex bg-surface-container-low rounded-xl p-1 mb-6">
+      <button id="tab-login" onclick="switchAuthTab('login')" class="flex-1 py-2 rounded-lg font-label font-bold text-sm transition-all bg-primary text-on-primary">Accedi</button>
+      <button id="tab-signup" onclick="switchAuthTab('signup')" class="flex-1 py-2 rounded-lg font-label font-bold text-sm transition-all text-on-surface-variant">Registrati</button>
+    </div>
+    <!-- Form -->
+    <div class="flex flex-col gap-3">
+      <input id="auth-name" type="text" placeholder="Il tuo nome" class="hidden w-full px-4 py-3 rounded-xl bg-surface-container-low border border-outline-variant/30 font-body text-on-surface focus:ring-2 focus:ring-primary/20 outline-none" autocomplete="name"/>
+      <input id="auth-email" type="email" placeholder="Email" class="w-full px-4 py-3 rounded-xl bg-surface-container-low border border-outline-variant/30 font-body text-on-surface focus:ring-2 focus:ring-primary/20 outline-none" autocomplete="email"/>
+      <input id="auth-pass" type="password" placeholder="Password" class="w-full px-4 py-3 rounded-xl bg-surface-container-low border border-outline-variant/30 font-body text-on-surface focus:ring-2 focus:ring-primary/20 outline-none" autocomplete="current-password"/>
+      <p id="auth-error" class="text-error text-xs font-label hidden"></p>
+      <button id="auth-submit" onclick="handleAuth()" class="w-full bg-primary text-on-primary font-headline font-bold py-3 rounded-xl active:scale-[0.97] transition-all shadow-lg">Accedi</button>
+    </div>
+    <!-- Divider -->
+    <div class="flex items-center gap-3 my-5">
+      <div class="flex-1 h-px bg-outline-variant/30"></div>
+      <span class="text-xs text-on-surface-variant font-label">oppure</span>
+      <div class="flex-1 h-px bg-outline-variant/30"></div>
+    </div>
+    <!-- Google -->
+    <button onclick="handleGoogleSignIn()" class="w-full flex items-center justify-center gap-3 bg-surface-container-low border border-outline-variant/30 py-3 rounded-xl font-label font-bold text-sm active:scale-[0.97] transition-all hover:bg-surface-container">
+      <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#4285F4" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#34A853" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59A14.5 14.5 0 019.5 24c0-1.59.28-3.14.76-4.59l-7.98-6.19A23.9 23.9 0 000 24c0 3.77.9 7.35 2.56 10.53l7.97-5.94z"/><path fill="#EA4335" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 5.94C6.51 42.62 14.62 48 24 48z"/></svg>
+      Accedi con Google
+    </button>
+    <!-- Skip -->
+    <button onclick="skipAuth()" class="w-full mt-4 py-2 text-on-surface-variant font-label text-xs underline active:scale-[0.97] transition-all">
+      Continua senza account
+    </button>
+    <p class="text-center text-[10px] text-outline mt-6 font-label">v1.0</p>
+  </div>
+</main>
+
 <!-- ═══════════ HEADER ═══════════ -->
-<header id="app-header" class="bg-white/90 backdrop-blur-md flex justify-between items-center px-4 md:px-6 py-3 w-full fixed top-0 z-50 border-b border-outline-variant/30">
+<header id="app-header" class="bg-white/90 backdrop-blur-md flex justify-between items-center px-4 md:px-6 py-3 w-full fixed top-0 z-50 border-b border-outline-variant/30 hidden">
   <div class="flex items-center gap-3">
     <button id="btn-back" class="p-2 hover:bg-primary-fixed/40 rounded-full active:scale-95 hidden" onclick="goBack()">
       <span class="material-symbols-outlined text-primary">arrow_back</span>
@@ -77,9 +121,9 @@ svg.geo { max-width:100%; height:auto; }
 </header>
 
 <!-- ═══════════ SCHERMATA 1: HOME ═══════════ -->
-<main id="screen-home" class="screen active flex-1 mt-16 mb-20 px-4 md:px-8 lg:px-16 max-w-5xl mx-auto w-full pt-6">
+<main id="screen-home" class="screen flex-1 mt-16 mb-20 px-4 md:px-8 lg:px-16 max-w-5xl mx-auto w-full pt-6">
   <div class="mb-8">
-    <h2 class="text-2xl md:text-3xl font-headline font-extrabold text-on-surface mb-2">Ciao! 👋</h2>
+    <h2 id="home-greeting" class="text-2xl md:text-3xl font-headline font-extrabold text-on-surface mb-2">Ciao! 👋</h2>
     <p class="text-on-surface-variant">Scegli un argomento per esercitarti.</p>
   </div>
   <!-- Barra progresso globale -->
@@ -94,6 +138,7 @@ svg.geo { max-width:100%; height:auto; }
   </div>
   <!-- Griglia argomenti -->
   <div id="topics-grid" class="topic-grid"></div>
+  <p class="text-center text-[10px] text-outline mt-8 font-label">v1.0</p>
 </main>
 
 <!-- ═══════════ SCHERMATA 2: LISTA ESERCIZI ═══════════ -->
@@ -194,7 +239,7 @@ svg.geo { max-width:100%; height:auto; }
 </main>
 
 <!-- ═══════════ BOTTOM NAV ═══════════ -->
-<nav class="fixed bottom-0 left-0 w-full z-50 bg-white flex justify-around items-center pt-2 px-2 shadow-[0_-2px_20px_rgba(7,30,39,0.08)] rounded-t-2xl pb-safe">
+<nav id="bottom-nav" class="fixed bottom-0 left-0 w-full z-50 bg-white flex justify-around items-center pt-2 px-2 shadow-[0_-2px_20px_rgba(7,30,39,0.08)] rounded-t-2xl pb-safe hidden">
   <button onclick="navigate('home')" data-nav="home" class="nav-btn flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all">
     <span class="material-symbols-outlined mb-0.5">home</span>
     <span class="text-[10px] font-label font-bold">Home</span>
@@ -215,8 +260,138 @@ svg.geo { max-width:100%; height:auto; }
 
 <script>
 /* ═══════════════════════════════════════════════════════════
-   MATHEMATICAL ATELIER — App completa (Fase 1, solo frontend)
+   MATHEMATICAL ATELIER — App completa con Firebase
    ═══════════════════════════════════════════════════════════ */
+
+/* ────────── FIREBASE CONFIG ────────── */
+const firebaseConfig = {
+  apiKey: "AIzaSyDbVcxYA5HtVvzHcVnMZXvQ4vaGUDQTAXs",
+  authDomain: "mathematical-atelier.firebaseapp.com",
+  projectId: "mathematical-atelier",
+  storageBucket: "mathematical-atelier.firebasestorage.app",
+  messagingSenderId: "335586060952",
+  appId: "1:335586060952:web:2d2761197c85ae55793eed"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+let currentUser = null;
+let isOfflineMode = false;
+
+/* ────────── AUTH UI ────────── */
+let authMode = 'login';
+
+function switchAuthTab(mode) {
+  authMode = mode;
+  const tabLogin = document.getElementById('tab-login');
+  const tabSignup = document.getElementById('tab-signup');
+  const nameField = document.getElementById('auth-name');
+  const submitBtn = document.getElementById('auth-submit');
+  document.getElementById('auth-error').classList.add('hidden');
+  if (mode === 'signup') {
+    tabSignup.className = 'flex-1 py-2 rounded-lg font-label font-bold text-sm transition-all bg-primary text-on-primary';
+    tabLogin.className = 'flex-1 py-2 rounded-lg font-label font-bold text-sm transition-all text-on-surface-variant';
+    nameField.classList.remove('hidden');
+    submitBtn.textContent = 'Registrati';
+  } else {
+    tabLogin.className = 'flex-1 py-2 rounded-lg font-label font-bold text-sm transition-all bg-primary text-on-primary';
+    tabSignup.className = 'flex-1 py-2 rounded-lg font-label font-bold text-sm transition-all text-on-surface-variant';
+    nameField.classList.add('hidden');
+    submitBtn.textContent = 'Accedi';
+  }
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-error');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+async function handleAuth() {
+  const email = document.getElementById('auth-email').value.trim();
+  const pass = document.getElementById('auth-pass').value;
+  const name = document.getElementById('auth-name').value.trim();
+  document.getElementById('auth-error').classList.add('hidden');
+  if (!email || !pass) return showAuthError('Inserisci email e password.');
+  if (authMode === 'signup' && !name) return showAuthError('Inserisci il tuo nome.');
+  if (pass.length < 6) return showAuthError('La password deve avere almeno 6 caratteri.');
+  try {
+    if (authMode === 'signup') {
+      const cred = await auth.createUserWithEmailAndPassword(email, pass);
+      await cred.user.updateProfile({ displayName: name });
+      await db.collection('users').doc(cred.user.uid).set({
+        name: name, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } else {
+      await auth.signInWithEmailAndPassword(email, pass);
+    }
+  } catch (e) {
+    const msgs = {
+      'auth/email-already-in-use': 'Questa email e\u0027 gia\u0027 registrata. Prova ad accedere.',
+      'auth/invalid-email': 'Email non valida.',
+      'auth/wrong-password': 'Password errata.',
+      'auth/user-not-found': 'Nessun account con questa email. Registrati!',
+      'auth/invalid-credential': 'Email o password errati.',
+      'auth/too-many-requests': 'Troppi tentativi. Riprova tra qualche minuto.',
+    };
+    showAuthError(msgs[e.code] || e.message);
+  }
+}
+
+async function handleGoogleSignIn() {
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    await auth.signInWithPopup(provider);
+  } catch (e) {
+    if (e.code !== 'auth/popup-closed-by-user') showAuthError('Errore con Google. Riprova.');
+  }
+}
+
+function skipAuth() {
+  isOfflineMode = true;
+  enterApp(null);
+}
+
+function enterApp(user) {
+  currentUser = user;
+  document.getElementById('screen-auth').classList.remove('active');
+  document.getElementById('app-header').classList.remove('hidden');
+  document.getElementById('bottom-nav').classList.remove('hidden');
+  updateHeaderUser();
+  loadProgress().then(() => navigate('home'));
+}
+
+function updateHeaderUser() {
+  const hr = document.getElementById('header-right');
+  if (currentUser) {
+    const name = currentUser.displayName || currentUser.email.split('@')[0];
+    const initial = name.charAt(0).toUpperCase();
+    document.getElementById('home-greeting').textContent = 'Ciao ' + name + '! \uD83D\uDC4B';
+    hr.innerHTML = '<div class="flex items-center gap-2">' +
+      '<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-headline font-bold text-sm">' + initial + '</div>' +
+      '<button onclick="handleLogout()" class="p-1.5 hover:bg-error-container rounded-full transition-all" title="Esci">' +
+      '<span class="material-symbols-outlined text-on-surface-variant text-xl">logout</span></button></div>';
+  } else {
+    document.getElementById('home-greeting').textContent = 'Ciao! \uD83D\uDC4B';
+    hr.innerHTML = '';
+  }
+}
+
+async function handleLogout() {
+  await auth.signOut();
+  currentUser = null;
+  isOfflineMode = false;
+  progress = {};
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-auth').classList.add('active');
+  document.getElementById('app-header').classList.add('hidden');
+  document.getElementById('bottom-nav').classList.add('hidden');
+}
+
+/* Listener stato autenticazione */
+auth.onAuthStateChanged(user => {
+  if (user && !isOfflineMode) enterApp(user);
+});
 
 /* ────────── ARGOMENTI ────────── */
 const TOPICS = [
@@ -1138,8 +1313,25 @@ let hintIdx = 0;
 /* Progresso: { topicId: Set di indici completati } */
 let progress = {};
 
-/* Carica da localStorage */
-function loadProgress() {
+/* Carica progresso da Firestore (o localStorage se offline) */
+async function loadProgress() {
+  progress = {};
+  if (currentUser) {
+    try {
+      const doc = await db.collection('progress').doc(currentUser.uid).get();
+      if (doc.exists) {
+        const d = doc.data();
+        for (const k in d) progress[k] = new Set(d[k]);
+      }
+    } catch(e) {
+      // Fallback a localStorage se Firestore non raggiungibile
+      loadFromLocal();
+    }
+  } else {
+    loadFromLocal();
+  }
+}
+function loadFromLocal() {
   try {
     const s = localStorage.getItem('mathAtelier_progress');
     if (s) {
@@ -1148,12 +1340,16 @@ function loadProgress() {
     }
   } catch(e) {}
 }
-function saveProgress() {
+async function saveProgress() {
   const d = {};
   for (const k in progress) d[k] = [...progress[k]];
+  // Salva sempre in locale
   localStorage.setItem('mathAtelier_progress', JSON.stringify(d));
+  // Salva su Firestore se loggato
+  if (currentUser) {
+    try { await db.collection('progress').doc(currentUser.uid).set(d); } catch(e) {}
+  }
 }
-loadProgress();
 
 /* ────────── NORMALIZZAZIONE ────────── */
 function norm(s) {
@@ -1637,7 +1833,8 @@ function renderStats() {
 }
 
 /* ────────── INIT ────────── */
-navigate('home');
+/* L'app parte dalla schermata auth.
+   Se l'utente è già loggato, onAuthStateChanged chiama enterApp automaticamente. */
 </script>
 </body>
 </html>
