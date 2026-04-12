@@ -1365,8 +1365,6 @@ function navigate(screen, topicId, exIdx) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   currentScreen = screen;
   const backBtn = document.getElementById('btn-back');
-  const headerRight = document.getElementById('header-right');
-  headerRight.innerHTML = '';
 
   if (screen === 'home') {
     document.getElementById('screen-home').classList.add('active');
@@ -1388,6 +1386,7 @@ function navigate(screen, topicId, exIdx) {
     backBtn.classList.add('hidden');
     renderStats();
   }
+  updateHeaderUser();
   updateNav();
   window.scrollTo(0,0);
 }
