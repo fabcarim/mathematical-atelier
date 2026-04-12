@@ -214,6 +214,13 @@ svg.geo { max-width:100%; height:auto; }
             </h3>
             <span class="text-xs font-label font-bold text-secondary bg-secondary-container px-2 py-1 rounded-full">Validazione attiva</span>
           </div>
+          <!-- Legenda notazione -->
+          <div class="mb-5 p-3 bg-surface-container-low rounded-xl flex flex-wrap gap-x-4 gap-y-1 text-xs font-label text-on-surface-variant">
+            <span><b class="text-primary">^</b> = potenza (x^2)</span>
+            <span><b class="text-primary">*</b> = moltiplicazione</span>
+            <span><b class="text-primary">/</b> = divisione</span>
+            <span class="text-outline">oppure scrivi normalmente: 2x, x2, 3x+5</span>
+          </div>
           <div id="steps-container"></div>
         </div>
       </div>
@@ -796,14 +803,14 @@ prodotti: [
     tech:{name:"Quadrato di binomio",desc:"(a+b)² = a² + 2ab + b²"},
     hint:"Servono tre pezzi: il quadrato del primo, il doppio prodotto, il quadrato del secondo.",
     steps:[
-      {label:"Passo 1: Applica la formula",answer:["x^2+2*x*3+3^2","x^2+2*x*3+9","x²+2·x·3+9"],feedback:"a²=x², 2ab=2·x·3, b²=9."},
+      {label:"Passo 1: Applica la formula",answer:["x^2+2*x*3+3^2","x^2+2*x*3+9","x^2+2x3+9","x^2+6x+3^2","x^2+6x+9","x^2+2*3*x+9","x^2+2*3x+9","x^2+2*3x+3^2"],feedback:"a²=x², 2ab=2·x·3, b²=9."},
       {label:"Passo 2: Semplifica",answer:["x^2+6x+9","x²+6x+9"],feedback:"2·x·3 = 6x."}
     ], finalAnswer:["x^2+6x+9","x²+6x+9"] },
   { expr:"(x − 4)²", title:"Quadrato con meno", desc:"(a−b)² = a² − 2ab + b²",
     tech:{name:"Quadrato di differenza",desc:"(a−b)² = a² − 2ab + b²"},
     hint:"Come il quadrato di somma, ma il doppio prodotto ha il meno.",
     steps:[
-      {label:"Passo 1: Applica la formula",answer:["x^2-2*x*4+16","x^2-8x+16","x²-8x+16"],feedback:"a²=x², −2ab=−8x, b²=16."},
+      {label:"Passo 1: Applica la formula",answer:["x^2-2*x*4+16","x^2-8x+16","x^2-2*x*4+4^2","x^2-2*4*x+16","x^2-2*4x+16","x^2-2x4+16","x^2-2x4+4^2"],feedback:"a²=x², −2ab=−8x, b²=16."},
       {label:"Passo 2: Semplifica",answer:["x^2-8x+16","x²-8x+16"],feedback:"−2·x·4 = −8x."}
     ], finalAnswer:["x^2-8x+16","x²-8x+16"] },
   { expr:"(x + 5)(x − 5)", title:"Somma per differenza", desc:"(a+b)(a−b) = a² − b²",
@@ -816,7 +823,7 @@ prodotti: [
     tech:{name:"Quadrato di binomio",desc:"(a+b)² = a² + 2ab + b²"},
     hint:"Attenzione: a non è solo x, ma 2x. Quanto fa (2x) al quadrato?",
     steps:[
-      {label:"Passo 1: a²",answer:["4x^2+2*2x*1+1","4x^2+4x+1","4x²+4x+1"],feedback:"(2x)²=4x²."},
+      {label:"Passo 1: Espandi",answer:["4x^2+2*2x*1+1","4x^2+4x+1","4x^2+2*2*x*1+1^2","4x^2+2*2x+1","(2x)^2+2*2x*1+1^2","4x^2+2*2x*1+1^2"],feedback:"(2x)²=4x², 2·2x·1=4x, 1²=1."},
       {label:"Passo 2: Risultato",answer:["4x^2+4x+1","4x²+4x+1"],feedback:"2·2x·1=4x, 1²=1."}
     ], finalAnswer:["4x^2+4x+1","4x²+4x+1"] },
   { expr:"(3x − 2)(3x + 2)", title:"Somma per differenza (2)", desc:"(a−b)(a+b) = a² − b²",
@@ -1353,13 +1360,66 @@ async function saveProgress() {
   }
 }
 
-/* ────────── NORMALIZZAZIONE ────────── */
+/* ────────── NORMALIZZAZIONE AVANZATA ────────── */
+/* Normalizza una stringa matematica rimuovendo ambiguità di notazione.
+   - Rimuove spazi
+   - Unifica simboli (×·* → *, ÷ → /, , → .)
+   - Converte ² ³ ⁴ ⁵ ⁶ ⁷ ⁸ ⁹ → ^2 ^3 etc.
+   - Rende implicita la moltiplicazione tra numero e lettera (2x → 2*x)
+   - Rende implicita la moltiplicazione tra lettera e numero (x3 → x*3) ma solo se non è parte di un ^
+*/
 function norm(s) {
-  return s.replace(/\s+/g,'').replace(/×/g,'*').replace(/·/g,'*').replace(/÷/g,'/').replace(/,/g,'.').toLowerCase();
+  let r = s;
+  r = r.replace(/\s+/g, '');
+  // Unifica simboli operazione
+  r = r.replace(/×/g, '*').replace(/·/g, '*').replace(/÷/g, '/').replace(/,/g, '.');
+  // Converti apici Unicode in ^n
+  r = r.replace(/⁰/g,'^0').replace(/¹/g,'^1').replace(/²/g,'^2').replace(/³/g,'^3')
+       .replace(/⁴/g,'^4').replace(/⁵/g,'^5').replace(/⁶/g,'^6').replace(/⁷/g,'^7')
+       .replace(/⁸/g,'^8').replace(/⁹/g,'^9');
+  r = r.toLowerCase();
+  // Rimuovi tutti i * (la moltiplicazione diventa implicita per il confronto)
+  r = r.replace(/\*/g, '');
+  return r;
 }
+
+/* Confronta la risposta con le risposte accettate.
+   Prova anche a riordinare i termini sommati/sottratti per catturare ordini diversi. */
 function checkAns(input, accepted) {
-  const n = norm(input);
-  return accepted.some(a => norm(a) === n);
+  const ni = norm(input);
+  // Confronto diretto
+  if (accepted.some(a => norm(a) === ni)) return true;
+  // Prova a confrontare i termini come insieme (ordine diverso)
+  const inputTerms = splitTerms(ni);
+  return accepted.some(a => {
+    const aTerms = splitTerms(norm(a));
+    if (inputTerms.length !== aTerms.length) return false;
+    const sorted1 = [...inputTerms].sort();
+    const sorted2 = [...aTerms].sort();
+    return sorted1.every((t, i) => t === sorted2[i]);
+  });
+}
+
+/* Splitta un'espressione nei suoi termini additivi preservando i segni.
+   "x^2+6x+9" → ["x^2", "+6x", "+9"]
+   "x^2-8x+16" → ["x^2", "-8x", "+16"]  */
+function splitTerms(expr) {
+  // Rimuovi parentesi esterne se presenti
+  let s = expr.replace(/^\(|\)$/g, '');
+  const terms = [];
+  let current = '';
+  for (let i = 0; i < s.length; i++) {
+    const c = s[i];
+    if ((c === '+' || c === '-') && i > 0 && s[i-1] !== '^') {
+      if (current) terms.push(current);
+      current = c;
+    } else {
+      current += c;
+    }
+  }
+  if (current) terms.push(current);
+  // Normalizza: aggiungi + se il termine non ha segno
+  return terms.map(t => (t[0] !== '+' && t[0] !== '-') ? '+' + t : t);
 }
 
 /* ────────── NAVIGAZIONE ────────── */
