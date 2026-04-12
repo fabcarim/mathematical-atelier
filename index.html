@@ -1,0 +1,1643 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<title>Mathematical Atelier</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=Work+Sans:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        "surface":"#f3faff","on-surface":"#071e27","surface-container":"#dbf1fe",
+        "surface-container-low":"#e6f6ff","surface-container-lowest":"#ffffff",
+        "surface-container-high":"#d5ecf8","surface-container-highest":"#cfe6f2",
+        "surface-dim":"#c7dde9","surface-variant":"#cfe6f2",
+        "primary":"#004790","on-primary":"#ffffff","primary-container":"#1a5fb4",
+        "on-primary-container":"#cbdcff","primary-fixed":"#d6e3ff","primary-fixed-dim":"#aac7ff",
+        "secondary":"#1b6d24","on-secondary":"#ffffff","secondary-container":"#a0f399",
+        "secondary-fixed":"#a3f69c","secondary-fixed-dim":"#88d982",
+        "tertiary":"#743800","tertiary-fixed":"#ffdcc6","tertiary-fixed-dim":"#ffb786",
+        "on-tertiary-fixed":"#311300","tertiary-container":"#984b00",
+        "error":"#ba1a1a","on-error":"#ffffff","error-container":"#ffdad6",
+        "outline":"#727783","outline-variant":"#c2c6d4",
+        "on-surface-variant":"#424752","inverse-surface":"#1e333c",
+        "on-primary-fixed":"#001b3e"
+      },
+      borderRadius: { DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem","2xl":"1rem","3xl":"1.5rem",full:"9999px" },
+      fontFamily: { headline:["Lexend"], body:["Work Sans"], label:["Plus Jakarta Sans"] }
+    }
+  }
+};
+</script>
+<style>
+.material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+body { font-family:'Work Sans',sans-serif; }
+h1,h2,h3,.font-headline { font-family:'Lexend',sans-serif; }
+.font-label { font-family:'Plus Jakarta Sans',sans-serif; }
+/* Animazioni */
+@keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+@keyframes pulse-ok { 0%,100%{box-shadow:0 0 0 0 rgba(27,109,36,.3)} 50%{box-shadow:0 0 0 12px rgba(27,109,36,0)} }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)} }
+.anim-enter { animation:fadeIn .35s ease-out; }
+.anim-ok { animation:pulse-ok .5s ease-out; }
+.anim-err { animation:shake .35s ease-out; }
+/* Schermata attiva/nascosta */
+.screen { display:none; }
+.screen.active { display:flex; flex-direction:column; }
+/* Griglia argomenti responsive */
+.topic-grid { display:grid; gap:1rem; grid-template-columns:repeat(2,1fr); }
+@media(min-width:768px) { .topic-grid { grid-template-columns:repeat(3,1fr); } }
+@media(min-width:1024px) { .topic-grid { grid-template-columns:repeat(4,1fr); } }
+/* Input touch-friendly */
+input[type=text] { font-size:1.25rem!important; min-height:52px; }
+@media(min-width:768px) { input[type=text] { font-size:1.5rem!important; } }
+/* SVG responsive */
+svg.geo { max-width:100%; height:auto; }
+/* Safe area iOS */
+.pb-safe { padding-bottom:max(1.5rem,env(safe-area-inset-bottom)); }
+</style>
+</head>
+<body class="bg-surface text-on-surface min-h-[100dvh] flex flex-col">
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header id="app-header" class="bg-white/90 backdrop-blur-md flex justify-between items-center px-4 md:px-6 py-3 w-full fixed top-0 z-50 border-b border-outline-variant/30">
+  <div class="flex items-center gap-3">
+    <button id="btn-back" class="p-2 hover:bg-primary-fixed/40 rounded-full active:scale-95 hidden" onclick="goBack()">
+      <span class="material-symbols-outlined text-primary">arrow_back</span>
+    </button>
+    <h1 class="text-lg md:text-xl font-bold tracking-tight text-primary">Mathematical Atelier</h1>
+  </div>
+  <div id="header-right" class="flex items-center gap-2"></div>
+</header>
+
+<!-- ═══════════ SCHERMATA 1: HOME ═══════════ -->
+<main id="screen-home" class="screen active flex-1 mt-16 mb-20 px-4 md:px-8 lg:px-16 max-w-5xl mx-auto w-full pt-6">
+  <div class="mb-8">
+    <h2 class="text-2xl md:text-3xl font-headline font-extrabold text-on-surface mb-2">Ciao! 👋</h2>
+    <p class="text-on-surface-variant">Scegli un argomento per esercitarti.</p>
+  </div>
+  <!-- Barra progresso globale -->
+  <div class="mb-8 bg-surface-container-low p-4 rounded-2xl">
+    <div class="flex justify-between items-center mb-2">
+      <span class="font-label text-xs font-bold text-on-surface-variant uppercase tracking-wider">Progresso totale</span>
+      <span id="global-progress-text" class="font-headline font-bold text-primary text-sm">0%</span>
+    </div>
+    <div class="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden">
+      <div id="global-progress-bar" class="h-full bg-secondary rounded-full transition-all duration-500" style="width:0%"></div>
+    </div>
+  </div>
+  <!-- Griglia argomenti -->
+  <div id="topics-grid" class="topic-grid"></div>
+</main>
+
+<!-- ═══════════ SCHERMATA 2: LISTA ESERCIZI ═══════════ -->
+<main id="screen-list" class="screen flex-1 mt-16 mb-20 px-4 md:px-8 lg:px-16 max-w-3xl mx-auto w-full pt-6">
+  <div class="mb-6">
+    <span id="list-topic-icon" class="material-symbols-outlined text-4xl text-primary mb-2"></span>
+    <h2 id="list-topic-title" class="text-2xl font-headline font-extrabold text-on-surface mb-1"></h2>
+    <p id="list-topic-desc" class="text-on-surface-variant text-sm"></p>
+  </div>
+  <div class="mb-4 bg-surface-container-low p-3 rounded-xl">
+    <div class="flex justify-between items-center mb-1">
+      <span class="font-label text-xs font-bold uppercase tracking-wider text-on-surface-variant">Completati</span>
+      <span id="list-progress-text" class="font-label font-bold text-secondary text-sm"></span>
+    </div>
+    <div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+      <div id="list-progress-bar" class="h-full bg-secondary rounded-full transition-all" style="width:0%"></div>
+    </div>
+  </div>
+  <div id="exercises-list" class="flex flex-col gap-3"></div>
+</main>
+
+<!-- ═══════════ SCHERMATA 3: WORKSPACE ═══════════ -->
+<main id="screen-work" class="screen flex-1 mt-16 mb-20 px-4 md:px-8 lg:px-16 max-w-6xl mx-auto w-full pt-4">
+  <!-- Progress pills -->
+  <div id="work-pills" class="flex gap-2 mb-6 justify-center flex-wrap"></div>
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <!-- Pannello problema -->
+    <section class="lg:col-span-4 flex flex-col gap-4">
+      <div class="bg-surface-container-low p-6 rounded-3xl relative overflow-hidden">
+        <div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary-fixed"></div>
+        <span class="font-label text-xs font-bold text-tertiary uppercase tracking-widest mb-1 block" id="w-challenge-label">Esercizio</span>
+        <h2 id="w-title" class="text-xl md:text-2xl font-headline font-extrabold text-on-surface mb-3 leading-tight"></h2>
+        <!-- Espressione o testo problema -->
+        <div id="w-expression-box" class="bg-surface-container-lowest p-4 md:p-6 rounded-2xl mb-4 flex justify-center items-center">
+          <span id="w-expression" class="text-2xl md:text-3xl font-headline font-bold tracking-wide text-primary text-center"></span>
+        </div>
+        <!-- SVG per geometria (nascosto di default) -->
+        <div id="w-svg-box" class="bg-surface-container-lowest p-4 rounded-2xl mb-4 flex justify-center items-center hidden"></div>
+        <p id="w-desc" class="text-on-surface-variant text-sm leading-relaxed"></p>
+      </div>
+      <!-- Tecnica attiva -->
+      <div class="bg-surface-container p-4 rounded-2xl border border-primary/5">
+        <div class="flex items-center gap-2 mb-2">
+          <div class="w-8 h-8 bg-primary-container rounded-lg flex items-center justify-center">
+            <span class="material-symbols-outlined text-on-primary-container text-sm">calculate</span>
+          </div>
+          <h3 class="font-headline font-bold text-sm">Tecnica</h3>
+        </div>
+        <div class="p-3 bg-white/50 rounded-xl border-l-4 border-secondary">
+          <p id="w-tech-name" class="font-headline font-bold text-secondary text-xs mb-0.5"></p>
+          <p id="w-tech-desc" class="text-xs text-on-surface-variant"></p>
+        </div>
+      </div>
+      <!-- Bottone suggerimento (per problemi) -->
+      <button id="w-hint-btn" class="hidden bg-tertiary-fixed text-on-tertiary-fixed font-label font-bold px-4 py-3 rounded-2xl active:scale-95 transition-all flex items-center gap-2 justify-center text-sm" onclick="showHint()">
+        <span class="material-symbols-outlined text-sm">psychology</span>
+        Suggerimento
+      </button>
+      <div id="w-hint-box" class="hidden bg-tertiary-fixed/30 p-4 rounded-2xl border border-tertiary-fixed">
+        <p id="w-hint-text" class="text-sm text-on-surface-variant leading-relaxed"></p>
+      </div>
+    </section>
+    <!-- Workspace -->
+    <section class="lg:col-span-8 flex flex-col gap-4">
+      <div class="bg-surface-container-low p-1 rounded-3xl">
+        <div class="bg-surface-container-lowest p-4 md:p-6 rounded-[1.3rem] shadow-sm">
+          <div class="flex justify-between items-center mb-6">
+            <h3 class="font-headline font-bold text-base md:text-lg flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-xl">edit_square</span>
+              Calcolo passo-passo
+            </h3>
+            <span class="text-xs font-label font-bold text-secondary bg-secondary-container px-2 py-1 rounded-full">Validazione attiva</span>
+          </div>
+          <div id="steps-container"></div>
+        </div>
+      </div>
+      <!-- Area risultato finale -->
+      <div id="final-area" class="bg-surface-container-highest p-6 rounded-3xl">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="text-center sm:text-left">
+            <span class="font-label text-xs font-bold text-primary uppercase tracking-widest block mb-1">Risultato finale</span>
+            <div id="final-result" class="text-3xl md:text-4xl font-headline font-black text-on-surface">?</div>
+          </div>
+          <button id="btn-check" class="bg-primary text-on-primary font-headline font-bold px-8 py-4 rounded-2xl hover:bg-primary-container transition-all active:scale-95 shadow-lg flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed text-sm md:text-base" disabled onclick="handleFinalCheck()">
+            Verifica risultato
+            <span class="material-symbols-outlined">arrow_forward</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ═══════════ SCHERMATA 4: RIEPILOGO ═══════════ -->
+<main id="screen-stats" class="screen flex-1 mt-16 mb-20 px-4 md:px-8 lg:px-16 max-w-3xl mx-auto w-full pt-6">
+  <h2 class="text-2xl font-headline font-extrabold text-on-surface mb-6">Il tuo progresso</h2>
+  <div id="stats-content"></div>
+</main>
+
+<!-- ═══════════ BOTTOM NAV ═══════════ -->
+<nav class="fixed bottom-0 left-0 w-full z-50 bg-white flex justify-around items-center pt-2 px-2 shadow-[0_-2px_20px_rgba(7,30,39,0.08)] rounded-t-2xl pb-safe">
+  <button onclick="navigate('home')" data-nav="home" class="nav-btn flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all">
+    <span class="material-symbols-outlined mb-0.5">home</span>
+    <span class="text-[10px] font-label font-bold">Home</span>
+  </button>
+  <button onclick="navigate('work')" data-nav="work" class="nav-btn flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all">
+    <span class="material-symbols-outlined mb-0.5">edit_square</span>
+    <span class="text-[10px] font-label font-bold">Esercizi</span>
+  </button>
+  <button onclick="navigate('stats')" data-nav="stats" class="nav-btn flex flex-col items-center justify-center px-4 py-2 rounded-xl transition-all">
+    <span class="material-symbols-outlined mb-0.5">analytics</span>
+    <span class="text-[10px] font-label font-bold">Progresso</span>
+  </button>
+</nav>
+
+<!-- Decorazioni sfondo -->
+<div class="fixed -bottom-24 -right-24 w-72 h-72 bg-secondary-container/15 rounded-full blur-[80px] -z-10 pointer-events-none"></div>
+<div class="fixed top-48 -left-20 w-52 h-52 bg-primary-container/10 rounded-full blur-[60px] -z-10 pointer-events-none"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   MATHEMATICAL ATELIER — App completa (Fase 1, solo frontend)
+   ═══════════════════════════════════════════════════════════ */
+
+/* ────────── ARGOMENTI ────────── */
+const TOPICS = [
+  { id:"espressioni",   icon:"function",       name:"Espressioni",          desc:"Calcolo con precedenze e parentesi" },
+  { id:"frazioni",      icon:"pie_chart",      name:"Frazioni",             desc:"Operazioni con le frazioni" },
+  { id:"potenze",       icon:"superscript",    name:"Potenze",              desc:"Proprietà e calcolo delle potenze" },
+  { id:"equazioni",     icon:"equal",          name:"Equazioni",            desc:"Equazioni di primo grado" },
+  { id:"monomi",        icon:"variable_add",   name:"Monomi e Polinomi",    desc:"Somma, prodotto e semplificazione" },
+  { id:"prodotti",      icon:"square",         name:"Prodotti Notevoli",    desc:"Quadrato di binomio e differenza di quadrati" },
+  { id:"geometria",     icon:"pentagon",       name:"Geometria Piana",      desc:"Aree e perimetri con figure", hasSvg:true },
+  { id:"pitagora",      icon:"change_history", name:"Teorema di Pitagora",  desc:"Trovare i lati dei triangoli rettangoli", hasSvg:true },
+  { id:"app_pitagora",  icon:"architecture",   name:"Applicazioni Pitagora",desc:"Problemi reali con Pitagora", hasSvg:true, isProb:true },
+  { id:"funzioni",      icon:"show_chart",     name:"Funzioni Lineari",     desc:"y = mx + q — rette e grafici", isProb:true },
+  { id:"problemi",      icon:"quiz",           name:"Problemi con Equazioni",desc:"Dal testo all'equazione", isProb:true },
+];
+
+/* ────────── BANCA DATI ESERCIZI ──────────
+   Ogni esercizio: { expr, title, desc, tech:{name,desc}, hint, steps:[ {label, prefilled?, answer[]?, feedback?} ], finalAnswer:[] }
+   Per geometria: svgType + svgData
+   Per problemi: problemText + hints[]
+*/
+const EXERCISES = {
+
+/* ══════ 1. ESPRESSIONI CON NUMERI INTERI ══════ */
+espressioni: [
+  { expr:"12 + 3 × 4", title:"Precedenze", desc:"Ricorda: prima le moltiplicazioni, poi le addizioni.",
+    tech:{name:"Precedenza operazioni",desc:"In un'espressione senza parentesi, × e ÷ si eseguono prima di + e −."},
+    hint:"Quale operazione ha la precedenza qui?",
+    steps:[
+      {label:"Passo 1: Moltiplica",answer:["12+12"],feedback:"3 × 4 = 12. Ora somma."},
+      {label:"Passo 2: Somma",answer:["24"],feedback:"12 + 12 = 24. Perfetto!"}
+    ], finalAnswer:["24"] },
+  { expr:"20 − 4 × 3 + 2", title:"Precedenze miste", desc:"Esegui prima ×, poi procedi da sinistra a destra con + e −.",
+    tech:{name:"Precedenza operazioni",desc:"× e ÷ prima di + e −, poi da sinistra a destra."},
+    hint:"C'è una moltiplicazione: risolvila per prima.",
+    steps:[
+      {label:"Passo 1: Moltiplica",answer:["20-12+2"],feedback:"4 × 3 = 12."},
+      {label:"Passo 2: Calcola",answer:["10"],feedback:"20 − 12 = 8, poi 8 + 2 = 10."}
+    ], finalAnswer:["10"] },
+  { expr:"(5 + 3) × 2", title:"Parentesi tonde", desc:"Le parentesi hanno la priorità assoluta.",
+    tech:{name:"Parentesi",desc:"Calcola prima ciò che è dentro le parentesi."},
+    hint:"Cosa c'è dentro le parentesi? Risolvilo prima.",
+    steps:[
+      {label:"Passo 1: Parentesi",answer:["8*2","8×2","8·2"],feedback:"5 + 3 = 8."},
+      {label:"Passo 2: Moltiplica",answer:["16"],feedback:"8 × 2 = 16."}
+    ], finalAnswer:["16"] },
+  { expr:"(10 − 4) × (2 + 3)", title:"Due parentesi", desc:"Calcola entrambe le parentesi, poi moltiplica.",
+    tech:{name:"Parentesi multiple",desc:"Risolvi ogni parentesi separatamente, poi combina."},
+    hint:"Risolvi ogni parentesi separatamente, poi combina i risultati.",
+    steps:[
+      {label:"Passo 1: Prima parentesi",answer:["6*(2+3)","6×(2+3)"],feedback:"10 − 4 = 6."},
+      {label:"Passo 2: Seconda parentesi",answer:["6*5","6×5"],feedback:"2 + 3 = 5."},
+      {label:"Passo 3: Moltiplica",answer:["30"],feedback:"6 × 5 = 30."}
+    ], finalAnswer:["30"] },
+  { expr:"2 × [3 + (4 − 1)]", title:"Parentesi quadre", desc:"Risolvi dall'interno verso l'esterno: prima tonde, poi quadre.",
+    tech:{name:"Parentesi annidate",desc:"Si risolvono dall'interno (tonde) verso l'esterno (quadre, graffe)."},
+    hint:"Parti sempre dalla parentesi più interna.",
+    steps:[
+      {label:"Passo 1: Tonde",answer:["2*[3+3]","2×[3+3]"],feedback:"4 − 1 = 3."},
+      {label:"Passo 2: Quadre",answer:["2*6","2×6"],feedback:"3 + 3 = 6."},
+      {label:"Passo 3: Risultato",answer:["12"],feedback:"2 × 6 = 12."}
+    ], finalAnswer:["12"] },
+  { expr:"18 ÷ (2 + 4) × 3", title:"Divisione e parentesi", desc:"Prima la parentesi, poi ÷ e × da sinistra a destra.",
+    tech:{name:"Ordine operazioni",desc:"Parentesi → × e ÷ (da sx a dx) → + e − (da sx a dx)."},
+    hint:"Risolvi la parentesi, poi procedi da sinistra a destra.",
+    steps:[
+      {label:"Passo 1: Parentesi",answer:["18/6*3","18÷6×3","18÷6*3"],feedback:"2 + 4 = 6."},
+      {label:"Passo 2: Dividi",answer:["3*3","3×3"],feedback:"18 ÷ 6 = 3."},
+      {label:"Passo 3: Moltiplica",answer:["9"],feedback:"3 × 3 = 9."}
+    ], finalAnswer:["9"] },
+  { expr:"5 × (8 − 3) − 10", title:"Sottrazione finale", desc:"Parentesi, moltiplicazione, poi sottrai.",
+    tech:{name:"Ordine operazioni",desc:"Parentesi → × → −"},
+    hint:"Inizia dalla parentesi, poi segui l'ordine delle operazioni.",
+    steps:[
+      {label:"Passo 1: Parentesi",answer:["5*5-10","5×5-10"],feedback:"8 − 3 = 5."},
+      {label:"Passo 2: Moltiplica",answer:["25-10"],feedback:"5 × 5 = 25."},
+      {label:"Passo 3: Sottrai",answer:["15"],feedback:"25 − 10 = 15."}
+    ], finalAnswer:["15"] },
+  { expr:"(15 − 5) ÷ 2 + 7", title:"Mix operazioni", desc:"Parentesi, poi ÷, poi +.",
+    tech:{name:"Ordine operazioni",desc:"Parentesi → ÷ → +"},
+    hint:"La parentesi prima di tutto. Poi quale operazione viene prima?",
+    steps:[
+      {label:"Passo 1: Parentesi",answer:["10/2+7","10÷2+7"],feedback:"15 − 5 = 10."},
+      {label:"Passo 2: Dividi",answer:["5+7"],feedback:"10 ÷ 2 = 5."},
+      {label:"Passo 3: Somma",answer:["12"],feedback:"5 + 7 = 12."}
+    ], finalAnswer:["12"] },
+  { expr:"3 × {2 × [5 − (1 + 2)]}", title:"Tre livelli di parentesi", desc:"Risolvi dall'interno: tonde → quadre → graffe.",
+    tech:{name:"Parentesi annidate",desc:"Tonde ( ) → Quadre [ ] → Graffe { } sempre dall'interno."},
+    hint:"Tre livelli di parentesi: parti sempre dal centro.",
+    steps:[
+      {label:"Passo 1: Tonde",answer:["3*{2*[5-3]}","3×{2×[5-3]}"],feedback:"1 + 2 = 3."},
+      {label:"Passo 2: Quadre",answer:["3*{2*2}","3×{2×2}","3*{4}","3×{4}"],feedback:"5 − 3 = 2."},
+      {label:"Passo 3: Graffe",answer:["3*4","3×4"],feedback:"2 × 2 = 4."},
+      {label:"Passo 4: Risultato",answer:["12"],feedback:"3 × 4 = 12."}
+    ], finalAnswer:["12"] },
+  { expr:"4² + 3 × 2 − 1", title:"Con potenza", desc:"Prima la potenza, poi ×, infine + e −.",
+    tech:{name:"Ordine completo",desc:"Potenze → × e ÷ → + e −"},
+    hint:"Ricorda l'ordine: potenze, poi moltiplicazioni, poi addizioni.",
+    steps:[
+      {label:"Passo 1: Potenza",answer:["16+3*2-1","16+3×2-1"],feedback:"4² = 16."},
+      {label:"Passo 2: Moltiplica",answer:["16+6-1"],feedback:"3 × 2 = 6."},
+      {label:"Passo 3: Calcola",answer:["21"],feedback:"16 + 6 = 22, poi 22 − 1 = 21."}
+    ], finalAnswer:["21"] },
+],
+
+/* ══════ 2. FRAZIONI ══════ */
+frazioni: [
+  { expr:"1/2 + 1/3", title:"Somma di frazioni", desc:"Trova il minimo comune denominatore (mcm) e somma.",
+    tech:{name:"mcm per somma",desc:"Per sommare frazioni con denominatori diversi, trova il mcm."},
+    hint:"Per sommare frazioni con denominatori diversi, serve il mcm.",
+    steps:[
+      {label:"Passo 1: mcm e trasforma",answer:["3/6+2/6"],feedback:"1/2 = 3/6 e 1/3 = 2/6."},
+      {label:"Passo 2: Somma",answer:["5/6"],feedback:"3 + 2 = 5, denominatore resta 6."}
+    ], finalAnswer:["5/6"] },
+  { expr:"3/4 − 1/2", title:"Differenza di frazioni", desc:"Trova il mcm e sottrai i numeratori.",
+    tech:{name:"mcm per differenza",desc:"Stesso metodo della somma, ma sottrai i numeratori."},
+    hint:"Un denominatore è già multiplo dell'altro.",
+    steps:[
+      {label:"Passo 1: Trasforma",answer:["3/4-2/4"],feedback:"1/2 = 2/4."},
+      {label:"Passo 2: Sottrai",answer:["1/4"],feedback:"3 − 2 = 1, denominatore 4."}
+    ], finalAnswer:["1/4"] },
+  { expr:"2/3 × 3/5", title:"Prodotto di frazioni", desc:"Moltiplica numeratore × numeratore e denominatore × denominatore.",
+    tech:{name:"Prodotto di frazioni",desc:"a/b × c/d = (a×c)/(b×d). Poi semplifica se possibile."},
+    hint:"Numeratore per numeratore, denominatore per denominatore. Poi semplifica.",
+    steps:[
+      {label:"Passo 1: Moltiplica",answer:["6/15"],feedback:"2×3=6, 3×5=15."},
+      {label:"Passo 2: Semplifica",answer:["2/5"],feedback:"6/15 semplificato per 3 = 2/5."}
+    ], finalAnswer:["2/5"] },
+  { expr:"3/4 ÷ 1/2", title:"Divisione di frazioni", desc:"Dividi = moltiplica per il reciproco.",
+    tech:{name:"Reciproco",desc:"a/b ÷ c/d = a/b × d/c. Capovolgi la seconda e moltiplica."},
+    hint:"Per dividere frazioni, capovolgi la seconda e moltiplica.",
+    steps:[
+      {label:"Passo 1: Reciproco",answer:["3/4*2/1","3/4×2/1","3/4*2"],feedback:"Capovolgi 1/2 → 2/1."},
+      {label:"Passo 2: Moltiplica",answer:["6/4","3/2"],feedback:"3×2=6, 4×1=4 → 6/4."},
+      {label:"Passo 3: Semplifica",answer:["3/2","1,5"],feedback:"6/4 = 3/2."}
+    ], finalAnswer:["3/2"] },
+  { expr:"5/6 + 1/4", title:"Somma con mcm", desc:"mcm(6,4) = 12.",
+    tech:{name:"mcm per somma",desc:"Trova il mcm dei denominatori."},
+    hint:"Qual è il mcm tra 6 e 4?",
+    steps:[
+      {label:"Passo 1: Trasforma",answer:["10/12+3/12"],feedback:"5/6 = 10/12, 1/4 = 3/12."},
+      {label:"Passo 2: Somma",answer:["13/12"],feedback:"10 + 3 = 13, denominatore 12."}
+    ], finalAnswer:["13/12"] },
+  { expr:"2/5 × 5/8", title:"Prodotto con semplificazione", desc:"Semplifica prima di moltiplicare se possibile.",
+    tech:{name:"Semplificazione incrociata",desc:"Prima di moltiplicare, puoi semplificare tra numeratore e denominatore opposti."},
+    hint:"C'è un numero che appare sia sopra che sotto? Semplificalo prima.",
+    steps:[
+      {label:"Passo 1: Semplifica i 5",answer:["2/8","2*1/(1*8)"],feedback:"5 si semplifica con 5."},
+      {label:"Passo 2: Semplifica",answer:["1/4"],feedback:"2/8 = 1/4."}
+    ], finalAnswer:["1/4"] },
+  { expr:"7/10 − 2/5", title:"Differenza con mcm 10", desc:"mcm(10,5) = 10.",
+    tech:{name:"mcm",desc:"Uno dei denominatori è già multiplo dell'altro."},
+    hint:"Il denominatore 10 è multiplo di 5. Trasforma solo una frazione.",
+    steps:[
+      {label:"Passo 1: Trasforma",answer:["7/10-4/10"],feedback:"2/5 = 4/10."},
+      {label:"Passo 2: Sottrai",answer:["3/10"],feedback:"7 − 4 = 3."}
+    ], finalAnswer:["3/10"] },
+  { expr:"1/3 + 1/4 + 1/6", title:"Tre frazioni", desc:"Trova mcm(3,4,6) = 12.",
+    tech:{name:"mcm di tre",desc:"Trova il mcm di tutti i denominatori insieme."},
+    hint:"Serve un denominatore comune per tutti e tre. Qual è il mcm di 3, 4 e 6?",
+    steps:[
+      {label:"Passo 1: Trasforma",answer:["4/12+3/12+2/12"],feedback:"mcm = 12."},
+      {label:"Passo 2: Somma",answer:["9/12"],feedback:"4+3+2 = 9."},
+      {label:"Passo 3: Semplifica",answer:["3/4"],feedback:"9/12 ÷ 3 = 3/4."}
+    ], finalAnswer:["3/4"] },
+  { expr:"(1/2 + 1/3) × 6", title:"Espressione con frazioni", desc:"Prima la parentesi (somma frazioni), poi moltiplica.",
+    tech:{name:"Parentesi con frazioni",desc:"Ordine operazioni + regole frazioni."},
+    hint:"Prima risolvi la somma tra le frazioni nella parentesi.",
+    steps:[
+      {label:"Passo 1: Somma",answer:["5/6*6","5/6×6"],feedback:"1/2+1/3 = 5/6."},
+      {label:"Passo 2: Moltiplica",answer:["5"],feedback:"5/6 × 6 = 5."}
+    ], finalAnswer:["5"] },
+  { expr:"2/3 ÷ 4/9", title:"Divisione e semplificazione", desc:"Capovolgi e moltiplica, poi semplifica.",
+    tech:{name:"Reciproco",desc:"Capovolgi la seconda frazione e moltiplica."},
+    hint:"Capovolgi la seconda e moltiplica. Poi semplifica.",
+    steps:[
+      {label:"Passo 1: Reciproco",answer:["2/3*9/4","2/3×9/4"],feedback:"4/9 → 9/4."},
+      {label:"Passo 2: Moltiplica",answer:["18/12"],feedback:"2×9=18, 3×4=12."},
+      {label:"Passo 3: Semplifica",answer:["3/2"],feedback:"18/12 ÷ 6 = 3/2."}
+    ], finalAnswer:["3/2"] },
+],
+
+/* ══════ 3. POTENZE ══════ */
+potenze: [
+  { expr:"2³ × 2⁴", title:"Prodotto di potenze", desc:"Stessa base: somma gli esponenti.",
+    tech:{name:"Prodotto",desc:"aⁿ × aᵐ = aⁿ⁺ᵐ"},
+    hint:"Stessa base? Cosa fai con gli esponenti quando moltiplichi?",
+    steps:[
+      {label:"Passo 1: Somma esponenti",answer:["2^7"],feedback:"3 + 4 = 7."},
+      {label:"Passo 2: Calcola",answer:["128"],feedback:"2⁷ = 128."}
+    ], finalAnswer:["128","2^7"] },
+  { expr:"5⁶ ÷ 5²", title:"Quoziente di potenze", desc:"Stessa base: sottrai gli esponenti.",
+    tech:{name:"Quoziente",desc:"aⁿ ÷ aᵐ = aⁿ⁻ᵐ"},
+    hint:"Stessa base e divisione: cosa fai con gli esponenti?",
+    steps:[
+      {label:"Passo 1: Sottrai esponenti",answer:["5^4"],feedback:"6 − 2 = 4."},
+      {label:"Passo 2: Calcola",answer:["625"],feedback:"5⁴ = 625."}
+    ], finalAnswer:["625","5^4"] },
+  { expr:"(3²)³", title:"Potenza di potenza", desc:"Moltiplica gli esponenti.",
+    tech:{name:"Potenza di potenza",desc:"(aⁿ)ᵐ = aⁿˣᵐ"},
+    hint:"Potenza di potenza: cosa fai con i due esponenti?",
+    steps:[
+      {label:"Passo 1: Moltiplica esponenti",answer:["3^6"],feedback:"2 × 3 = 6."},
+      {label:"Passo 2: Calcola",answer:["729"],feedback:"3⁶ = 729."}
+    ], finalAnswer:["729","3^6"] },
+  { expr:"4⁰", title:"Esponente zero", desc:"Qualsiasi numero (≠0) elevato a 0 dà 1.",
+    tech:{name:"Esponente zero",desc:"a⁰ = 1 per ogni a ≠ 0."},
+    hint:"Qualsiasi numero elevato a zero dà sempre lo stesso risultato.",
+    steps:[
+      {label:"Passo 1: Applica la regola",answer:["1"],feedback:"4⁰ = 1. Sempre!"}
+    ], finalAnswer:["1"] },
+  { expr:"2³ × 3³", title:"Potenza di un prodotto", desc:"Stessi esponenti, basi diverse: (a×b)ⁿ.",
+    tech:{name:"Potenza di prodotto",desc:"aⁿ × bⁿ = (a×b)ⁿ"},
+    hint:"Stesso esponente, basi diverse: puoi combinare le basi.",
+    steps:[
+      {label:"Passo 1: Combina le basi",answer:["6^3","(2*3)^3"],feedback:"(2×3)³ = 6³."},
+      {label:"Passo 2: Calcola",answer:["216"],feedback:"6³ = 216."}
+    ], finalAnswer:["216","6^3"] },
+  { expr:"10⁵ ÷ 10³", title:"Quoziente base 10", desc:"Sottrai gli esponenti.",
+    tech:{name:"Quoziente",desc:"10ⁿ ÷ 10ᵐ = 10ⁿ⁻ᵐ"},
+    hint:"Stessa base, divisione: sottrai gli esponenti.",
+    steps:[
+      {label:"Passo 1: Sottrai",answer:["10^2"],feedback:"5 − 3 = 2."},
+      {label:"Passo 2: Calcola",answer:["100"],feedback:"10² = 100."}
+    ], finalAnswer:["100","10^2"] },
+  { expr:"(2⁴)²", title:"Potenza di potenza (2)", desc:"Moltiplica gli esponenti.",
+    tech:{name:"Potenza di potenza",desc:"(aⁿ)ᵐ = aⁿˣᵐ"},
+    hint:"Potenza di potenza: moltiplica gli esponenti.",
+    steps:[
+      {label:"Passo 1: Moltiplica",answer:["2^8"],feedback:"4 × 2 = 8."},
+      {label:"Passo 2: Calcola",answer:["256"],feedback:"2⁸ = 256."}
+    ], finalAnswer:["256","2^8"] },
+  { expr:"3⁵ ÷ 3⁵", title:"Stesso esponente", desc:"Stessa base, stesso esponente: il risultato è?",
+    tech:{name:"Quoziente uguale",desc:"aⁿ ÷ aⁿ = a⁰ = 1"},
+    hint:"Dividi una potenza per se stessa: che esponente resta?",
+    steps:[
+      {label:"Passo 1: Sottrai esponenti",answer:["3^0"],feedback:"5 − 5 = 0."},
+      {label:"Passo 2: Calcola",answer:["1"],feedback:"3⁰ = 1."}
+    ], finalAnswer:["1"] },
+  { expr:"(5²)⁰", title:"Potenza zero composta", desc:"Qualsiasi cosa elevata a 0 dà 1.",
+    tech:{name:"Esponente zero",desc:"(qualsiasi)⁰ = 1"},
+    hint:"Concentrati sull'esponente più esterno.",
+    steps:[
+      {label:"Passo 1: Risultato",answer:["1"],feedback:"(5²)⁰ = 1. L'esponente 0 vince!"}
+    ], finalAnswer:["1"] },
+  { expr:"2² × 2³ × 2", title:"Tre fattori stessa base", desc:"2 = 2¹. Somma tutti gli esponenti.",
+    tech:{name:"Prodotto multiplo",desc:"aⁿ × aᵐ × aᵖ = aⁿ⁺ᵐ⁺ᵖ"},
+    hint:"Ricorda che 2 senza esponente significa 2 alla prima. Somma tutti gli esponenti.",
+    steps:[
+      {label:"Passo 1: Scrivi tutti gli esponenti",answer:["2^(2+3+1)","2^6"],feedback:"2+3+1=6."},
+      {label:"Passo 2: Calcola",answer:["64"],feedback:"2⁶ = 64."}
+    ], finalAnswer:["64","2^6"] },
+],
+
+/* ══════ 4. EQUAZIONI DI PRIMO GRADO ══════ */
+equazioni: [
+  { expr:"x + 5 = 12", title:"Equazione semplice", desc:"Isola x spostando il 5 dall'altra parte.",
+    tech:{name:"Isolare l'incognita",desc:"Sposta i numeri dall'altra parte cambiando segno."},
+    hint:"Cosa devi spostare per restare solo con la x?",
+    steps:[
+      {label:"Passo 1: Sposta il 5",answer:["x=12-5"],feedback:"Il 5 passa dall'altra parte col segno −."},
+      {label:"Passo 2: Calcola",answer:["x=7"],feedback:"x = 7. Corretto!"}
+    ], finalAnswer:["x=7","7"] },
+  { expr:"3x = 18", title:"Coefficiente di x", desc:"Dividi entrambi i membri per il coefficiente.",
+    tech:{name:"Dividere per il coefficiente",desc:"Se ax = b, allora x = b/a."},
+    hint:"La x è moltiplicata per un numero. Come la liberi?",
+    steps:[
+      {label:"Passo 1: Dividi per 3",answer:["x=18/3","x=6"],feedback:"Dividi entrambi i lati per 3."},
+      {label:"Passo 2: Risultato",answer:["x=6","6"],feedback:"x = 6."}
+    ], finalAnswer:["x=6","6"] },
+  { expr:"2x + 3 = 11", title:"Due passaggi", desc:"Prima sposta il termine noto, poi dividi.",
+    tech:{name:"Due passaggi",desc:"1) Sposta il termine noto 2) Dividi per il coefficiente."},
+    hint:"Due passaggi: prima sposta il numero, poi libera la x.",
+    steps:[
+      {label:"Passo 1: Sposta il 3",answer:["2x=11-3","2x=8"],feedback:"Il 3 va dall'altra parte."},
+      {label:"Passo 2: Dividi",answer:["x=4","4"],feedback:"8 ÷ 2 = 4."}
+    ], finalAnswer:["x=4","4"] },
+  { expr:"5x − 7 = 13", title:"Con sottrazione", desc:"Sposta −7 cambiando segno, poi dividi.",
+    tech:{name:"Trasposizione",desc:"Cambia segno quando sposti un termine."},
+    hint:"Il termine noto va dall'altra parte. Attento al segno!",
+    steps:[
+      {label:"Passo 1: Sposta il −7",answer:["5x=13+7","5x=20"],feedback:"−7 diventa +7."},
+      {label:"Passo 2: Dividi",answer:["x=4","4"],feedback:"20 ÷ 5 = 4."}
+    ], finalAnswer:["x=4","4"] },
+  { expr:"4x + 2 = 2x + 10", title:"x su entrambi i lati", desc:"Porta le x da un lato e i numeri dall'altro.",
+    tech:{name:"Raggruppamento",desc:"Porta tutti i termini con x a sinistra e i numeri a destra."},
+    hint:"Porta tutte le x da un lato e tutti i numeri dall'altro.",
+    steps:[
+      {label:"Passo 1: Raggruppa",answer:["4x-2x=10-2","2x=8"],feedback:"4x−2x a sx, 10−2 a dx."},
+      {label:"Passo 2: Semplifica",answer:["2x=8"],feedback:"2x = 8."},
+      {label:"Passo 3: Dividi",answer:["x=4","4"],feedback:"x = 4."}
+    ], finalAnswer:["x=4","4"] },
+  { expr:"3(x + 2) = 15", title:"Con parentesi", desc:"Distribuisci, poi risolvi.",
+    tech:{name:"Distribuzione + equazione",desc:"Prima espandi la parentesi, poi isola x."},
+    hint:"Prima distribuisci il numero davanti alla parentesi.",
+    steps:[
+      {label:"Passo 1: Distribuisci",answer:["3x+6=15"],feedback:"3 × x + 3 × 2 = 3x + 6."},
+      {label:"Passo 2: Sposta il 6",answer:["3x=9"],feedback:"15 − 6 = 9."},
+      {label:"Passo 3: Dividi",answer:["x=3","3"],feedback:"9 ÷ 3 = 3."}
+    ], finalAnswer:["x=3","3"] },
+  { expr:"x/4 = 5", title:"x diviso", desc:"Moltiplica entrambi i lati per il denominatore.",
+    tech:{name:"Moltiplicare per il denominatore",desc:"Se x/a = b, allora x = a × b."},
+    hint:"La x è divisa. Come annulli una divisione?",
+    steps:[
+      {label:"Passo 1: Moltiplica per 4",answer:["x=4*5","x=20","x=4×5"],feedback:"Moltiplica entrambi i lati."},
+      {label:"Passo 2: Risultato",answer:["x=20","20"],feedback:"x = 20."}
+    ], finalAnswer:["x=20","20"] },
+  { expr:"7x − 3 = 4x + 9", title:"x su entrambi i lati (2)", desc:"Raggruppa le x e i numeri.",
+    tech:{name:"Raggruppamento",desc:"x a sinistra, numeri a destra."},
+    hint:"Sposta i termini con x a sinistra e i numeri a destra.",
+    steps:[
+      {label:"Passo 1: Raggruppa",answer:["7x-4x=9+3","3x=12"],feedback:"Sposta 4x e −3."},
+      {label:"Passo 2: Semplifica",answer:["3x=12"],feedback:"3x = 12."},
+      {label:"Passo 3: Dividi",answer:["x=4","4"],feedback:"12 ÷ 3 = 4."}
+    ], finalAnswer:["x=4","4"] },
+  { expr:"2(x − 3) = x + 1", title:"Parentesi e raggruppamento", desc:"Distribuisci, poi raggruppa.",
+    tech:{name:"Distribuzione + raggruppamento",desc:"Espandi, poi porta le x da un lato."},
+    hint:"Distribuisci, poi raggruppa le x da un lato.",
+    steps:[
+      {label:"Passo 1: Distribuisci",answer:["2x-6=x+1"],feedback:"2(x−3) = 2x − 6."},
+      {label:"Passo 2: Raggruppa",answer:["2x-x=1+6","x=7"],feedback:"x a sx, numeri a dx."},
+      {label:"Passo 3: Risultato",answer:["x=7","7"],feedback:"x = 7."}
+    ], finalAnswer:["x=7","7"] },
+  { expr:"−2x + 8 = 2", title:"Coefficiente negativo", desc:"Attenzione al segno quando dividi.",
+    tech:{name:"Coefficiente negativo",desc:"Dividi per −2: il segno cambia."},
+    hint:"Attenzione: dividere per un numero negativo cambia il segno.",
+    steps:[
+      {label:"Passo 1: Sposta il 8",answer:["-2x=2-8","-2x=-6"],feedback:"Sposta +8 → −8."},
+      {label:"Passo 2: Dividi per −2",answer:["x=3","3"],feedback:"−6 ÷ (−2) = 3."}
+    ], finalAnswer:["x=3","3"] },
+],
+
+/* ══════ 5. MONOMI E POLINOMI ══════ */
+monomi: [
+  { expr:"3x + 5x", title:"Somma di monomi simili", desc:"Stessa parte letterale: somma i coefficienti.",
+    tech:{name:"Monomi simili",desc:"Se la parte letterale è uguale, somma i coefficienti."},
+    hint:"Stessa lettera? Puoi sommare i coefficienti.",
+    steps:[{label:"Passo 1: Somma coefficienti",answer:["8x"],feedback:"3+5=8, parte letterale x."}],
+    finalAnswer:["8x"] },
+  { expr:"7a² − 3a²", title:"Differenza di monomi", desc:"Sottrai i coefficienti, stessa parte letterale.",
+    tech:{name:"Monomi simili",desc:"Sottrai i coefficienti quando la parte letterale è identica."},
+    hint:"Stessa parte letterale: lavora solo con i coefficienti.",
+    steps:[{label:"Passo 1: Sottrai",answer:["4a^2","4a²"],feedback:"7−3 = 4, la parte a² resta."}],
+    finalAnswer:["4a^2","4a²"] },
+  { expr:"2x · 3x", title:"Prodotto di monomi", desc:"Moltiplica coefficienti e somma esponenti.",
+    tech:{name:"Prodotto monomi",desc:"Coefficienti si moltiplicano, esponenti della stessa lettera si sommano."},
+    hint:"Coefficienti si moltiplicano, esponenti si...?",
+    steps:[
+      {label:"Passo 1: Coefficienti",answer:["6x^2","6x²"],feedback:"2×3=6, x·x=x²."}
+    ], finalAnswer:["6x^2","6x²"] },
+  { expr:"4x² · 5x³", title:"Prodotto con esponenti", desc:"Moltiplica 4×5 e somma 2+3.",
+    tech:{name:"Prodotto monomi",desc:"Coefficienti ×, esponenti +."},
+    hint:"Moltiplica i coefficienti e ricorda la regola degli esponenti.",
+    steps:[
+      {label:"Passo 1: Calcola",answer:["20x^5","20x⁵"],feedback:"4×5=20, x²·x³=x⁵."}
+    ], finalAnswer:["20x^5","20x⁵"] },
+  { expr:"(3x + 2) + (5x − 4)", title:"Somma di polinomi", desc:"Togli le parentesi e somma i termini simili.",
+    tech:{name:"Somma polinomi",desc:"Togli parentesi e raggruppa i termini con la stessa parte letterale."},
+    hint:"Togli le parentesi e raggruppa i termini con la stessa lettera.",
+    steps:[
+      {label:"Passo 1: Togli parentesi",answer:["3x+2+5x-4"],feedback:"Le parentesi spariscono (segno + davanti)."},
+      {label:"Passo 2: Raggruppa",answer:["8x-2"],feedback:"3x+5x=8x, 2−4=−2."}
+    ], finalAnswer:["8x-2"] },
+  { expr:"(4x² + 3x) − (2x² − x)", title:"Differenza di polinomi", desc:"Attenzione: il − cambia tutti i segni nella seconda parentesi.",
+    tech:{name:"Differenza polinomi",desc:"Cambia segno a tutti i termini del polinomio sottratto."},
+    hint:"Il segno meno davanti alla parentesi cambia tutti i segni dentro!",
+    steps:[
+      {label:"Passo 1: Cambia segni",answer:["4x^2+3x-2x^2+x","4x²+3x-2x²+x"],feedback:"−(2x²−x) = −2x²+x."},
+      {label:"Passo 2: Raggruppa",answer:["2x^2+4x","2x²+4x"],feedback:"4x²−2x²=2x², 3x+x=4x."}
+    ], finalAnswer:["2x^2+4x","2x²+4x"] },
+  { expr:"3(2x + 1)", title:"Monomio × Polinomio", desc:"Distribuisci il 3 su ogni termine.",
+    tech:{name:"Distribuzione",desc:"a(b+c) = ab + ac"},
+    hint:"Distribuisci il numero a ciascun termine nella parentesi.",
+    steps:[
+      {label:"Passo 1: Distribuisci",answer:["6x+3"],feedback:"3·2x=6x, 3·1=3."}
+    ], finalAnswer:["6x+3"] },
+  { expr:"x(x + 4)", title:"x per un binomio", desc:"Distribuisci la x.",
+    tech:{name:"Distribuzione",desc:"x(a+b) = xa + xb"},
+    hint:"Moltiplica la x per ogni termine dentro la parentesi.",
+    steps:[
+      {label:"Passo 1: Distribuisci",answer:["x^2+4x","x²+4x"],feedback:"x·x=x², x·4=4x."}
+    ], finalAnswer:["x^2+4x","x²+4x"] },
+  { expr:"2x(3x − 5)", title:"Monomio × Binomio (2)", desc:"Distribuisci 2x.",
+    tech:{name:"Distribuzione",desc:"2x·(3x−5) = 2x·3x − 2x·5"},
+    hint:"Distribuisci 2x a ciascun termine dentro la parentesi.",
+    steps:[
+      {label:"Passo 1: Distribuisci",answer:["6x^2-10x","6x²-10x"],feedback:"2x·3x=6x², 2x·5=10x."}
+    ], finalAnswer:["6x^2-10x","6x²-10x"] },
+  { expr:"5a²b · 2ab³", title:"Prodotto con due lettere", desc:"Moltiplica coefficienti e somma esponenti lettera per lettera.",
+    tech:{name:"Prodotto monomi",desc:"Ogni lettera: somma i suoi esponenti separatamente."},
+    hint:"Moltiplica i coefficienti e somma gli esponenti di ogni lettera.",
+    steps:[
+      {label:"Passo 1: Calcola",answer:["10a^3b^4","10a³b⁴"],feedback:"10a³b⁴."}
+    ], finalAnswer:["10a^3b^4","10a³b⁴"] },
+],
+
+/* ══════ 6. PRODOTTI NOTEVOLI ══════ */
+prodotti: [
+  { expr:"(x + 3)²", title:"Quadrato di binomio", desc:"(a+b)² = a² + 2ab + b²",
+    tech:{name:"Quadrato di binomio",desc:"(a+b)² = a² + 2ab + b²"},
+    hint:"Servono tre pezzi: il quadrato del primo, il doppio prodotto, il quadrato del secondo.",
+    steps:[
+      {label:"Passo 1: Applica la formula",answer:["x^2+2*x*3+3^2","x^2+2*x*3+9","x²+2·x·3+9"],feedback:"a²=x², 2ab=2·x·3, b²=9."},
+      {label:"Passo 2: Semplifica",answer:["x^2+6x+9","x²+6x+9"],feedback:"2·x·3 = 6x."}
+    ], finalAnswer:["x^2+6x+9","x²+6x+9"] },
+  { expr:"(x − 4)²", title:"Quadrato con meno", desc:"(a−b)² = a² − 2ab + b²",
+    tech:{name:"Quadrato di differenza",desc:"(a−b)² = a² − 2ab + b²"},
+    hint:"Come il quadrato di somma, ma il doppio prodotto ha il meno.",
+    steps:[
+      {label:"Passo 1: Applica la formula",answer:["x^2-2*x*4+16","x^2-8x+16","x²-8x+16"],feedback:"a²=x², −2ab=−8x, b²=16."},
+      {label:"Passo 2: Semplifica",answer:["x^2-8x+16","x²-8x+16"],feedback:"−2·x·4 = −8x."}
+    ], finalAnswer:["x^2-8x+16","x²-8x+16"] },
+  { expr:"(x + 5)(x − 5)", title:"Somma per differenza", desc:"(a+b)(a−b) = a² − b²",
+    tech:{name:"Differenza di quadrati",desc:"(a+b)(a−b) = a² − b². Il doppio prodotto si cancella!"},
+    hint:"Somma per differenza: il doppio prodotto si cancella!",
+    steps:[
+      {label:"Passo 1: Applica",answer:["x^2-25","x²-25"],feedback:"x² − 25."}
+    ], finalAnswer:["x^2-25","x²-25"] },
+  { expr:"(2x + 1)²", title:"Quadrato con coefficiente", desc:"a = 2x, b = 1.",
+    tech:{name:"Quadrato di binomio",desc:"(a+b)² = a² + 2ab + b²"},
+    hint:"Attenzione: a non è solo x, ma 2x. Quanto fa (2x) al quadrato?",
+    steps:[
+      {label:"Passo 1: a²",answer:["4x^2+2*2x*1+1","4x^2+4x+1","4x²+4x+1"],feedback:"(2x)²=4x²."},
+      {label:"Passo 2: Risultato",answer:["4x^2+4x+1","4x²+4x+1"],feedback:"2·2x·1=4x, 1²=1."}
+    ], finalAnswer:["4x^2+4x+1","4x²+4x+1"] },
+  { expr:"(3x − 2)(3x + 2)", title:"Somma per differenza (2)", desc:"(a−b)(a+b) = a² − b²",
+    tech:{name:"Differenza di quadrati",desc:"a=3x, b=2"},
+    hint:"Somma per differenza: a al quadrato meno b al quadrato.",
+    steps:[
+      {label:"Passo 1: Applica",answer:["9x^2-4","9x²-4"],feedback:"9x² − 4."}
+    ], finalAnswer:["9x^2-4","9x²-4"] },
+  { expr:"(x + 1)(x + 2)", title:"Prodotto di binomi", desc:"Usa FOIL: First, Outer, Inner, Last.",
+    tech:{name:"FOIL",desc:"(a+b)(c+d) = ac + ad + bc + bd"},
+    hint:"Moltiplica ogni termine della prima per ogni termine della seconda.",
+    steps:[
+      {label:"Passo 1: Espandi",answer:["x^2+2x+x+2","x²+2x+x+2"],feedback:"x²+2x+x+2."},
+      {label:"Passo 2: Somma simili",answer:["x^2+3x+2","x²+3x+2"],feedback:"2x+x = 3x."}
+    ], finalAnswer:["x^2+3x+2","x²+3x+2"] },
+  { expr:"(x − 6)²", title:"Quadrato di differenza (2)", desc:"(a−b)² = a² − 2ab + b²",
+    tech:{name:"Quadrato di differenza",desc:"a=x, b=6"},
+    hint:"Il b al quadrato è sempre positivo, il doppio prodotto è negativo.",
+    steps:[
+      {label:"Passo 1: Espandi",answer:["x^2-12x+36","x²-12x+36"],feedback:"−2·x·6=−12x, 6²=36."}
+    ], finalAnswer:["x^2-12x+36","x²-12x+36"] },
+  { expr:"(x + 7)(x − 7)", title:"Differenza di quadrati (3)", desc:"a=x, b=7.",
+    tech:{name:"Differenza di quadrati",desc:"a²−b²"},
+    hint:"Somma per differenza: i termini medi si cancellano.",
+    steps:[
+      {label:"Passo 1: Applica",answer:["x^2-49","x²-49"],feedback:"x² − 49."}
+    ], finalAnswer:["x^2-49","x²-49"] },
+  { expr:"(2x + 3)²", title:"Quadrato (a=2x, b=3)", desc:"Applica (a+b)² = a² + 2ab + b².",
+    tech:{name:"Quadrato di binomio",desc:"(2x+3)²"},
+    hint:"Chi è a? Chi è b? Calcola i tre pezzi separatamente.",
+    steps:[
+      {label:"Passo 1: a²",answer:["4x^2","4x²"],feedback:"(2x)² = 4x²."},
+      {label:"Passo 2: 2ab",answer:["12x"],feedback:"2·2x·3 = 12x."},
+      {label:"Passo 3: Risultato",answer:["4x^2+12x+9","4x²+12x+9"],feedback:"4x²+12x+9."}
+    ], finalAnswer:["4x^2+12x+9","4x²+12x+9"] },
+  { expr:"(x − 2)(x + 5)", title:"Prodotto binomi diversi", desc:"FOIL: x·x + x·5 − 2·x − 2·5.",
+    tech:{name:"FOIL",desc:"(a+b)(c+d)=ac+ad+bc+bd"},
+    hint:"Moltiplica ogni termine per ogni termine, poi raggruppa i simili.",
+    steps:[
+      {label:"Passo 1: Espandi",answer:["x^2+5x-2x-10","x²+5x-2x-10"],feedback:"FOIL applicato."},
+      {label:"Passo 2: Somma simili",answer:["x^2+3x-10","x²+3x-10"],feedback:"5x−2x = 3x."}
+    ], finalAnswer:["x^2+3x-10","x²+3x-10"] },
+],
+
+/* ══════ 7. GEOMETRIA PIANA ══════ */
+geometria: [
+  { expr:"Rettangolo: b=8, h=5", title:"Area del rettangolo", desc:"A = base × altezza.",
+    tech:{name:"Area rettangolo",desc:"A = b × h"},
+    hint:"Come si calcola l'area di un rettangolo?",
+    svgType:"rect", svgData:{b:8,h:5},
+    steps:[{label:"Calcola l'area",answer:["40","a=40"],feedback:"8 × 5 = 40."}],
+    finalAnswer:["40"] },
+  { expr:"Rettangolo: b=12, h=7", title:"Perimetro del rettangolo", desc:"P = 2(b + h).",
+    tech:{name:"Perimetro rettangolo",desc:"P = 2 × (base + altezza)"},
+    hint:"Il perimetro è la somma di tutti i lati. Un rettangolo ha lati a coppie.",
+    svgType:"rect", svgData:{b:12,h:7},
+    steps:[
+      {label:"Passo 1: Somma",answer:["12+7","19"],feedback:"12 + 7 = 19."},
+      {label:"Passo 2: Raddoppia",answer:["38","p=38"],feedback:"2 × 19 = 38."}
+    ], finalAnswer:["38"] },
+  { expr:"Triangolo: b=10, h=6", title:"Area del triangolo", desc:"A = (base × altezza) / 2.",
+    tech:{name:"Area triangolo",desc:"A = (b × h) / 2"},
+    hint:"L'area del triangolo è metà di quella del rettangolo corrispondente.",
+    svgType:"tri", svgData:{b:10,h:6},
+    steps:[
+      {label:"Passo 1: base × altezza",answer:["60","10*6"],feedback:"10 × 6 = 60."},
+      {label:"Passo 2: Dividi per 2",answer:["30","a=30"],feedback:"60 / 2 = 30."}
+    ], finalAnswer:["30"] },
+  { expr:"Cerchio: r=7", title:"Area del cerchio", desc:"A = π × r². Usa π ≈ 3,14.",
+    tech:{name:"Area cerchio",desc:"A = πr²"},
+    hint:"La formula dell'area del cerchio usa il raggio. Cosa fai con r?",
+    svgType:"circle", svgData:{r:7},
+    steps:[
+      {label:"Passo 1: r²",answer:["49"],feedback:"7² = 49."},
+      {label:"Passo 2: × π",answer:["153.86","153,86"],feedback:"3,14 × 49 = 153,86."}
+    ], finalAnswer:["153.86","153,86"] },
+  { expr:"Cerchio: r=5", title:"Circonferenza", desc:"C = 2πr. Usa π ≈ 3,14.",
+    tech:{name:"Circonferenza",desc:"C = 2 × π × r"},
+    hint:"La formula della circonferenza: C = 2 per pi greco per...",
+    svgType:"circle", svgData:{r:5},
+    steps:[
+      {label:"Passo 1: 2 × r",answer:["10"],feedback:"2 × 5 = 10."},
+      {label:"Passo 2: × π",answer:["31.4","31,4"],feedback:"3,14 × 10 = 31,4."}
+    ], finalAnswer:["31.4","31,4"] },
+  { expr:"Trapezio: B=12, b=8, h=5", title:"Area del trapezio", desc:"A = (B + b) × h / 2.",
+    tech:{name:"Area trapezio",desc:"A = (Base maggiore + base minore) × altezza / 2"},
+    hint:"Nel trapezio: sommi le due basi, moltiplichi per l'altezza e poi...",
+    svgType:"trap", svgData:{B:12,b:8,h:5},
+    steps:[
+      {label:"Passo 1: Somma basi",answer:["20"],feedback:"12 + 8 = 20."},
+      {label:"Passo 2: × h",answer:["100"],feedback:"20 × 5 = 100."},
+      {label:"Passo 3: ÷ 2",answer:["50","a=50"],feedback:"100 / 2 = 50."}
+    ], finalAnswer:["50"] },
+  { expr:"Triangolo equil.: l=6", title:"Perimetro triang. equilatero", desc:"P = 3 × lato.",
+    tech:{name:"Perimetro",desc:"Triangolo equilatero: tutti i lati uguali, P = 3l."},
+    hint:"Equilatero = tutti i lati uguali. Quanti lati ha un triangolo?",
+    svgType:"tri_eq", svgData:{l:6},
+    steps:[{label:"Calcola P",answer:["18","p=18"],feedback:"3 × 6 = 18."}],
+    finalAnswer:["18"] },
+  { expr:"Quadrato: l=9", title:"Area e perimetro quadrato", desc:"A = l². P = 4l.",
+    tech:{name:"Quadrato",desc:"A = l², P = 4l"},
+    hint:"L'area del quadrato: il lato per se stesso. Il perimetro: quanti lati?",
+    svgType:"rect", svgData:{b:9,h:9},
+    steps:[
+      {label:"Passo 1: Area",answer:["81","a=81"],feedback:"9² = 81."},
+      {label:"Passo 2: Perimetro",answer:["36","p=36"],feedback:"4 × 9 = 36."}
+    ], finalAnswer:["81"] },
+  { expr:"Parallelogramma: b=10, h=4", title:"Area parallelogramma", desc:"A = base × altezza (come il rettangolo!).",
+    tech:{name:"Area parallelogramma",desc:"A = b × h"},
+    hint:"Il parallelogramma ha la stessa formula dell'area del rettangolo!",
+    svgType:"para", svgData:{b:10,h:4},
+    steps:[{label:"Calcola l'area",answer:["40","a=40"],feedback:"10 × 4 = 40."}],
+    finalAnswer:["40"] },
+  { expr:"Rombo: d₁=6, d₂=8", title:"Area del rombo", desc:"A = (d₁ × d₂) / 2.",
+    tech:{name:"Area rombo",desc:"A = (diagonale₁ × diagonale₂) / 2"},
+    hint:"L'area del rombo usa le diagonali: moltiplicale e poi...",
+    svgType:"rhombus", svgData:{d1:6,d2:8},
+    steps:[
+      {label:"Passo 1: Prodotto diagonali",answer:["48"],feedback:"6 × 8 = 48."},
+      {label:"Passo 2: Dividi per 2",answer:["24","a=24"],feedback:"48 / 2 = 24."}
+    ], finalAnswer:["24"] },
+],
+
+/* ══════ 8. TEOREMA DI PITAGORA ══════ */
+pitagora: [
+  { expr:"a=3, b=4, c=?", title:"Trova l'ipotenusa", desc:"c² = a² + b². Poi c = √(c²).",
+    tech:{name:"Pitagora: ipotenusa",desc:"c = √(a² + b²)"},
+    hint:"Per trovare l'ipotenusa: eleva i cateti al quadrato e sommali.",
+    svgType:"right_tri", svgData:{a:3,b:4,find:"c"},
+    steps:[
+      {label:"Passo 1: Quadrati",answer:["9+16","25"],feedback:"3²=9, 4²=16. Somma=25."},
+      {label:"Passo 2: Radice",answer:["5","c=5"],feedback:"√25 = 5."}
+    ], finalAnswer:["5"] },
+  { expr:"a=5, b=12, c=?", title:"Ipotenusa (2)", desc:"c = √(a² + b²).",
+    tech:{name:"Pitagora: ipotenusa",desc:"c = √(a² + b²)"},
+    hint:"Stessa procedura: quadrato dei cateti, sommali, poi radice.",
+    svgType:"right_tri", svgData:{a:5,b:12,find:"c"},
+    steps:[
+      {label:"Passo 1: Quadrati",answer:["25+144","169"],feedback:"5²=25, 12²=144."},
+      {label:"Passo 2: Radice",answer:["13","c=13"],feedback:"√169 = 13."}
+    ], finalAnswer:["13"] },
+  { expr:"a=6, b=8, c=?", title:"Ipotenusa (3)", desc:"c = √(a² + b²).",
+    tech:{name:"Pitagora",desc:"c = √(a² + b²)"},
+    hint:"Ipotenusa = radice della somma dei quadrati dei cateti.",
+    svgType:"right_tri", svgData:{a:6,b:8,find:"c"},
+    steps:[
+      {label:"Passo 1: Quadrati",answer:["36+64","100"],feedback:"6²=36, 8²=64."},
+      {label:"Passo 2: Radice",answer:["10","c=10"],feedback:"√100 = 10."}
+    ], finalAnswer:["10"] },
+  { expr:"c=10, a=6, b=?", title:"Trova un cateto", desc:"b² = c² − a². Poi b = √(b²).",
+    tech:{name:"Pitagora: cateto",desc:"b = √(c² − a²)"},
+    hint:"Per trovare un cateto: parti dall'ipotenusa al quadrato e sottrai.",
+    svgType:"right_tri", svgData:{a:6,c:10,find:"b"},
+    steps:[
+      {label:"Passo 1: Differenza quadrati",answer:["100-36","64"],feedback:"10²=100, 6²=36."},
+      {label:"Passo 2: Radice",answer:["8","b=8"],feedback:"√64 = 8."}
+    ], finalAnswer:["8"] },
+  { expr:"c=13, b=12, a=?", title:"Cateto (2)", desc:"a = √(c² − b²).",
+    tech:{name:"Pitagora: cateto",desc:"a = √(c² − b²)"},
+    hint:"Cateto: quadrato dell'ipotenusa meno quadrato dell'altro cateto.",
+    svgType:"right_tri", svgData:{b:12,c:13,find:"a"},
+    steps:[
+      {label:"Passo 1: Differenza",answer:["169-144","25"],feedback:"13²=169, 12²=144."},
+      {label:"Passo 2: Radice",answer:["5","a=5"],feedback:"√25 = 5."}
+    ], finalAnswer:["5"] },
+  { expr:"c=15, a=9, b=?", title:"Cateto (3)", desc:"b = √(c² − a²).",
+    tech:{name:"Pitagora: cateto",desc:"b = √(c² − a²)"},
+    hint:"Stessa tecnica: c al quadrato meno a al quadrato. Poi radice.",
+    svgType:"right_tri", svgData:{a:9,c:15,find:"b"},
+    steps:[
+      {label:"Passo 1: Differenza",answer:["225-81","144"],feedback:"15²=225, 9²=81."},
+      {label:"Passo 2: Radice",answer:["12","b=12"],feedback:"√144 = 12."}
+    ], finalAnswer:["12"] },
+  { expr:"a=8, b=15, c=?", title:"Ipotenusa (4)", desc:"c = √(64+225).",
+    tech:{name:"Pitagora",desc:"c = √(a²+b²)"},
+    hint:"Ipotenusa: somma i quadrati dei due cateti, poi radice.",
+    svgType:"right_tri", svgData:{a:8,b:15,find:"c"},
+    steps:[
+      {label:"Passo 1: Quadrati",answer:["64+225","289"],feedback:"8²=64, 15²=225."},
+      {label:"Passo 2: Radice",answer:["17","c=17"],feedback:"√289 = 17."}
+    ], finalAnswer:["17"] },
+  { expr:"c=25, a=7, b=?", title:"Cateto (4)", desc:"b = √(625−49).",
+    tech:{name:"Pitagora: cateto",desc:"b = √(c²−a²)"},
+    hint:"Cateto: sottrai dal quadrato dell'ipotenusa.",
+    svgType:"right_tri", svgData:{a:7,c:25,find:"b"},
+    steps:[
+      {label:"Passo 1: Differenza",answer:["625-49","576"],feedback:"25²=625, 7²=49."},
+      {label:"Passo 2: Radice",answer:["24","b=24"],feedback:"√576 = 24."}
+    ], finalAnswer:["24"] },
+  { expr:"a=9, b=12, c=?", title:"Ipotenusa (5)", desc:"c = √(81+144).",
+    tech:{name:"Pitagora",desc:"c = √(a²+b²)"},
+    hint:"Calcola il quadrato di ciascun cateto e sommali.",
+    svgType:"right_tri", svgData:{a:9,b:12,find:"c"},
+    steps:[
+      {label:"Passo 1: Quadrati",answer:["81+144","225"],feedback:"9²=81, 12²=144."},
+      {label:"Passo 2: Radice",answer:["15","c=15"],feedback:"√225 = 15."}
+    ], finalAnswer:["15"] },
+  { expr:"c=20, b=16, a=?", title:"Cateto (5)", desc:"a = √(400−256).",
+    tech:{name:"Pitagora: cateto",desc:"a = √(c²−b²)"},
+    hint:"Sottrai il quadrato del cateto noto da quello dell'ipotenusa.",
+    svgType:"right_tri", svgData:{b:16,c:20,find:"a"},
+    steps:[
+      {label:"Passo 1: Differenza",answer:["400-256","144"],feedback:"20²=400, 16²=256."},
+      {label:"Passo 2: Radice",answer:["12","a=12"],feedback:"√144 = 12."}
+    ], finalAnswer:["12"] },
+],
+
+/* ══════ 9. APPLICAZIONI DI PITAGORA ══════ */
+app_pitagora: [
+  { expr:"Problema", title:"La scala appoggiata", problemText:"Una scala lunga 5 m è appoggiata a un muro. Il piede della scala dista 3 m dal muro. A che altezza arriva la scala?",
+    desc:"Modella la situazione come un triangolo rettangolo.",
+    tech:{name:"Pitagora applicato",desc:"Scala = ipotenusa, distanza dal muro = cateto, altezza = cateto da trovare."},
+    hints:["Quale elemento è l'ipotenusa? Quale è un cateto?","Devi trovare un cateto. Quale formula di Pitagora usi?"],
+    svgType:"right_tri", svgData:{a:3,c:5,find:"b",labels:{a:"3 m (distanza)",c:"5 m (scala)",b:"? (altezza)"}},
+    steps:[
+      {label:"Passo 1: Imposta",answer:["h^2=25-9","h^2=16","h²=25-9","h²=16","b^2=25-9","b^2=16"],feedback:"h² = 5² − 3² = 25 − 9 = 16."},
+      {label:"Passo 2: Calcola",answer:["4","h=4","4m"],feedback:"h = √16 = 4 m."}
+    ], finalAnswer:["4"] },
+  { expr:"Problema", title:"La diagonale del rettangolo", problemText:"Un rettangolo ha base 12 cm e altezza 5 cm. Quanto è lunga la diagonale?",
+    desc:"La diagonale di un rettangolo è l'ipotenusa del triangolo rettangolo formato da base e altezza.",
+    tech:{name:"Diagonale rettangolo",desc:"d = √(b² + h²)"},
+    hints:["Che forma geometrica crea la diagonale dentro il rettangolo?","La diagonale è l'ipotenusa. I cateti sono...?"],
+    svgType:"rect_diag", svgData:{b:12,h:5},
+    steps:[
+      {label:"Passo 1: Quadrati",answer:["144+25","169"],feedback:"12²=144, 5²=25."},
+      {label:"Passo 2: Radice",answer:["13","d=13"],feedback:"√169 = 13 cm."}
+    ], finalAnswer:["13"] },
+  { expr:"Problema", title:"Il campo da calcio", problemText:"Un campo rettangolare è lungo 80 m e largo 60 m. Quanto è lunga la diagonale?",
+    desc:"Modella come un triangolo rettangolo.",
+    tech:{name:"Diagonale",desc:"d = √(l² + w²)"},
+    hints:["Quali sono i cateti del triangolo?","Somma i quadrati e poi prendi la radice."],
+    svgType:"rect_diag", svgData:{b:80,h:60},
+    steps:[
+      {label:"Passo 1: Quadrati",answer:["6400+3600","10000"],feedback:"80²=6400, 60²=3600."},
+      {label:"Passo 2: Radice",answer:["100","d=100"],feedback:"√10000 = 100 m."}
+    ], finalAnswer:["100"] },
+  { expr:"Problema", title:"L'albero e l'ombra", problemText:"Un albero alto 8 m proietta un'ombra lunga 6 m. Qual è la distanza dalla cima dell'albero alla punta dell'ombra?",
+    desc:"L'albero è verticale, l'ombra è orizzontale: formano un triangolo rettangolo.",
+    tech:{name:"Pitagora",desc:"distanza = √(altezza² + ombra²)"},
+    hints:["Disegna la situazione: dove si forma l'angolo retto?"],
+    svgType:"right_tri", svgData:{a:8,b:6,find:"c"},
+    steps:[
+      {label:"Passo 1: Quadrati",answer:["64+36","100"],feedback:"8²=64, 6²=36."},
+      {label:"Passo 2: Radice",answer:["10","d=10"],feedback:"√100 = 10 m."}
+    ], finalAnswer:["10"] },
+  { expr:"Problema", title:"Il rombo e le diagonali", problemText:"Un rombo ha diagonali di 10 cm e 24 cm. Quanto misura il lato?",
+    desc:"Le diagonali del rombo si dimezzano e formano un triangolo rettangolo con il lato.",
+    tech:{name:"Rombo e Pitagora",desc:"Le semidiagonali sono i cateti, il lato è l'ipotenusa."},
+    hints:["Le diagonali del rombo si tagliano a metà. Quanto valgono le metà?","Le semidiagonali sono i cateti. Il lato è...?"],
+    svgType:"right_tri", svgData:{a:5,b:12,find:"c"},
+    steps:[
+      {label:"Passo 1: Semidiagonali",answer:["5","12","5e12","5 e 12"],feedback:"10/2=5, 24/2=12."},
+      {label:"Passo 2: Pitagora",answer:["25+144","169"],feedback:"5²=25, 12²=144."},
+      {label:"Passo 3: Lato",answer:["13","l=13"],feedback:"√169 = 13 cm."}
+    ], finalAnswer:["13"] },
+  { expr:"Problema", title:"La TV", problemText:'Un televisore ha una diagonale di 50 pollici e la larghezza è 40 pollici. Qual è l\'altezza?',
+    desc:"Larghezza e altezza sono i cateti, la diagonale è l'ipotenusa.",
+    tech:{name:"Cateto con Pitagora",desc:"h = √(d² − l²)"},
+    hints:["La diagonale è l'ipotenusa. Devi trovare un cateto.","Sottrai il quadrato del cateto noto dal quadrato dell'ipotenusa."],
+    svgType:"right_tri", svgData:{b:40,c:50,find:"a"},
+    steps:[
+      {label:"Passo 1: Differenza",answer:["2500-1600","900"],feedback:"50²=2500, 40²=1600."},
+      {label:"Passo 2: Radice",answer:["30","h=30"],feedback:"√900 = 30 pollici."}
+    ], finalAnswer:["30"] },
+  { expr:"Problema", title:"Il triangolo isoscele", problemText:"Un triangolo isoscele ha base 16 cm e lato obliquo 10 cm. Calcola l'altezza.",
+    desc:"L'altezza divide la base a metà, creando due triangoli rettangoli.",
+    tech:{name:"Altezza triang. isoscele",desc:"h = √(l² − (b/2)²)"},
+    hints:["L'altezza divide la base a metà. Quanto è metà della base?","Ora hai un triangolo rettangolo. L'ipotenusa è il lato obliquo."],
+    svgType:"right_tri", svgData:{a:8,c:10,find:"b"},
+    steps:[
+      {label:"Passo 1: Metà base",answer:["8"],feedback:"16 / 2 = 8 cm."},
+      {label:"Passo 2: Pitagora",answer:["100-64","36"],feedback:"10²=100, 8²=64."},
+      {label:"Passo 3: Altezza",answer:["6","h=6"],feedback:"√36 = 6 cm."}
+    ], finalAnswer:["6"] },
+  { expr:"Problema", title:"La passerella", problemText:"Una passerella sale di 3 m in altezza su una distanza orizzontale di 4 m. Quanto è lunga la passerella?",
+    desc:"Altezza e distanza sono cateti, la passerella è l'ipotenusa.",
+    tech:{name:"Pitagora",desc:"L = √(h² + d²)"},
+    hints:["Hai due cateti. Come trovi l'ipotenusa?"],
+    svgType:"right_tri", svgData:{a:3,b:4,find:"c"},
+    steps:[
+      {label:"Passo 1: Quadrati",answer:["9+16","25"],feedback:"3²=9, 4²=16."},
+      {label:"Passo 2: Radice",answer:["5","l=5"],feedback:"√25 = 5 m."}
+    ], finalAnswer:["5"] },
+  { expr:"Problema", title:"Il traliccio", problemText:"Un cavo d'acciaio lungo 15 m è teso dal suolo a un traliccio alto 12 m. A che distanza dal piede del traliccio è ancorato il cavo?",
+    desc:"Cavo = ipotenusa, altezza traliccio = cateto.",
+    tech:{name:"Pitagora: cateto",desc:"d = √(c² − a²)"},
+    hints:["Il cavo è l'ipotenusa. Il traliccio è un cateto.","Sottrai e prendi la radice."],
+    svgType:"right_tri", svgData:{a:12,c:15,find:"b"},
+    steps:[
+      {label:"Passo 1: Differenza",answer:["225-144","81"],feedback:"15²=225, 12²=144."},
+      {label:"Passo 2: Radice",answer:["9","d=9"],feedback:"√81 = 9 m."}
+    ], finalAnswer:["9"] },
+  { expr:"Problema", title:"La finestra e la scala", problemText:"Una scala di 10 m raggiunge una finestra a 8 m di altezza. A che distanza dal muro è appoggiata?",
+    desc:"Scala = ipotenusa, altezza finestra = cateto.",
+    tech:{name:"Pitagora: cateto",desc:"d = √(l² − h²)"},
+    hints:["Scala = ipotenusa, altezza = cateto. Trova l'altro cateto."],
+    svgType:"right_tri", svgData:{a:8,c:10,find:"b"},
+    steps:[
+      {label:"Passo 1: Differenza",answer:["100-64","36"],feedback:"10²=100, 8²=64."},
+      {label:"Passo 2: Radice",answer:["6","d=6"],feedback:"√36 = 6 m."}
+    ], finalAnswer:["6"] },
+],
+
+/* ══════ 10. FUNZIONI LINEARI ══════ */
+funzioni: [
+  { expr:"y = 2x + 1", title:"Tabella valori", problemText:"Calcola y per x = 0, 1, 2, 3.",
+    desc:"Sostituisci ogni valore di x nella formula e calcola y.",
+    tech:{name:"Sostituzione",desc:"Sostituisci x con il valore dato e calcola."},
+    hints:["Per x=0: y = 2·0 + 1 = ?","Per x=1: y = 2·1 + 1 = ?"],
+    steps:[
+      {label:"x = 0 → y = ?",answer:["1","y=1"],feedback:"2·0+1 = 1."},
+      {label:"x = 1 → y = ?",answer:["3","y=3"],feedback:"2·1+1 = 3."},
+      {label:"x = 2 → y = ?",answer:["5","y=5"],feedback:"2·2+1 = 5."},
+      {label:"x = 3 → y = ?",answer:["7","y=7"],feedback:"2·3+1 = 7."}
+    ], finalAnswer:["7"] },
+  { expr:"y = −x + 4", title:"Funzione decrescente", problemText:"Calcola y per x = 0, 1, 2, 4.",
+    desc:"La pendenza è negativa: y diminuisce quando x aumenta.",
+    tech:{name:"Sostituzione",desc:"y = −x + 4: sostituisci x."},
+    hints:["Per x=0: y = −0 + 4 = 4."],
+    steps:[
+      {label:"x = 0 → y = ?",answer:["4","y=4"],feedback:"−0+4 = 4."},
+      {label:"x = 1 → y = ?",answer:["3","y=3"],feedback:"−1+4 = 3."},
+      {label:"x = 2 → y = ?",answer:["2","y=2"],feedback:"−2+4 = 2."},
+      {label:"x = 4 → y = ?",answer:["0","y=0"],feedback:"−4+4 = 0."}
+    ], finalAnswer:["0"] },
+  { expr:"y = 3x", title:"Proporzionalità diretta", problemText:"Calcola y per x = 0, 1, 2, 5. Che tipo di funzione è?",
+    desc:"Quando q = 0, la retta passa per l'origine.",
+    tech:{name:"Proporzionalità",desc:"y = kx → la retta passa per l'origine."},
+    hints:["Cosa succede quando x vale 0?"],
+    steps:[
+      {label:"x = 0 → y = ?",answer:["0","y=0"],feedback:"3·0 = 0."},
+      {label:"x = 2 → y = ?",answer:["6","y=6"],feedback:"3·2 = 6."},
+      {label:"x = 5 → y = ?",answer:["15","y=15"],feedback:"3·5 = 15."}
+    ], finalAnswer:["15"] },
+  { expr:"Problema", title:"Trova m e q", problemText:"Una retta passa per i punti (0, 3) e (2, 7). Trova m (pendenza) e q (intercetta).",
+    desc:"m = (y₂−y₁)/(x₂−x₁). q = y quando x=0.",
+    tech:{name:"Pendenza",desc:"m = Δy/Δx = (y₂−y₁)/(x₂−x₁)"},
+    hints:["Quando x vale 0, quanto vale y? Quello è q.","La pendenza è il rapporto tra la variazione di y e quella di x."],
+    steps:[
+      {label:"Passo 1: q = ?",answer:["3","q=3"],feedback:"Quando x=0, y=3 → q=3."},
+      {label:"Passo 2: m = (7−3)/(2−0)",answer:["2","m=2"],feedback:"4/2 = 2."},
+      {label:"Passo 3: Scrivi y=mx+q",answer:["y=2x+3"],feedback:"y = 2x + 3."}
+    ], finalAnswer:["y=2x+3"] },
+  { expr:"Problema", title:"Trova m e q (2)", problemText:"Una retta passa per (1, 5) e (3, 11). Scrivi l'equazione.",
+    desc:"Calcola m, poi trova q.",
+    tech:{name:"Pendenza e intercetta",desc:"m = Δy/Δx, poi q = y − mx."},
+    hints:["Quanto cambia y? Quanto cambia x? Il rapporto è m.","Ora che hai m, sostituisci un punto per trovare q."],
+    steps:[
+      {label:"Passo 1: m",answer:["3","m=3"],feedback:"(11−5)/(3−1) = 3."},
+      {label:"Passo 2: q",answer:["2","q=2"],feedback:"5 − 3·1 = 2."},
+      {label:"Passo 3: Equazione",answer:["y=3x+2"],feedback:"y = 3x + 2."}
+    ], finalAnswer:["y=3x+2"] },
+  { expr:"y = x − 2", title:"Intersezione con asse x", problemText:"Per quale valore di x la retta y = x − 2 interseca l'asse x (cioè y=0)?",
+    desc:"Sull'asse x, y=0. Risolvi 0 = x − 2.",
+    tech:{name:"Intersezione asse x",desc:"Poni y=0 e risolvi."},
+    hints:["Poni y uguale a zero e risolvi per x."],
+    steps:[
+      {label:"Passo 1: Poni y=0",answer:["0=x-2"],feedback:"Sostituisci y con 0."},
+      {label:"Passo 2: Risolvi",answer:["x=2","2"],feedback:"x = 2. La retta interseca l'asse x in (2, 0)."}
+    ], finalAnswer:["x=2","2"] },
+  { expr:"y = ½x + 1", title:"Con coefficiente frazionario", problemText:"Calcola y per x = 0, 2, 4, 6.",
+    desc:"m = ½ significa che y cresce di 1 ogni volta che x cresce di 2.",
+    tech:{name:"Sostituzione",desc:"Sostituisci e calcola."},
+    hints:["Sostituisci ogni valore di x nella formula."],
+    steps:[
+      {label:"x = 0 → y = ?",answer:["1","y=1"],feedback:"½·0+1 = 1."},
+      {label:"x = 2 → y = ?",answer:["2","y=2"],feedback:"½·2+1 = 2."},
+      {label:"x = 4 → y = ?",answer:["3","y=3"],feedback:"½·4+1 = 3."},
+      {label:"x = 6 → y = ?",answer:["4","y=4"],feedback:"½·6+1 = 4."}
+    ], finalAnswer:["4"] },
+  { expr:"Problema", title:"Rette parallele", problemText:"Le rette y=2x+1 e y=2x+5 sono parallele? Perché?",
+    desc:"Due rette sono parallele se hanno la stessa pendenza m.",
+    tech:{name:"Rette parallele",desc:"Stessa m → parallele."},
+    hints:["Due rette sono parallele quando hanno la stessa...?"],
+    steps:[
+      {label:"m della prima retta",answer:["2","m=2"],feedback:"y=2x+1 → m=2."},
+      {label:"m della seconda retta",answer:["2","m=2"],feedback:"y=2x+5 → m=2. Stessa m → parallele!"}
+    ], finalAnswer:["2"] },
+  { expr:"Problema", title:"Dove si incontrano?", problemText:"Trova il punto di intersezione tra y=x+1 e y=−x+5.",
+    desc:"Al punto di intersezione le due y sono uguali: x+1 = −x+5.",
+    tech:{name:"Intersezione rette",desc:"Uguaglia le due equazioni e risolvi."},
+    hints:["Al punto di intersezione le due y sono uguali. Scrivi l'equazione."],
+    steps:[
+      {label:"Passo 1: Uguaglia",answer:["x+1=-x+5","2x=4"],feedback:"x+1 = −x+5."},
+      {label:"Passo 2: Risolvi x",answer:["x=2","2"],feedback:"2x=4 → x=2."},
+      {label:"Passo 3: Trova y",answer:["y=3","3"],feedback:"y=2+1=3. Punto: (2,3)."}
+    ], finalAnswer:["3"] },
+  { expr:"Problema", title:"Costo e ricavo", problemText:"Il costo di un taxi è y = 3x + 5 dove x sono i km. Quanto costa una corsa di 10 km? E di 20 km?",
+    desc:"Sostituisci x con i km percorsi.",
+    tech:{name:"Funzione costo",desc:"Sostituisci e calcola."},
+    hints:["Sostituisci x con i km e calcola."],
+    steps:[
+      {label:"Costo per 10 km",answer:["35","y=35"],feedback:"3·10+5 = 35 €."},
+      {label:"Costo per 20 km",answer:["65","y=65"],feedback:"3·20+5 = 65 €."}
+    ], finalAnswer:["65"] },
+],
+
+/* ══════ 11. PROBLEMI CON EQUAZIONI ══════ */
+problemi: [
+  { expr:"Problema", title:"L'età di Marco", problemText:"Marco ha 5 anni più di Luca. Insieme hanno 29 anni. Quanti anni ha Marco?",
+    desc:"Traduci il problema in un'equazione e risolvila.",
+    tech:{name:"Impostare l'equazione",desc:"Scegli l'incognita, scrivi l'equazione, risolvi."},
+    hints:["Scegli un'incognita. Se Luca ha x anni, Marco ne ha...?","Scrivi la somma delle due età e ponila uguale a 29."],
+    steps:[
+      {label:"Passo 1: Scrivi l'equazione",answer:["x+x+5=29","2x+5=29"],feedback:"Luca=x, Marco=x+5, somma=29."},
+      {label:"Passo 2: Risolvi",answer:["2x=24","x=12"],feedback:"2x+5=29 → 2x=24 → x=12."},
+      {label:"Passo 3: Età di Marco",answer:["17","marco=17"],feedback:"Marco = 12+5 = 17 anni."}
+    ], finalAnswer:["17"] },
+  { expr:"Problema", title:"I biglietti", problemText:"Un cinema ha venduto 200 biglietti. I biglietti adulti costano 10€ e quelli ragazzi 6€. L'incasso totale è 1520€. Quanti biglietti adulti sono stati venduti?",
+    desc:"Imposta un sistema o un'equazione.",
+    tech:{name:"Equazione con incognita",desc:"x = biglietti adulti, 200−x = biglietti ragazzi."},
+    hints:["Se x sono i biglietti adulti, quanti sono quelli ragazzi?","Espandi e raggruppa i termini con x."],
+    steps:[
+      {label:"Passo 1: Equazione",answer:["10x+6(200-x)=1520","10x+6*(200-x)=1520"],feedback:"Adulti=x, ragazzi=200−x."},
+      {label:"Passo 2: Espandi",answer:["10x+1200-6x=1520","4x+1200=1520"],feedback:"6·200=1200, 10x−6x=4x."},
+      {label:"Passo 3: Risolvi",answer:["x=80","80"],feedback:"4x=320 → x=80 adulti."}
+    ], finalAnswer:["80"] },
+  { expr:"Problema", title:"Il perimetro", problemText:"Un rettangolo ha il perimetro di 40 cm. La base è il doppio dell'altezza. Trova base e altezza.",
+    desc:"Imposta con l'incognita x per l'altezza.",
+    tech:{name:"Perimetro e equazione",desc:"P = 2(b+h), b=2h."},
+    hints:["Se l'altezza è x, la base è...? Poi usa la formula del perimetro.","Ora risolvi l'equazione per trovare x."],
+    steps:[
+      {label:"Passo 1: Equazione",answer:["2(2x+x)=40","6x=40"],feedback:"b=2x, h=x, P=2(2x+x)=6x."},
+      {label:"Passo 2: Risolvi x (altezza)",answer:["x=20/3","6.67","6,67","20/3"],feedback:"x ≈ 6,67 cm."},
+      {label:"Passo 3: Base",answer:["40/3","13.33","13,33"],feedback:"b = 2·20/3 = 40/3 ≈ 13,33 cm."}
+    ], finalAnswer:["20/3","6.67","6,67"] },
+  { expr:"Problema", title:"Tre numeri consecutivi", problemText:"La somma di tre numeri consecutivi è 54. Quali sono?",
+    desc:"Tre numeri consecutivi: x, x+1, x+2.",
+    tech:{name:"Numeri consecutivi",desc:"x + (x+1) + (x+2) = somma."},
+    hints:["Scrivi la somma dei tre numeri e semplifica."],
+    steps:[
+      {label:"Passo 1: Equazione",answer:["x+x+1+x+2=54","3x+3=54"],feedback:"x+(x+1)+(x+2)=54 → 3x+3=54."},
+      {label:"Passo 2: Risolvi",answer:["x=17","17"],feedback:"3x=51 → x=17."},
+      {label:"Passo 3: I tre numeri",answer:["17,18,19","17 18 19"],feedback:"17, 18, 19."}
+    ], finalAnswer:["17"] },
+  { expr:"Problema", title:"La piscina", problemText:"Una piscina si riempie con un rubinetto in 6 ore. Un secondo rubinetto la riempirebbe in 3 ore. In quanto tempo si riempie con entrambi aperti?",
+    desc:"Usa le velocità: primo rubinetto fa 1/6 della piscina all'ora, il secondo 1/3.",
+    tech:{name:"Lavoro",desc:"Velocità totale = somma delle velocità individuali."},
+    hints:["Somma le velocità dei due rubinetti (frazioni del lavoro per ora).","Se conosci la velocità totale, il tempo è 1 diviso la velocità."],
+    steps:[
+      {label:"Passo 1: Velocità totale",answer:["1/6+1/3","1/2","3/6"],feedback:"1/6 + 2/6 = 3/6 = 1/2."},
+      {label:"Passo 2: Tempo",answer:["2","2ore","t=2"],feedback:"1 ÷ ½ = 2 ore."}
+    ], finalAnswer:["2"] },
+  { expr:"Problema", title:"Lo sconto", problemText:"Un oggetto costa 80€. Con uno sconto del 15%, quanto si paga?",
+    desc:"Calcola lo sconto e sottrailo dal prezzo.",
+    tech:{name:"Percentuale",desc:"Sconto = prezzo × percentuale / 100."},
+    hints:["Come si calcola il 15% di un numero?"],
+    steps:[
+      {label:"Passo 1: Calcola lo sconto",answer:["12","12€"],feedback:"80 × 0,15 = 12€."},
+      {label:"Passo 2: Prezzo finale",answer:["68","68€"],feedback:"80 − 12 = 68€."}
+    ], finalAnswer:["68"] },
+  { expr:"Problema", title:"Ripartizione", problemText:"120€ vengono divisi tra Anna e Bea in modo che Anna riceva il doppio di Bea. Quanto riceve Anna?",
+    desc:"Bea=x, Anna=2x.",
+    tech:{name:"Ripartizione",desc:"x + 2x = 120."},
+    hints:["Scrivi l'equazione: quota di Anna + quota di Bea = totale."],
+    steps:[
+      {label:"Passo 1: Equazione",answer:["x+2x=120","3x=120"],feedback:"Bea=x, Anna=2x."},
+      {label:"Passo 2: x (Bea)",answer:["x=40","40"],feedback:"120/3 = 40."},
+      {label:"Passo 3: Anna",answer:["80"],feedback:"2 × 40 = 80€."}
+    ], finalAnswer:["80"] },
+  { expr:"Problema", title:"Il treno", problemText:"Un treno viaggia a 90 km/h. Quanto tempo impiega per percorrere 315 km?",
+    desc:"t = distanza / velocità.",
+    tech:{name:"Formula del moto",desc:"t = s / v"},
+    hints:["La formula del tempo: t = distanza diviso...?"],
+    steps:[
+      {label:"Passo 1: Formula",answer:["t=315/90","315/90"],feedback:"t = s/v."},
+      {label:"Passo 2: Calcola",answer:["3.5","3,5"],feedback:"315/90 = 3,5 ore."}
+    ], finalAnswer:["3.5","3,5"] },
+  { expr:"Problema", title:"L'area del giardino", problemText:"Un giardino rettangolare ha area 96 m² e la base è 12 m. Qual è l'altezza?",
+    desc:"A = b × h → h = A / b.",
+    tech:{name:"Area inversa",desc:"h = A / b"},
+    hints:["Se conosci area e base, come trovi l'altezza?"],
+    steps:[
+      {label:"Passo 1: Formula",answer:["h=96/12"],feedback:"h = Area / base."},
+      {label:"Passo 2: Calcola",answer:["8","h=8"],feedback:"96/12 = 8 m."}
+    ], finalAnswer:["8"] },
+  { expr:"Problema", title:"Miscela", problemText:"Hai 2 litri di succo al 30% di frutta e aggiungi acqua per ottenere una miscela al 10%. Quanta acqua devi aggiungere?",
+    desc:"La quantità di frutta resta uguale: 30% di 2L = 10% di (2+x)L.",
+    tech:{name:"Equazione delle percentuali",desc:"Quantità_pura = %_finale × volume_totale."},
+    hints:["Quanta frutta pura c'è nel succo iniziale?","La frutta non cambia. Deve essere il 10% del volume totale."],
+    steps:[
+      {label:"Passo 1: Frutta",answer:["0.6","0,6"],feedback:"30% di 2L = 0,6L."},
+      {label:"Passo 2: Equazione",answer:["0.6=0.1*(2+x)","0,6=0,1*(2+x)","0.1*(2+x)=0.6"],feedback:"0,6 = 0,1·(2+x)."},
+      {label:"Passo 3: Risolvi",answer:["x=4","4"],feedback:"2+x=6 → x=4 litri d'acqua."}
+    ], finalAnswer:["4"] },
+],
+};
+
+/* ────────── STATO APP ────────── */
+let currentScreen = 'home';
+let currentTopicId = null;
+let currentExIdx = 0;
+let stepStates = [];
+let completedAnswers = [];
+let hintIdx = 0;
+/* Progresso: { topicId: Set di indici completati } */
+let progress = {};
+
+/* Carica da localStorage */
+function loadProgress() {
+  try {
+    const s = localStorage.getItem('mathAtelier_progress');
+    if (s) {
+      const d = JSON.parse(s);
+      for (const k in d) progress[k] = new Set(d[k]);
+    }
+  } catch(e) {}
+}
+function saveProgress() {
+  const d = {};
+  for (const k in progress) d[k] = [...progress[k]];
+  localStorage.setItem('mathAtelier_progress', JSON.stringify(d));
+}
+loadProgress();
+
+/* ────────── NORMALIZZAZIONE ────────── */
+function norm(s) {
+  return s.replace(/\s+/g,'').replace(/×/g,'*').replace(/·/g,'*').replace(/÷/g,'/').replace(/,/g,'.').toLowerCase();
+}
+function checkAns(input, accepted) {
+  const n = norm(input);
+  return accepted.some(a => norm(a) === n);
+}
+
+/* ────────── NAVIGAZIONE ────────── */
+function navigate(screen, topicId, exIdx) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  currentScreen = screen;
+  const backBtn = document.getElementById('btn-back');
+  const headerRight = document.getElementById('header-right');
+  headerRight.innerHTML = '';
+
+  if (screen === 'home') {
+    document.getElementById('screen-home').classList.add('active');
+    backBtn.classList.add('hidden');
+    renderHome();
+  } else if (screen === 'list') {
+    currentTopicId = topicId;
+    document.getElementById('screen-list').classList.add('active');
+    backBtn.classList.remove('hidden');
+    renderList();
+  } else if (screen === 'work') {
+    if (topicId !== undefined) currentTopicId = topicId;
+    if (exIdx !== undefined) currentExIdx = exIdx;
+    document.getElementById('screen-work').classList.add('active');
+    backBtn.classList.remove('hidden');
+    loadExercise();
+  } else if (screen === 'stats') {
+    document.getElementById('screen-stats').classList.add('active');
+    backBtn.classList.add('hidden');
+    renderStats();
+  }
+  updateNav();
+  window.scrollTo(0,0);
+}
+
+function goBack() {
+  if (currentScreen === 'list') navigate('home');
+  else if (currentScreen === 'work') navigate('list', currentTopicId);
+  else navigate('home');
+}
+
+function updateNav() {
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    const n = b.dataset.nav;
+    if (n === currentScreen || (n === 'work' && currentScreen === 'list')) {
+      b.className = 'nav-btn flex flex-col items-center justify-center bg-primary-fixed text-primary rounded-xl px-4 py-2 transition-all';
+      b.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24";
+    } else {
+      b.className = 'nav-btn flex flex-col items-center justify-center text-on-surface-variant px-4 py-2 rounded-xl transition-all hover:bg-surface-container-low';
+      b.querySelector('.material-symbols-outlined').style.fontVariationSettings = "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24";
+    }
+  });
+}
+
+/* ────────── HOME ────────── */
+function renderHome() {
+  const grid = document.getElementById('topics-grid');
+  grid.innerHTML = '';
+  let totalDone = 0, totalAll = 0;
+
+  TOPICS.forEach(t => {
+    const exs = EXERCISES[t.id] || [];
+    const done = progress[t.id] ? progress[t.id].size : 0;
+    const total = exs.length;
+    totalDone += done;
+    totalAll += total;
+    const pct = total ? Math.round(done/total*100) : 0;
+
+    const card = document.createElement('button');
+    card.className = 'bg-surface-container-low p-4 rounded-2xl text-left hover:bg-surface-container transition-all active:scale-[0.97] flex flex-col gap-3';
+    card.onclick = () => navigate('list', t.id);
+    card.innerHTML = `
+      <div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center">
+        <span class="material-symbols-outlined text-on-primary-container">${t.icon}</span>
+      </div>
+      <h3 class="font-headline font-bold text-sm leading-tight">${t.name}</h3>
+      <p class="text-xs text-on-surface-variant leading-snug">${t.desc}</p>
+      <div class="mt-auto">
+        <div class="flex justify-between text-xs font-label mb-1">
+          <span class="text-on-surface-variant">${done}/${total}</span>
+          <span class="font-bold ${pct===100?'text-secondary':'text-primary'}">${pct}%</span>
+        </div>
+        <div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden">
+          <div class="h-full ${pct===100?'bg-secondary':'bg-primary'} rounded-full transition-all" style="width:${pct}%"></div>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  const gPct = totalAll ? Math.round(totalDone/totalAll*100) : 0;
+  document.getElementById('global-progress-bar').style.width = gPct + '%';
+  document.getElementById('global-progress-text').textContent = gPct + '%';
+}
+
+/* ────────── LISTA ESERCIZI ────────── */
+function renderList() {
+  const topic = TOPICS.find(t => t.id === currentTopicId);
+  const exs = EXERCISES[currentTopicId] || [];
+  const done = progress[currentTopicId] ? progress[currentTopicId].size : 0;
+
+  document.getElementById('list-topic-icon').textContent = topic.icon;
+  document.getElementById('list-topic-title').textContent = topic.name;
+  document.getElementById('list-topic-desc').textContent = topic.desc;
+  document.getElementById('list-progress-text').textContent = `${done}/${exs.length}`;
+  document.getElementById('list-progress-bar').style.width = (exs.length ? done/exs.length*100 : 0) + '%';
+
+  const list = document.getElementById('exercises-list');
+  list.innerHTML = '';
+  exs.forEach((ex, i) => {
+    const isDone = progress[currentTopicId]?.has(i);
+    const btn = document.createElement('button');
+    btn.className = `flex items-center gap-4 p-4 rounded-2xl transition-all active:scale-[0.98] ${isDone ? 'bg-secondary-container/30' : 'bg-surface-container-low hover:bg-surface-container'}`;
+    btn.onclick = () => navigate('work', currentTopicId, i);
+    btn.innerHTML = `
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center font-headline font-bold text-sm shrink-0 ${isDone ? 'bg-secondary text-on-secondary' : 'bg-primary-fixed text-primary'}">
+        ${isDone ? '<span class="material-symbols-outlined text-sm" style="font-variation-settings:\'FILL\' 1">check</span>' : (i+1)}
+      </div>
+      <div class="flex-1 text-left">
+        <p class="font-headline font-bold text-sm">${ex.title}</p>
+        <p class="text-xs text-on-surface-variant mt-0.5 line-clamp-1">${ex.problemText || ex.expr}</p>
+      </div>
+      <span class="material-symbols-outlined text-on-surface-variant text-xl">chevron_right</span>`;
+    list.appendChild(btn);
+  });
+}
+
+/* ────────── SVG GEOMETRIA ────────── */
+function makeSvg(type, data) {
+  const w = 280, h = 200;
+  let svg = `<svg class="geo" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">`;
+  const st = 'fill:none;stroke:#004790;stroke-width:2';
+  const stD = 'fill:none;stroke:#1b6d24;stroke-width:2;stroke-dasharray:6,4';
+  const txt = 'font-family:Lexend;font-size:13px;fill:#004790;font-weight:600';
+  const txtG = 'font-family:Lexend;font-size:13px;fill:#1b6d24;font-weight:700';
+
+  if (type === 'rect') {
+    svg += `<rect x="40" y="40" width="200" height="120" rx="2" style="${st}"/>`;
+    svg += `<text x="140" y="178" text-anchor="middle" style="${txt}">${data.b}</text>`;
+    svg += `<text x="18" y="105" text-anchor="middle" style="${txt}">${data.h}</text>`;
+  } else if (type === 'rect_diag') {
+    svg += `<rect x="40" y="40" width="200" height="120" rx="2" style="${st}"/>`;
+    svg += `<line x1="40" y1="160" x2="240" y2="40" style="${stD}"/>`;
+    svg += `<text x="140" y="178" text-anchor="middle" style="${txt}">${data.b}</text>`;
+    svg += `<text x="18" y="105" text-anchor="middle" style="${txt}">${data.h}</text>`;
+    svg += `<text x="155" y="90" text-anchor="middle" style="${txtG}">?</text>`;
+  } else if (type === 'tri') {
+    svg += `<polygon points="140,30 40,170 240,170" style="${st}"/>`;
+    svg += `<line x1="140" y1="30" x2="140" y2="170" style="${stD}"/>`;
+    svg += `<text x="140" y="190" text-anchor="middle" style="${txt}">${data.b}</text>`;
+    svg += `<text x="155" y="105" text-anchor="start" style="${txt}">h=${data.h}</text>`;
+  } else if (type === 'tri_eq') {
+    svg += `<polygon points="140,30 40,170 240,170" style="${st}"/>`;
+    svg += `<text x="140" y="190" text-anchor="middle" style="${txt}">${data.l}</text>`;
+    svg += `<text x="80" y="95" text-anchor="middle" style="${txt}">${data.l}</text>`;
+    svg += `<text x="200" y="95" text-anchor="middle" style="${txt}">${data.l}</text>`;
+  } else if (type === 'circle') {
+    svg += `<circle cx="140" cy="100" r="70" style="${st}"/>`;
+    svg += `<line x1="140" y1="100" x2="210" y2="100" style="${stD}"/>`;
+    svg += `<text x="175" y="93" text-anchor="middle" style="${txt}">r=${data.r}</text>`;
+  } else if (type === 'trap') {
+    const bOff = (200 - 200*data.b/data.B) / 2;
+    svg += `<polygon points="${40+bOff},40 ${240-bOff},40 240,160 40,160" style="${st}"/>`;
+    svg += `<text x="140" y="30" text-anchor="middle" style="${txt}">${data.b}</text>`;
+    svg += `<text x="140" y="180" text-anchor="middle" style="${txt}">${data.B}</text>`;
+    svg += `<text x="18" y="105" text-anchor="middle" style="${txt}">${data.h}</text>`;
+  } else if (type === 'right_tri') {
+    // Triangolo rettangolo con angolo retto in basso a sinistra
+    svg += `<polygon points="60,160 260,160 60,40" style="${st}"/>`;
+    // Angolo retto
+    svg += `<rect x="60" y="140" width="20" height="20" style="fill:none;stroke:#727783;stroke-width:1"/>`;
+    const aVal = data.a || '?';
+    const bVal = data.b || '?';
+    const cVal = data.c || '?';
+    const aLabel = data.find==='a' ? '?' : aVal;
+    const bLabel = data.find==='b' ? '?' : bVal;
+    const cLabel = data.find==='c' ? '?' : cVal;
+    // cateto verticale (a)
+    svg += `<text x="42" y="105" text-anchor="middle" style="${data.find==='a'?txtG:txt}">${aLabel}</text>`;
+    // cateto orizzontale (b)
+    svg += `<text x="160" y="180" text-anchor="middle" style="${data.find==='b'?txtG:txt}">${bLabel}</text>`;
+    // ipotenusa (c)
+    svg += `<text x="175" y="90" text-anchor="middle" style="${data.find==='c'?txtG:txt}">${cLabel}</text>`;
+  } else if (type === 'para') {
+    svg += `<polygon points="80,40 260,40 220,160 40,160" style="${st}"/>`;
+    svg += `<line x1="80" y1="40" x2="80" y2="160" style="${stD}"/>`;
+    svg += `<text x="150" y="180" text-anchor="middle" style="${txt}">${data.b}</text>`;
+    svg += `<text x="68" y="105" text-anchor="middle" style="${txt}">h=${data.h}</text>`;
+  } else if (type === 'rhombus') {
+    svg += `<polygon points="140,20 260,100 140,180 20,100" style="${st}"/>`;
+    svg += `<line x1="20" y1="100" x2="260" y2="100" style="${stD}"/>`;
+    svg += `<line x1="140" y1="20" x2="140" y2="180" style="${stD}"/>`;
+    svg += `<text x="140" y="15" text-anchor="middle" style="${txt}">d₂=${data.d2}</text>`;
+    svg += `<text x="265" y="105" text-anchor="start" style="${txt}">d₁=${data.d1}</text>`;
+  }
+  svg += '</svg>';
+  return svg;
+}
+
+/* ────────── WORKSPACE ────────── */
+function loadExercise() {
+  const exs = EXERCISES[currentTopicId] || [];
+  const ex = exs[currentExIdx];
+  if (!ex) return;
+
+  const topic = TOPICS.find(t => t.id === currentTopicId);
+  const isDone = progress[currentTopicId]?.has(currentExIdx);
+
+  // Header info
+  document.getElementById('w-challenge-label').textContent = `${topic.name} — Esercizio ${currentExIdx+1}/${exs.length}`;
+  document.getElementById('w-title').textContent = ex.title;
+  document.getElementById('w-desc').textContent = ex.desc;
+  document.getElementById('w-tech-name').textContent = ex.tech.name;
+  document.getElementById('w-tech-desc').textContent = ex.tech.desc;
+
+  // Espressione o problema
+  const exprBox = document.getElementById('w-expression-box');
+  const exprEl = document.getElementById('w-expression');
+  if (ex.problemText) {
+    exprEl.className = 'text-base md:text-lg font-body text-on-surface text-left leading-relaxed';
+    exprEl.textContent = ex.problemText;
+  } else {
+    exprEl.className = 'text-2xl md:text-3xl font-headline font-bold tracking-wide text-primary text-center';
+    exprEl.textContent = ex.expr;
+  }
+
+  // SVG geometria
+  const svgBox = document.getElementById('w-svg-box');
+  if (ex.svgType) {
+    svgBox.innerHTML = makeSvg(ex.svgType, ex.svgData);
+    svgBox.classList.remove('hidden');
+  } else {
+    svgBox.classList.add('hidden');
+    svgBox.innerHTML = '';
+  }
+
+  // Hint (per problemi)
+  hintIdx = 0;
+  const hintBtn = document.getElementById('w-hint-btn');
+  const hintBox = document.getElementById('w-hint-box');
+  hintBox.classList.add('hidden');
+  if (ex.hints && ex.hints.length > 0) {
+    hintBtn.classList.remove('hidden');
+  } else if (ex.hint) {
+    // Hint singolo, mostra come suggerimento statico
+    hintBtn.classList.remove('hidden');
+    document.getElementById('w-hint-text').textContent = '';
+  } else {
+    hintBtn.classList.add('hidden');
+  }
+
+  // Inizializza step
+  if (isDone) {
+    stepStates = ex.steps.map(() => 'completed');
+    completedAnswers = ex.steps.map(s => s.answer ? s.answer[0] : (s.prefilled || ''));
+  } else {
+    stepStates = ex.steps.map((s, i) => {
+      if (s.prefilled) return 'completed';
+      const firstInteractive = ex.steps.findIndex(st => !st.prefilled);
+      return i === firstInteractive ? 'active' : 'locked';
+    });
+    completedAnswers = ex.steps.map(s => s.prefilled || '');
+  }
+
+  // Reset area finale
+  const finalRes = document.getElementById('final-result');
+  finalRes.textContent = isDone ? completedAnswers[completedAnswers.length-1] : '?';
+  finalRes.className = `text-3xl md:text-4xl font-headline font-black ${isDone ? 'text-secondary' : 'text-on-surface'}`;
+  const btn = document.getElementById('btn-check');
+  btn.disabled = !isDone;
+
+  if (isDone && currentExIdx < exs.length - 1) {
+    btn.innerHTML = 'Prossimo esercizio <span class="material-symbols-outlined">arrow_forward</span>';
+    btn.disabled = false;
+  } else if (isDone) {
+    btn.innerHTML = 'Completato! <span class="material-symbols-outlined">check_circle</span>';
+    btn.className = btn.className.replace('bg-primary','bg-secondary');
+  } else {
+    btn.innerHTML = 'Verifica risultato <span class="material-symbols-outlined">arrow_forward</span>';
+    btn.className = btn.className.replace('bg-secondary','bg-primary');
+  }
+
+  renderPills();
+  renderSteps();
+}
+
+function renderPills() {
+  const c = document.getElementById('work-pills');
+  c.innerHTML = '';
+  const exs = EXERCISES[currentTopicId] || [];
+  exs.forEach((_, i) => {
+    const p = document.createElement('button');
+    p.className = 'h-2 rounded-full transition-all cursor-pointer hover:opacity-80';
+    const isDone = progress[currentTopicId]?.has(i);
+    if (i === currentExIdx) {
+      p.classList.add('w-12', 'md:w-16', 'bg-primary', 'shadow-[0_0_10px_rgba(23,93,178,0.3)]');
+    } else if (isDone) {
+      p.classList.add('w-8', 'md:w-12', 'bg-secondary-fixed');
+    } else {
+      p.classList.add('w-8', 'md:w-12', 'bg-surface-container-highest');
+    }
+    p.onclick = () => { currentExIdx = i; loadExercise(); window.scrollTo(0,0); };
+    p.title = `Esercizio ${i+1}`;
+    c.appendChild(p);
+  });
+}
+
+function renderSteps() {
+  const c = document.getElementById('steps-container');
+  c.innerHTML = '';
+  const ex = (EXERCISES[currentTopicId]||[])[currentExIdx];
+  if (!ex) return;
+
+  ex.steps.forEach((step, i) => {
+    const state = stepStates[i];
+    const isLast = i === ex.steps.length - 1;
+    const div = document.createElement('div');
+    div.className = `flex gap-4 md:gap-6 ${isLast ? '' : 'mb-6'} ${state==='active'?'anim-enter':''}`;
+    div.id = `step-${i}`;
+
+    // Indicatore
+    let ind = '';
+    if (state === 'completed') {
+      ind = `<div class="flex flex-col items-center"><div class="w-8 h-8 rounded-full bg-secondary text-on-secondary flex items-center justify-center font-bold text-sm shrink-0"><span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1">check</span></div>${!isLast?'<div class="w-0.5 flex-1 bg-secondary-fixed mt-2"></div>':''}</div>`;
+    } else if (state === 'active') {
+      ind = `<div class="flex flex-col items-center"><div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-bold text-sm ring-4 ring-primary-fixed shrink-0">${i+1}</div>${!isLast?'<div class="w-0.5 flex-1 bg-surface-container-highest mt-2"></div>':''}</div>`;
+    } else {
+      ind = `<div class="flex flex-col items-center"><div class="w-8 h-8 rounded-full bg-surface-dim text-on-surface-variant flex items-center justify-center font-bold text-sm shrink-0">${i+1}</div>${!isLast?'<div class="w-0.5 flex-1 bg-surface-container-highest mt-2"></div>':''}</div>`;
+    }
+
+    // Contenuto
+    let cont = '';
+    if (state === 'completed') {
+      const ans = completedAnswers[i] || '';
+      cont = `<div class="flex-1 pb-2"><div class="flex justify-between items-start mb-1 flex-wrap gap-1"><span class="font-label text-xs text-on-surface-variant uppercase font-bold">${step.label}</span><span class="text-secondary text-xs font-bold">✓ Verificato</span></div><div class="text-xl md:text-2xl font-headline font-medium text-on-surface">${ans}</div>${step.feedback && state==='completed' && !step.prefilled?`<p class="mt-1 text-xs text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-xs">check_circle</span>${step.feedback}</p>`:''}</div>`;
+    } else if (state === 'active') {
+      cont = `<div class="flex-1"><div class="mb-1"><span class="font-label text-xs text-primary uppercase font-bold tracking-widest">${step.label}</span></div><div class="relative"><input id="input-${i}" data-step="${i}" class="step-input w-full text-xl md:text-2xl font-headline font-bold text-primary bg-primary-fixed/30 border-none rounded-2xl px-4 py-3 focus:ring-4 focus:ring-primary/10 transition-all outline-none" placeholder="Scrivi la risposta..." type="text" autocomplete="off" inputmode="text"/></div><p id="fb-${i}" class="mt-2 text-xs text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-xs">lightbulb</span>Scrivi la risposta e premi Invio.</p></div>`;
+    } else {
+      cont = `<div class="flex-1"><div class="mb-1"><span class="font-label text-xs text-outline uppercase font-bold tracking-widest">${step.label}</span></div><div class="w-full h-14 border-2 border-dashed border-outline-variant rounded-2xl flex items-center px-4"><span class="text-outline-variant font-headline italic text-sm">In attesa del passo precedente...</span></div></div>`;
+    }
+
+    div.innerHTML = ind + cont;
+    c.appendChild(div);
+  });
+
+  // Listener sugli input
+  document.querySelectorAll('.step-input').forEach(inp => {
+    inp.addEventListener('keydown', onStepKey);
+    setTimeout(() => inp.focus(), 80);
+  });
+}
+
+function onStepKey(e) {
+  if (e.key !== 'Enter') return;
+  const i = parseInt(e.target.dataset.step);
+  const ex = (EXERCISES[currentTopicId]||[])[currentExIdx];
+  const step = ex.steps[i];
+  const val = e.target.value.trim();
+  if (!val) return;
+
+  if (checkAns(val, step.answer)) {
+    // Corretto
+    completedAnswers[i] = val;
+    stepStates[i] = 'completed';
+    if (i + 1 < ex.steps.length && stepStates[i+1] === 'locked') {
+      stepStates[i+1] = 'active';
+    }
+    const allDone = stepStates.every(s => s === 'completed');
+    document.getElementById('btn-check').disabled = !allDone;
+    renderSteps();
+  } else {
+    // Errato
+    e.target.classList.add('anim-err');
+    const fb = document.getElementById(`fb-${i}`);
+    if (fb) fb.innerHTML = '<span class="material-symbols-outlined text-xs text-error">close</span><span class="text-error">Non è corretto. Riprova!</span>';
+    setTimeout(() => e.target.classList.remove('anim-err'), 400);
+  }
+}
+
+/* Suggerimento progressivo */
+function showHint() {
+  const ex = (EXERCISES[currentTopicId]||[])[currentExIdx];
+  const hintBox = document.getElementById('w-hint-box');
+  const hintText = document.getElementById('w-hint-text');
+
+  if (ex.hints && ex.hints.length > 0) {
+    if (hintIdx < ex.hints.length) {
+      hintText.textContent = ex.hints[hintIdx];
+      hintIdx++;
+    } else {
+      hintText.textContent = 'Non ci sono altri suggerimenti. Rileggi il problema con calma!';
+    }
+  } else if (ex.hint) {
+    hintText.innerHTML = ex.hint;
+  }
+  hintBox.classList.remove('hidden');
+}
+
+/* Verifica finale */
+function handleFinalCheck() {
+  const exs = EXERCISES[currentTopicId] || [];
+  const ex = exs[currentExIdx];
+  const isDone = progress[currentTopicId]?.has(currentExIdx);
+
+  if (isDone) {
+    // Vai al prossimo
+    if (currentExIdx < exs.length - 1) {
+      currentExIdx++;
+      loadExercise();
+      window.scrollTo(0,0);
+    }
+    return;
+  }
+
+  const lastAns = completedAnswers[completedAnswers.length - 1];
+  if (checkAns(lastAns, ex.finalAnswer)) {
+    // Completato!
+    if (!progress[currentTopicId]) progress[currentTopicId] = new Set();
+    progress[currentTopicId].add(currentExIdx);
+    saveProgress();
+
+    const fr = document.getElementById('final-result');
+    fr.textContent = lastAns;
+    fr.className = 'text-3xl md:text-4xl font-headline font-black text-secondary';
+
+    const btn = document.getElementById('btn-check');
+    if (currentExIdx < exs.length - 1) {
+      btn.innerHTML = 'Prossimo esercizio <span class="material-symbols-outlined">arrow_forward</span>';
+      btn.disabled = false;
+    } else {
+      btn.innerHTML = 'Argomento completato! <span class="material-symbols-outlined">celebration</span>';
+      btn.className = btn.className.replace('bg-primary','bg-secondary');
+    }
+    renderPills();
+  }
+}
+
+/* ────────── RIEPILOGO ────────── */
+function renderStats() {
+  const c = document.getElementById('stats-content');
+  let totalDone = 0, totalAll = 0;
+  let html = '';
+
+  TOPICS.forEach(t => {
+    const exs = EXERCISES[t.id] || [];
+    const done = progress[t.id] ? progress[t.id].size : 0;
+    totalDone += done;
+    totalAll += exs.length;
+    const pct = exs.length ? Math.round(done/exs.length*100) : 0;
+
+    html += `<div class="flex items-center gap-4 p-4 bg-surface-container-low rounded-2xl mb-3">
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${pct===100?'bg-secondary text-on-secondary':'bg-primary-container'}">
+        <span class="material-symbols-outlined ${pct===100?'':'text-on-primary-container'}">${pct===100?'check_circle':t.icon}</span>
+      </div>
+      <div class="flex-1">
+        <p class="font-headline font-bold text-sm">${t.name}</p>
+        <div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden mt-1">
+          <div class="h-full ${pct===100?'bg-secondary':'bg-primary'} rounded-full" style="width:${pct}%"></div>
+        </div>
+      </div>
+      <span class="font-label font-bold text-sm ${pct===100?'text-secondary':'text-primary'}">${done}/${exs.length}</span>
+    </div>`;
+  });
+
+  const gPct = totalAll ? Math.round(totalDone/totalAll*100) : 0;
+  c.innerHTML = `
+    <div class="bg-primary-fixed p-6 rounded-3xl mb-6 text-center">
+      <p class="text-5xl font-headline font-black text-primary mb-2">${gPct}%</p>
+      <p class="text-on-primary-fixed text-sm">Esercizi completati: ${totalDone} su ${totalAll}</p>
+    </div>
+    ${html}
+    <button onclick="if(confirm('Vuoi davvero azzerare tutto il progresso?')){localStorage.removeItem('mathAtelier_progress');progress={};navigate('home');}" class="mt-6 w-full p-3 rounded-xl bg-error-container text-on-error-container font-label font-bold text-sm active:scale-95 transition-all">
+      Azzera progresso
+    </button>`;
+}
+
+/* ────────── INIT ────────── */
+navigate('home');
+</script>
+</body>
+</html>
