@@ -522,20 +522,20 @@ frazioni: [
       {label:"Passo 1: Trasforma",answer:["3/4-2/4"],feedback:"1/2 = 2/4."},
       {label:"Passo 2: Sottrai",answer:["1/4"],feedback:"3 − 2 = 1, denominatore 4."}
     ], finalAnswer:["1/4"] },
-  { expr:"2/3 × 3/5", title:"Prodotto di frazioni", desc:"Moltiplica numeratore × numeratore e denominatore × denominatore.",
-    tech:{name:"Prodotto di frazioni",desc:"a/b × c/d = (a×c)/(b×d). Poi semplifica se possibile."},
-    hint:"Numeratore per numeratore, denominatore per denominatore. Poi semplifica.",
+  { expr:"2/3 × 3/5", title:"Prodotto di frazioni", desc:"Prima semplifica in croce, poi moltiplica. È più facile!",
+    tech:{name:"Semplificazione incrociata",desc:"Prima di moltiplicare, cerca numeri uguali tra un numeratore e il denominatore opposto: si cancellano!"},
+    hint:"C'è un numero che compare sia sopra che sotto?",
     steps:[
-      {label:"Passo 1: Moltiplica",answer:["6/15"],feedback:"2×3=6, 3×5=15."},
-      {label:"Passo 2: Semplifica",answer:["2/5"],feedback:"6/15 semplificato per 3 = 2/5."}
+      {label:"Passo 1: Semplifica in croce",answer:["2/1*1/5","2*1/1*5","2/1x1/5"],feedback:"Il 3 al numeratore e il 3 al denominatore si cancellano!"},
+      {label:"Passo 2: Moltiplica",answer:["2/5"],feedback:"2×1 = 2, 1×5 = 5. Risultato: 2/5."}
     ], finalAnswer:["2/5"] },
-  { expr:"3/4 ÷ 1/2", title:"Divisione di frazioni", desc:"Dividi = moltiplica per il reciproco.",
-    tech:{name:"Reciproco",desc:"a/b ÷ c/d = a/b × d/c. Capovolgi la seconda e moltiplica."},
-    hint:"Per dividere frazioni, capovolgi la seconda e moltiplica.",
+  { expr:"3/4 ÷ 1/2", title:"Divisione di frazioni", desc:"Capovolgi la seconda, semplifica in croce, poi moltiplica.",
+    tech:{name:"Reciproco + semplificazione",desc:"a/b ÷ c/d = a/b × d/c. Capovolgi, semplifica e moltiplica."},
+    hint:"Per dividere frazioni, capovolgi la seconda. Poi cerca cosa puoi semplificare.",
     steps:[
-      {label:"Passo 1: Reciproco",answer:["3/4*2/1","3/4×2/1","3/4*2"],feedback:"Capovolgi 1/2 → 2/1."},
-      {label:"Passo 2: Moltiplica",answer:["6/4","3/2"],feedback:"3×2=6, 4×1=4 → 6/4."},
-      {label:"Passo 3: Semplifica",answer:["3/2","1,5"],feedback:"6/4 = 3/2."}
+      {label:"Passo 1: Capovolgi",answer:["3/4*2/1","3/4×2/1","3/4*2"],feedback:"Capovolgi 1/2 → 2/1."},
+      {label:"Passo 2: Semplifica il 2 e il 4",answer:["3/2*1/1","3/2","3/2*1"],feedback:"2 e 4 si semplificano per 2: 4÷2=2, 2÷2=1."},
+      {label:"Passo 3: Risultato",answer:["3/2","1.5","1,5"],feedback:"3/2. Bravo!"}
     ], finalAnswer:["3/2"] },
   { expr:"5/6 + 1/4", title:"Somma con mcm", desc:"mcm(6,4) = 12.",
     tech:{name:"mcm per somma",desc:"Trova il mcm dei denominatori."},
@@ -544,12 +544,12 @@ frazioni: [
       {label:"Passo 1: Trasforma",answer:["10/12+3/12"],feedback:"5/6 = 10/12, 1/4 = 3/12."},
       {label:"Passo 2: Somma",answer:["13/12"],feedback:"10 + 3 = 13, denominatore 12."}
     ], finalAnswer:["13/12"] },
-  { expr:"2/5 × 5/8", title:"Prodotto con semplificazione", desc:"Semplifica prima di moltiplicare se possibile.",
-    tech:{name:"Semplificazione incrociata",desc:"Prima di moltiplicare, puoi semplificare tra numeratore e denominatore opposti."},
-    hint:"C'è un numero che appare sia sopra che sotto? Semplificalo prima.",
+  { expr:"2/5 × 5/8", title:"Prodotto con semplificazione", desc:"Semplifica in croce prima di moltiplicare!",
+    tech:{name:"Semplificazione incrociata",desc:"Cerca numeri uguali tra un numeratore e il denominatore dell'altra frazione: si cancellano."},
+    hint:"C'è un numero che compare sia al numeratore di una che al denominatore dell'altra?",
     steps:[
-      {label:"Passo 1: Semplifica i 5",answer:["2/8","2*1/(1*8)"],feedback:"5 si semplifica con 5."},
-      {label:"Passo 2: Semplifica",answer:["1/4"],feedback:"2/8 = 1/4."}
+      {label:"Passo 1: Semplifica i 5",answer:["2/1*1/8","2/8","1/4"],feedback:"Il 5 al numeratore e il 5 al denominatore si cancellano!"},
+      {label:"Passo 2: Risultato",answer:["2/8","1/4"],feedback:"2/8 si riduce a 1/4. Perfetto!"}
     ], finalAnswer:["1/4"] },
   { expr:"7/10 − 2/5", title:"Differenza con mcm 10", desc:"mcm(10,5) = 10.",
     tech:{name:"mcm",desc:"Uno dei denominatori è già multiplo dell'altro."},
@@ -573,13 +573,13 @@ frazioni: [
       {label:"Passo 1: Somma",answer:["5/6*6","5/6×6"],feedback:"1/2+1/3 = 5/6."},
       {label:"Passo 2: Moltiplica",answer:["5"],feedback:"5/6 × 6 = 5."}
     ], finalAnswer:["5"] },
-  { expr:"2/3 ÷ 4/9", title:"Divisione e semplificazione", desc:"Capovolgi e moltiplica, poi semplifica.",
-    tech:{name:"Reciproco",desc:"Capovolgi la seconda frazione e moltiplica."},
-    hint:"Capovolgi la seconda e moltiplica. Poi semplifica.",
+  { expr:"2/3 ÷ 4/9", title:"Divisione e semplificazione", desc:"Capovolgi, semplifica in croce, poi moltiplica.",
+    tech:{name:"Reciproco + semplificazione",desc:"Capovolgi la seconda, poi semplifica prima di moltiplicare."},
+    hint:"Dopo aver capovolto, cerca cosa puoi semplificare in croce.",
     steps:[
-      {label:"Passo 1: Reciproco",answer:["2/3*9/4","2/3×9/4"],feedback:"4/9 → 9/4."},
-      {label:"Passo 2: Moltiplica",answer:["18/12"],feedback:"2×9=18, 3×4=12."},
-      {label:"Passo 3: Semplifica",answer:["3/2"],feedback:"18/12 ÷ 6 = 3/2."}
+      {label:"Passo 1: Capovolgi",answer:["2/3*9/4","2/3×9/4"],feedback:"4/9 diventa 9/4."},
+      {label:"Passo 2: Semplifica in croce",answer:["1/1*3/2","3/2","1*3/1*2"],feedback:"Il 3 e il 9 (÷3), il 2 e il 4 (÷2) si semplificano!"},
+      {label:"Passo 3: Risultato",answer:["3/2","1.5","1,5"],feedback:"3/2. Perfetto!"}
     ], finalAnswer:["3/2"] },
 ],
 
@@ -1378,8 +1378,6 @@ function norm(s) {
        .replace(/⁴/g,'^4').replace(/⁵/g,'^5').replace(/⁶/g,'^6').replace(/⁷/g,'^7')
        .replace(/⁸/g,'^8').replace(/⁹/g,'^9');
   r = r.toLowerCase();
-  // Rimuovi tutti i * (la moltiplicazione diventa implicita per il confronto)
-  r = r.replace(/\*/g, '');
   return r;
 }
 
@@ -1387,12 +1385,16 @@ function norm(s) {
    Prova anche a riordinare i termini sommati/sottratti per catturare ordini diversi. */
 function checkAns(input, accepted) {
   const ni = norm(input);
-  // Confronto diretto
-  if (accepted.some(a => norm(a) === ni)) return true;
+  const niNoMul = ni.replace(/\*/g, ''); // versione senza *
+  // Confronto diretto (con e senza *)
+  if (accepted.some(a => {
+    const na = norm(a);
+    return na === ni || na === niNoMul || na.replace(/\*/g,'') === niNoMul;
+  })) return true;
   // Prova a confrontare i termini come insieme (ordine diverso)
-  const inputTerms = splitTerms(ni);
+  const inputTerms = splitTerms(niNoMul);
   return accepted.some(a => {
-    const aTerms = splitTerms(norm(a));
+    const aTerms = splitTerms(norm(a).replace(/\*/g,''));
     if (inputTerms.length !== aTerms.length) return false;
     const sorted1 = [...inputTerms].sort();
     const sorted2 = [...aTerms].sort();
