@@ -803,15 +803,15 @@ prodotti: [
     tech:{name:"Quadrato di binomio",desc:"(a+b)² = a² + 2ab + b²"},
     hint:"Servono tre pezzi: il quadrato del primo, il doppio prodotto, il quadrato del secondo.",
     steps:[
-      {label:"Passo 1: Applica la formula",answer:["x^2+2*x*3+3^2","x^2+2*x*3+9","x^2+2x3+9","x^2+6x+3^2","x^2+6x+9","x^2+2*3*x+9","x^2+2*3x+9","x^2+2*3x+3^2"],feedback:"a²=x², 2ab=2·x·3, b²=9."},
-      {label:"Passo 2: Semplifica",answer:["x^2+6x+9","x²+6x+9"],feedback:"2·x·3 = 6x."}
+      {label:"Passo 1: Scrivi i tre pezzi (a² + 2ab + b²)",answer:["x^2+2*x*3+3^2","x^2+2*x*3+9","x^2+2x3+9","x^2+2*3*x+9","x^2+2*3x+9","x^2+2*3x+3^2","x^2+2x3+3^2"],feedback:"a²=x², 2ab=2·x·3, b²=9."},
+      {label:"Passo 2: Semplifica il doppio prodotto",answer:["x^2+6x+9","x²+6x+9","x^2+6x+3^2"],feedback:"2·x·3 = 6x."}
     ], finalAnswer:["x^2+6x+9","x²+6x+9"] },
   { expr:"(x − 4)²", title:"Quadrato con meno", desc:"(a−b)² = a² − 2ab + b²",
     tech:{name:"Quadrato di differenza",desc:"(a−b)² = a² − 2ab + b²"},
     hint:"Come il quadrato di somma, ma il doppio prodotto ha il meno.",
     steps:[
-      {label:"Passo 1: Applica la formula",answer:["x^2-2*x*4+16","x^2-8x+16","x^2-2*x*4+4^2","x^2-2*4*x+16","x^2-2*4x+16","x^2-2x4+16","x^2-2x4+4^2"],feedback:"a²=x², −2ab=−8x, b²=16."},
-      {label:"Passo 2: Semplifica",answer:["x^2-8x+16","x²-8x+16"],feedback:"−2·x·4 = −8x."}
+      {label:"Passo 1: Scrivi i tre pezzi (a² − 2ab + b²)",answer:["x^2-2*x*4+16","x^2-2*x*4+4^2","x^2-2*4*x+16","x^2-2*4x+16","x^2-2x4+16","x^2-2x4+4^2"],feedback:"a²=x², −2ab=−2·x·4, b²=16."},
+      {label:"Passo 2: Semplifica il doppio prodotto",answer:["x^2-8x+16","x²-8x+16","x^2-8x+4^2"],feedback:"−2·x·4 = −8x."}
     ], finalAnswer:["x^2-8x+16","x²-8x+16"] },
   { expr:"(x + 5)(x − 5)", title:"Somma per differenza", desc:"(a+b)(a−b) = a² − b²",
     tech:{name:"Differenza di quadrati",desc:"(a+b)(a−b) = a² − b². Il doppio prodotto si cancella!"},
@@ -823,8 +823,8 @@ prodotti: [
     tech:{name:"Quadrato di binomio",desc:"(a+b)² = a² + 2ab + b²"},
     hint:"Attenzione: a non è solo x, ma 2x. Quanto fa (2x) al quadrato?",
     steps:[
-      {label:"Passo 1: Espandi",answer:["4x^2+2*2x*1+1","4x^2+4x+1","4x^2+2*2*x*1+1^2","4x^2+2*2x+1","(2x)^2+2*2x*1+1^2","4x^2+2*2x*1+1^2"],feedback:"(2x)²=4x², 2·2x·1=4x, 1²=1."},
-      {label:"Passo 2: Risultato",answer:["4x^2+4x+1","4x²+4x+1"],feedback:"2·2x·1=4x, 1²=1."}
+      {label:"Passo 1: Scrivi i tre pezzi ((2x)² + 2·2x·1 + 1²)",answer:["4x^2+2*2x*1+1","4x^2+2*2*x*1+1^2","(2x)^2+2*2x*1+1^2","4x^2+2*2x*1+1^2","4x^2+4x*1+1","4x^2+4x+1^2"],feedback:"(2x)²=4x², 2·2x·1=4x, 1²=1."},
+      {label:"Passo 2: Semplifica il doppio prodotto",answer:["4x^2+4x+1","4x²+4x+1"],feedback:"2·2x·1=4x."}
     ], finalAnswer:["4x^2+4x+1","4x²+4x+1"] },
   { expr:"(3x − 2)(3x + 2)", title:"Somma per differenza (2)", desc:"(a−b)(a+b) = a² − b²",
     tech:{name:"Differenza di quadrati",desc:"a=3x, b=2"},
