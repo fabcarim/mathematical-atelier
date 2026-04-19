@@ -415,6 +415,13 @@ const TOPICS = [
   { id:"app_pitagora",  icon:"architecture",   name:"Applicazioni Pitagora",desc:"Problemi reali con Pitagora", hasSvg:true, isProb:true },
   { id:"funzioni",      icon:"show_chart",     name:"Funzioni Lineari",     desc:"y = mx + q — rette e grafici", isProb:true },
   { id:"problemi",      icon:"quiz",           name:"Problemi con Equazioni",desc:"Dal testo all'equazione", isProb:true },
+  { id:"radicali",      icon:"square_foot",    name:"Radicali",             desc:"Espressioni con radici quadrate" },
+  { id:"proporzioni",   icon:"compare_arrows", name:"Rapporti e Proporzioni",desc:"Verifiche, termine incognito, catene" },
+  { id:"tre_semplice",  icon:"sync_alt",       name:"Tre Semplice e Composto",desc:"Proporzionalità diretta e inversa", isProb:true },
+  { id:"percentuali",   icon:"percent",        name:"Percentuali e Interessi",desc:"Sconti, aumenti, interesse semplice", isProb:true },
+  { id:"statistica",    icon:"bar_chart",      name:"Statistica",           desc:"Frequenze, media, moda, mediana", isProb:true },
+  { id:"triangoli_not", icon:"details",        name:"Triangoli Notevoli",   desc:"45°, 30°-60° con radici", hasSvg:true },
+  { id:"cerchio",       icon:"circle",         name:"Cerchio e Poligoni",   desc:"Circonferenza, area, apotema", hasSvg:true },
 ];
 
 /* ────────── BANCA DATI ESERCIZI ──────────
@@ -1310,6 +1317,910 @@ problemi: [
       {label:"Passo 3: Risolvi",answer:["x=4","4"],feedback:"2+x=6 → x=4 litri d'acqua."}
     ], finalAnswer:["4"] },
 ],
+
+/* ══════ 12. RADICALI ══════ */
+radicali: [
+  { expr:"√25", title:"Radice esatta", desc:"Trova il numero che elevato al quadrato dà 25.",
+    tech:{name:"Radice quadrata",desc:"√a = b se b² = a (con b ≥ 0)."},
+    hint:"Quale numero al quadrato fa 25?",
+    steps:[{label:"Calcola",answer:["5"],feedback:"5² = 25, quindi √25 = 5."}],
+    finalAnswer:["5"] },
+  { expr:"√81", title:"Radice esatta (2)", desc:"Cerca il numero che al quadrato dà 81.",
+    tech:{name:"Radice quadrata",desc:"√a = b se b² = a."},
+    hint:"9 al quadrato fa 81?",
+    steps:[{label:"Calcola",answer:["9"],feedback:"9² = 81."}],
+    finalAnswer:["9"] },
+  { expr:"√(4·9)", title:"Radice di prodotto", desc:"√(a·b) = √a · √b. Spezza la radice!",
+    tech:{name:"Radice di prodotto",desc:"√(a·b) = √a · √b"},
+    hint:"Puoi separare la radice in due radici più semplici.",
+    steps:[
+      {label:"Passo 1: Spezza",answer:["√4*√9","√4·√9","2*3","2·3"],feedback:"√(4·9) = √4·√9 = 2·3."},
+      {label:"Passo 2: Calcola",answer:["6"],feedback:"2 × 3 = 6."}
+    ], finalAnswer:["6"] },
+  { expr:"√(16/4)", title:"Radice di quoziente", desc:"√(a/b) = √a / √b.",
+    tech:{name:"Radice di quoziente",desc:"√(a/b) = √a / √b"},
+    hint:"Separa la radice del numeratore dalla radice del denominatore.",
+    steps:[
+      {label:"Passo 1: Spezza",answer:["√16/√4","4/2"],feedback:"√16/√4 = 4/2."},
+      {label:"Passo 2: Calcola",answer:["2"],feedback:"4 ÷ 2 = 2."}
+    ], finalAnswer:["2"] },
+  { expr:"3·√25 − 2·√16", title:"Espressione con radicali", desc:"Calcola le radici, poi le moltiplicazioni, infine la sottrazione.",
+    tech:{name:"Espressioni con radicali",desc:"Le radici si calcolano prima delle altre operazioni."},
+    hint:"Trasforma le radici in numeri, poi segui l'ordine delle operazioni.",
+    steps:[
+      {label:"Passo 1: Calcola le radici",answer:["3*5-2*4","3·5-2·4","15-8"],feedback:"√25=5, √16=4."},
+      {label:"Passo 2: Moltiplica",answer:["15-8"],feedback:"3·5=15, 2·4=8."},
+      {label:"Passo 3: Sottrai",answer:["7"],feedback:"15 − 8 = 7."}
+    ], finalAnswer:["7"] },
+  { expr:"√100 + √36", title:"Somma di radici", desc:"Calcola ogni radice separatamente e somma.",
+    tech:{name:"Somma di radici",desc:"Calcola prima ciascuna radice."},
+    hint:"NON puoi sommare i numeri sotto radice direttamente!",
+    steps:[
+      {label:"Passo 1: Calcola le radici",answer:["10+6"],feedback:"√100=10, √36=6."},
+      {label:"Passo 2: Somma",answer:["16"],feedback:"10 + 6 = 16."}
+    ], finalAnswer:["16"] },
+  { expr:"√(49+15+36)", title:"Radice di una somma", desc:"Prima la somma sotto radice, poi la radice.",
+    tech:{name:"Radice di somma",desc:"Sotto radice, fai prima la somma. NON spezzare la radice di una somma!"},
+    hint:"Calcola prima la somma dentro la radice.",
+    steps:[
+      {label:"Passo 1: Somma",answer:["√100"],feedback:"49+15+36 = 100."},
+      {label:"Passo 2: Radice",answer:["10"],feedback:"√100 = 10."}
+    ], finalAnswer:["10"] },
+  { expr:"√(9/25)", title:"Frazione sotto radice", desc:"Spezza la radice del numeratore e del denominatore.",
+    tech:{name:"Radice di frazione",desc:"√(a/b) = √a / √b"},
+    hint:"Radice del numeratore diviso radice del denominatore.",
+    steps:[
+      {label:"Passo 1: Spezza",answer:["√9/√25","3/5"],feedback:"√9=3, √25=5."},
+      {label:"Passo 2: Risultato",answer:["3/5","0,6","0.6"],feedback:"3/5."}
+    ], finalAnswer:["3/5"] },
+  { expr:"√√16", title:"Radice di radice", desc:"Calcola prima la radice più interna.",
+    tech:{name:"Radici annidate",desc:"Risolvi sempre dall'interno verso l'esterno."},
+    hint:"Quanto fa la radice interna?",
+    steps:[
+      {label:"Passo 1: Radice interna",answer:["√4"],feedback:"√16 = 4."},
+      {label:"Passo 2: Radice esterna",answer:["2"],feedback:"√4 = 2."}
+    ], finalAnswer:["2"] },
+  { expr:"√144 − √64 + √9", title:"Espressione con tre radici", desc:"Calcola tutte le radici, poi le operazioni.",
+    tech:{name:"Espressione con radicali",desc:"Calcola prima le radici, poi somma e sottrai."},
+    hint:"Trasforma ogni radice in un numero.",
+    steps:[
+      {label:"Passo 1: Calcola le radici",answer:["12-8+3"],feedback:"√144=12, √64=8, √9=3."},
+      {label:"Passo 2: Calcola",answer:["7"],feedback:"12 − 8 + 3 = 7."}
+    ], finalAnswer:["7"] },
+  { expr:"√121 + √(81/9)", title:"Mix di radicali", desc:"Calcola entrambe le radici (nella seconda spezza la frazione).",
+    tech:{name:"Radicali misti",desc:"Una radice diretta + una radice di frazione."},
+    hint:"81/9 lo puoi calcolare prima, oppure spezzare la radice.",
+    steps:[
+      {label:"Passo 1: Frazione",answer:["√121+√9"],feedback:"81/9 = 9."},
+      {label:"Passo 2: Radici",answer:["11+3"],feedback:"√121=11, √9=3."},
+      {label:"Passo 3: Somma",answer:["14"],feedback:"11 + 3 = 14."}
+    ], finalAnswer:["14"] },
+  { expr:"(√5)²", title:"Quadrato di radice", desc:"Il quadrato e la radice si annullano.",
+    tech:{name:"Inverso",desc:"(√a)² = a (per a ≥ 0). Le due operazioni sono inverse."},
+    hint:"Pensa: cosa fa elevare al quadrato la radice quadrata?",
+    steps:[{label:"Risultato",answer:["5"],feedback:"(√5)² = 5. Quadrato e radice si elidono."}],
+    finalAnswer:["5"] },
+  { expr:"√(2·8)", title:"Radice di prodotto (2)", desc:"Calcola prima il prodotto, poi la radice.",
+    tech:{name:"Radice di prodotto",desc:"Conviene fare il prodotto se il risultato è un quadrato perfetto."},
+    hint:"Quanto fa 2·8?",
+    steps:[
+      {label:"Passo 1: Prodotto",answer:["√16"],feedback:"2·8 = 16."},
+      {label:"Passo 2: Radice",answer:["4"],feedback:"√16 = 4."}
+    ], finalAnswer:["4"] },
+  { expr:"√(3²+4²)", title:"Pitagora sotto radice", desc:"Calcola la somma dei quadrati, poi la radice.",
+    tech:{name:"Espressione tipo Pitagora",desc:"Calcola prima i quadrati, poi somma, poi radice."},
+    hint:"È come trovare l'ipotenusa di un triangolo 3-4-?",
+    steps:[
+      {label:"Passo 1: Quadrati",answer:["√(9+16)","√25"],feedback:"3²=9, 4²=16."},
+      {label:"Passo 2: Somma",answer:["√25"],feedback:"9 + 16 = 25."},
+      {label:"Passo 3: Radice",answer:["5"],feedback:"√25 = 5."}
+    ], finalAnswer:["5"] },
+  { expr:"√(0,16)", title:"Radice di decimale", desc:"Trova quale decimale al quadrato dà 0,16.",
+    tech:{name:"Radice di decimale",desc:"Conta le cifre decimali: il risultato ne ha la metà."},
+    hint:"0,4 al quadrato fa quanto?",
+    steps:[{label:"Calcola",answer:["0,4","0.4"],feedback:"0,4² = 0,16."}],
+    finalAnswer:["0,4","0.4"] },
+  { expr:"√169 ÷ √13²", title:"Quoziente con quadrato", desc:"Calcola le due radici e poi dividi.",
+    tech:{name:"Inverso",desc:"√(13²) = 13 perché radice e quadrato si annullano."},
+    hint:"Quanto fa √169 e quanto fa √(13²)?",
+    steps:[
+      {label:"Passo 1: Radici",answer:["13/13"],feedback:"√169=13, √(13²)=13."},
+      {label:"Passo 2: Dividi",answer:["1"],feedback:"13 ÷ 13 = 1."}
+    ], finalAnswer:["1"] },
+  { expr:"2·√9 + √(7²−5²)", title:"Radici miste", desc:"Calcola tutto sotto radici, poi le operazioni esterne.",
+    tech:{name:"Radicali con sottrazione",desc:"Sotto radice fai prima i quadrati e poi la sottrazione."},
+    hint:"7²-5² fa 49-25. Poi √24? No, √(7²-5²) non è 7-5!",
+    steps:[
+      {label:"Passo 1: Sotto la seconda radice",answer:["2*√9+√24","2·√9+√24"],feedback:"49-25 = 24."},
+      {label:"Passo 2: Calcola √9",answer:["6+√24","2*3+√24"],feedback:"√9=3, 2·3=6."},
+      {label:"Passo 3: Risultato (lascia √24)",answer:["6+√24"],feedback:"√24 non è una radice esatta. Risultato: 6 + √24."}
+    ], finalAnswer:["6+√24"] },
+],
+
+/* ══════ 13. RAPPORTI E PROPORZIONI ══════ */
+proporzioni: [
+  { expr:"x : 4 = 6 : 8", title:"Trova x", desc:"Usa la proprietà fondamentale: prodotto medi = prodotto estremi.",
+    tech:{name:"Proprietà fondamentale",desc:"In a:b=c:d → a·d = b·c. Quindi x = (b·c)/d."},
+    hint:"Moltiplica i medi e gli estremi: x·8 = 4·6.",
+    steps:[
+      {label:"Passo 1: Imposta",answer:["x*8=4*6","x*8=24","8x=24"],feedback:"Prodotto estremi = prodotto medi."},
+      {label:"Passo 2: Risolvi",answer:["x=3","3"],feedback:"24/8 = 3."}
+    ], finalAnswer:["x=3","3"] },
+  { expr:"3 : x = 9 : 15", title:"Trova x (2)", desc:"x è un medio. x = (estremi) / (altro medio).",
+    tech:{name:"Proprietà fondamentale",desc:"3·15 = x·9, quindi x = 45/9."},
+    hint:"Prodotto estremi diviso il medio noto.",
+    steps:[
+      {label:"Passo 1: Imposta",answer:["3*15=x*9","45=9x","9x=45"],feedback:"3·15 = 9·x."},
+      {label:"Passo 2: Risolvi",answer:["x=5","5"],feedback:"45/9 = 5."}
+    ], finalAnswer:["x=5","5"] },
+  { expr:"6 : 9 = 8 : 12", title:"Verifica proporzione", desc:"È una proporzione vera? Confronta prodotto medi e prodotto estremi.",
+    tech:{name:"Verifica",desc:"Una proporzione è vera se prodotto estremi = prodotto medi."},
+    hint:"Calcola 6·12 e 9·8.",
+    steps:[
+      {label:"Passo 1: Prodotto estremi",answer:["72"],feedback:"6·12 = 72."},
+      {label:"Passo 2: Prodotto medi",answer:["72"],feedback:"9·8 = 72."},
+      {label:"Passo 3: Vera o falsa?",answer:["vera","si","sì"],feedback:"72 = 72: la proporzione è vera!"}
+    ], finalAnswer:["vera"] },
+  { expr:"x : 5 = 12 : x", title:"Proporzione continua", desc:"x è medio proporzionale: x² = 5·12.",
+    tech:{name:"Medio proporzionale",desc:"In a:x=x:b → x = √(a·b)"},
+    hint:"x al quadrato fa quanto?",
+    steps:[
+      {label:"Passo 1: Imposta",answer:["x^2=60","x²=60","x*x=60"],feedback:"x² = 5·12 = 60."},
+      {label:"Passo 2: Radice",answer:["√60","x=√60"],feedback:"x = √60. Non è esatta."}
+    ], finalAnswer:["√60"] },
+  { expr:"4 : x = x : 9", title:"Medio proporzionale", desc:"x² = 4·9. Trova x.",
+    tech:{name:"Medio proporzionale",desc:"x = √(a·b)"},
+    hint:"Prodotto degli estremi = quadrato del medio.",
+    steps:[
+      {label:"Passo 1: Imposta",answer:["x^2=36","x²=36"],feedback:"x² = 4·9 = 36."},
+      {label:"Passo 2: Radice",answer:["6","x=6"],feedback:"√36 = 6."}
+    ], finalAnswer:["6"] },
+  { expr:"Problema", title:"Tre numeri in proporzione", problemText:"Tre numeri sono in proporzione 2 : 3 : 5 e la loro somma è 100. Quali sono i numeri?",
+    desc:"Indica i numeri come 2k, 3k, 5k. La somma è (2+3+5)k = 10k.",
+    tech:{name:"Catena di rapporti",desc:"Se a:b:c = m:n:p, allora a=mk, b=nk, c=pk per qualche k."},
+    hints:["Chiama i numeri 2k, 3k, 5k. Quanto vale la loro somma?","10k = 100 → k = ?"],
+    steps:[
+      {label:"Passo 1: Trova k",answer:["k=10","10"],feedback:"2k+3k+5k = 10k = 100, quindi k=10."},
+      {label:"Passo 2: Primo numero (2k)",answer:["20"],feedback:"2·10 = 20."},
+      {label:"Passo 3: Secondo (3k)",answer:["30"],feedback:"3·10 = 30."},
+      {label:"Passo 4: Terzo (5k)",answer:["50"],feedback:"5·10 = 50."}
+    ], finalAnswer:["50"] },
+  { expr:"Problema", title:"Lati di triangolo", problemText:"I lati di un triangolo sono in proporzione 3, 4, 5 e il perimetro è 60 cm. Calcola la lunghezza di ogni lato.",
+    desc:"Lati = 3k, 4k, 5k. Somma = 12k = 60.",
+    tech:{name:"Proporzione e perimetro",desc:"Indica i lati come multipli di k, somma = perimetro."},
+    hints:["Chiama i lati 3k, 4k, 5k.","12k = 60. Trova k."],
+    steps:[
+      {label:"Passo 1: Trova k",answer:["k=5","5"],feedback:"12k=60 → k=5."},
+      {label:"Passo 2: Lato 1 (3k)",answer:["15"],feedback:"15 cm."},
+      {label:"Passo 3: Lato 2 (4k)",answer:["20"],feedback:"20 cm."},
+      {label:"Passo 4: Lato 3 (5k)",answer:["25"],feedback:"25 cm."}
+    ], finalAnswer:["25"] },
+  { expr:"Problema", title:"Riparto", problemText:"Tre soci dividono 60 000 € in proporzione alle quote: 2, 3, 5. Quanto riceve ognuno?",
+    desc:"Quote = 2k, 3k, 5k. Somma = 10k = 60 000.",
+    tech:{name:"Riparto proporzionale",desc:"Dividi il totale in parti proporzionali."},
+    hints:["Indica le quote come 2k, 3k, 5k.","La somma deve essere 60 000."],
+    steps:[
+      {label:"Passo 1: Trova k",answer:["k=6000","6000"],feedback:"10k = 60 000 → k = 6 000."},
+      {label:"Passo 2: Primo socio",answer:["12000"],feedback:"2·6 000 = 12 000 €."},
+      {label:"Passo 3: Secondo socio",answer:["18000"],feedback:"3·6 000 = 18 000 €."},
+      {label:"Passo 4: Terzo socio",answer:["30000"],feedback:"5·6 000 = 30 000 €."}
+    ], finalAnswer:["30000"] },
+  { expr:"15 : 25 = 9 : x", title:"Trova x (3)", desc:"x è l'estremo. x = (medio·medio)/estremo.",
+    tech:{name:"Termine incognito",desc:"x = (b·c)/a quando manca l'ultimo estremo."},
+    hint:"15·x = 25·9.",
+    steps:[
+      {label:"Passo 1: Imposta",answer:["15x=25*9","15x=225"],feedback:"15·x = 25·9 = 225."},
+      {label:"Passo 2: Risolvi",answer:["x=15","15"],feedback:"225/15 = 15."}
+    ], finalAnswer:["x=15","15"] },
+  { expr:"8 : 12 = x : 18", title:"Trova x (4)", desc:"Applica la proprietà fondamentale.",
+    tech:{name:"Termine incognito",desc:"8·18 = 12·x"},
+    hint:"Estremi = medi. 8·18 = 12·x.",
+    steps:[
+      {label:"Passo 1: Imposta",answer:["8*18=12x","144=12x","12x=144"],feedback:"8·18 = 144."},
+      {label:"Passo 2: Risolvi",answer:["x=12","12"],feedback:"144/12 = 12."}
+    ], finalAnswer:["x=12","12"] },
+  { expr:"Problema", title:"Ricetta", problemText:"Per preparare 4 porzioni di torta servono 200 g di farina. Quanta farina serve per 6 porzioni?",
+    desc:"Le grandezze (porzioni-farina) sono direttamente proporzionali.",
+    tech:{name:"Proporzionalità diretta",desc:"4 : 200 = 6 : x"},
+    hints:["Imposta una proporzione tra porzioni e farina.","x = (200·6)/4."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["4:200=6:x","4*x=200*6"],feedback:"4 : 200 = 6 : x."},
+      {label:"Passo 2: Risolvi",answer:["x=300","300"],feedback:"x = (200·6)/4 = 300 g."}
+    ], finalAnswer:["300"] },
+  { expr:"Problema", title:"Distanza e tempo", problemText:"In 2 ore percorro 90 km. Quanti km percorro in 5 ore (a velocità costante)?",
+    desc:"Tempo e distanza sono direttamente proporzionali.",
+    tech:{name:"Proporzionalità diretta",desc:"2 : 90 = 5 : x"},
+    hints:["Imposta proporzione tra ore e km.","x = (90·5)/2."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["2:90=5:x","2x=90*5"],feedback:"2 : 90 = 5 : x."},
+      {label:"Passo 2: Risolvi",answer:["x=225","225"],feedback:"x = 450/2 = 225 km."}
+    ], finalAnswer:["225"] },
+  { expr:"x : 6 = 7 : 9 = z : 18", title:"Catena di rapporti", desc:"Trova x e z. Lavora separatamente sui due rapporti.",
+    tech:{name:"Catena",desc:"Più rapporti uguali fra loro."},
+    hint:"Da 7:9=z:18 trovi z. Da x:6=7:9 trovi x.",
+    steps:[
+      {label:"Passo 1: Trova z",answer:["z=14","14"],feedback:"z = (7·18)/9 = 14."},
+      {label:"Passo 2: Trova x",answer:["x=14/3","14/3"],feedback:"x = (6·7)/9 = 42/9 = 14/3."}
+    ], finalAnswer:["14"] },
+  { expr:"Problema", title:"Diviso in due parti", problemText:"Dividi 84 in due parti che siano in proporzione 3 : 4. Quali sono?",
+    desc:"Parti = 3k e 4k. Somma 7k = 84.",
+    tech:{name:"Riparto",desc:"Trova k, poi calcola le due parti."},
+    hints:["Chiama le parti 3k e 4k.","7k = 84."],
+    steps:[
+      {label:"Passo 1: Trova k",answer:["k=12","12"],feedback:"7k=84 → k=12."},
+      {label:"Passo 2: Prima parte",answer:["36"],feedback:"3·12 = 36."},
+      {label:"Passo 3: Seconda parte",answer:["48"],feedback:"4·12 = 48."}
+    ], finalAnswer:["48"] },
+  { expr:"Problema", title:"Cambio valuta", problemText:"3 € corrispondono a 3,30 $. A quanti dollari corrispondono 50 €?",
+    desc:"Le grandezze sono direttamente proporzionali.",
+    tech:{name:"Proporzionalità",desc:"3 : 3,30 = 50 : x"},
+    hints:["Imposta la proporzione € : $ = € : $.","x = (3,30·50)/3."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["3:3,30=50:x","3:3.3=50:x"],feedback:"3 : 3,30 = 50 : x."},
+      {label:"Passo 2: Risolvi",answer:["x=55","55"],feedback:"x = 165/3 = 55 $."}
+    ], finalAnswer:["55"] },
+  { expr:"Problema", title:"Quarto proporzionale", problemText:"Trova il quarto proporzionale dopo 5, 8, 15.",
+    desc:"Si chiama x il quarto: 5 : 8 = 15 : x.",
+    tech:{name:"Quarto proporzionale",desc:"Dato a, b, c trovare x tale che a:b=c:x."},
+    hints:["Scrivi la proporzione 5:8=15:x.","x = (8·15)/5."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["5:8=15:x","5x=8*15","5x=120"],feedback:"5 : 8 = 15 : x."},
+      {label:"Passo 2: Risolvi",answer:["x=24","24"],feedback:"120/5 = 24."}
+    ], finalAnswer:["24"] },
+],
+
+/* ══════ 14. TRE SEMPLICE E COMPOSTO ══════ */
+tre_semplice: [
+  { expr:"Problema", title:"Tre semplice diretto", problemText:"Per dipingere 45 m² servono 60 kg di colore. Per dipingere 150 m², quanti kg servono?",
+    desc:"Più superficie = più colore. Direttamente proporzionali.",
+    tech:{name:"Tre semplice diretto",desc:"45 : 60 = 150 : x → x = (60·150)/45"},
+    hints:["Imposta una proporzione tra superficie e colore.","Più superficie, più colore: proporzionalità diretta."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["45:60=150:x","45x=60*150"],feedback:"45 : 60 = 150 : x."},
+      {label:"Passo 2: Risolvi",answer:["x=200","200"],feedback:"x = 9000/45 = 200 kg."}
+    ], finalAnswer:["200"] },
+  { expr:"Problema", title:"Tre semplice diretto (2)", problemText:"Se 4 biro costano 5 €, quanto costano 6 biro?",
+    desc:"Più biro = più costo. Direttamente proporzionali.",
+    tech:{name:"Tre semplice diretto",desc:"4 : 5 = 6 : x"},
+    hints:["Quante biro più di prima? Il prezzo aumenta proporzionalmente.","x = (5·6)/4."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["4:5=6:x","4x=5*6"],feedback:"4 : 5 = 6 : x."},
+      {label:"Passo 2: Risolvi",answer:["x=7,5","7.5","7,50"],feedback:"x = 30/4 = 7,50 €."}
+    ], finalAnswer:["7,5","7.5"] },
+  { expr:"Problema", title:"Tre semplice diretto (3)", problemText:"Un'auto in 4 ore percorre 240 km. Quanti km percorre in 6 ore alla stessa velocità?",
+    desc:"Più tempo = più km. Direttamente proporzionali.",
+    tech:{name:"Tre semplice diretto",desc:"4 : 240 = 6 : x"},
+    hints:["Il tempo aumenta, la distanza aumenta proporzionalmente.","x = (240·6)/4."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["4:240=6:x","4x=240*6"],feedback:"4 : 240 = 6 : x."},
+      {label:"Passo 2: Risolvi",answer:["x=360","360"],feedback:"x = 1440/4 = 360 km."}
+    ], finalAnswer:["360"] },
+  { expr:"Problema", title:"Tre semplice inverso", problemText:"3 operai finiscono un lavoro in 8 giorni. Quanti giorni servono a 4 operai?",
+    desc:"Più operai = meno giorni. INVERSAMENTE proporzionali!",
+    tech:{name:"Tre semplice inverso",desc:"3·8 = 4·x. Si moltiplica invece di mettere in proporzione."},
+    hints:["Più operai impiegano meno tempo: è proporzionalità INVERSA.","Moltiplica operai per giorni: il prodotto è costante."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["3*8=4*x","24=4x","4x=24"],feedback:"3·8 = 4·x = 24."},
+      {label:"Passo 2: Risolvi",answer:["x=6","6"],feedback:"24/4 = 6 giorni."}
+    ], finalAnswer:["6"] },
+  { expr:"Problema", title:"Tre semplice inverso (2)", problemText:"Una vasca si riempie in 6 ore con un rubinetto che eroga 20 L/min. In quanto tempo si riempie con un rubinetto da 30 L/min?",
+    desc:"Più portata = meno tempo. Inversamente proporzionali.",
+    tech:{name:"Tre semplice inverso",desc:"6·20 = x·30"},
+    hints:["Più velocemente esce l'acqua, meno tempo serve.","Moltiplica le due grandezze: il prodotto resta costante."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["6*20=x*30","120=30x","30x=120"],feedback:"6·20 = 30·x = 120."},
+      {label:"Passo 2: Risolvi",answer:["x=4","4"],feedback:"120/30 = 4 ore."}
+    ], finalAnswer:["4"] },
+  { expr:"Problema", title:"Velocità e tempo", problemText:"Un'auto a 80 km/h percorre un tragitto in 3 ore. Quanto tempo impiega a 120 km/h?",
+    desc:"Più velocità = meno tempo. Inversamente proporzionali.",
+    tech:{name:"Tre semplice inverso",desc:"80·3 = 120·x"},
+    hints:["Velocità e tempo sono inversamente proporzionali (a parità di distanza).","Calcola la distanza prima."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["80*3=120*x","240=120x","120x=240"],feedback:"80·3 = 120·x = 240."},
+      {label:"Passo 2: Risolvi",answer:["x=2","2"],feedback:"240/120 = 2 ore."}
+    ], finalAnswer:["2"] },
+  { expr:"Problema", title:"Magazzino", problemText:"30 kg di mele costano 45 €. Quanto costano 50 kg?",
+    desc:"Direttamente proporzionali: più mele, più costo.",
+    tech:{name:"Tre semplice diretto",desc:"30 : 45 = 50 : x"},
+    hints:["Imposta la proporzione kg : € = kg : €."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["30:45=50:x","30x=45*50"],feedback:"30 : 45 = 50 : x."},
+      {label:"Passo 2: Risolvi",answer:["x=75","75"],feedback:"x = 2250/30 = 75 €."}
+    ], finalAnswer:["75"] },
+  { expr:"Problema", title:"Cibo per soldati", problemText:"Una caserma ha cibo per 40 soldati per 30 giorni. Per quanti giorni dura il cibo se i soldati sono 60?",
+    desc:"Più soldati = meno giorni. Inversamente proporzionali.",
+    tech:{name:"Tre semplice inverso",desc:"40·30 = 60·x"},
+    hints:["Più persone consumano più rapidamente: proporzionalità inversa.","40·30 dà la quantità totale di cibo (in 'soldato-giorni')."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["40*30=60*x","1200=60x","60x=1200"],feedback:"40·30 = 60·x = 1200."},
+      {label:"Passo 2: Risolvi",answer:["x=20","20"],feedback:"1200/60 = 20 giorni."}
+    ], finalAnswer:["20"] },
+  { expr:"Problema", title:"Pagine al minuto", problemText:"Una stampante stampa 25 pagine in 5 minuti. Quante pagine stampa in 12 minuti?",
+    desc:"Direttamente proporzionali: più tempo, più pagine.",
+    tech:{name:"Tre semplice diretto",desc:"5 : 25 = 12 : x"},
+    hints:["Imposta minuti : pagine = minuti : pagine."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["5:25=12:x","5x=25*12"],feedback:"5 : 25 = 12 : x."},
+      {label:"Passo 2: Risolvi",answer:["x=60","60"],feedback:"x = 300/5 = 60 pagine."}
+    ], finalAnswer:["60"] },
+  { expr:"Problema", title:"Pavimentare", problemText:"6 operai pavimentano una piazza in 10 giorni. In quanti giorni la pavimentano 4 operai (stessa velocità)?",
+    desc:"Inversamente proporzionali: meno operai = più giorni.",
+    tech:{name:"Tre semplice inverso",desc:"6·10 = 4·x"},
+    hints:["Meno operai impiegano più tempo: inversa.","Il prodotto operai·giorni è costante."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["6*10=4*x","60=4x","4x=60"],feedback:"6·10 = 4·x = 60."},
+      {label:"Passo 2: Risolvi",answer:["x=15","15"],feedback:"60/4 = 15 giorni."}
+    ], finalAnswer:["15"] },
+  { expr:"Problema", title:"Costo del taxi", problemText:"Per 8 km di taxi spendo 12 €. Quanto spendo per 20 km?",
+    desc:"Direttamente proporzionali: più km, più costo.",
+    tech:{name:"Tre semplice diretto",desc:"8 : 12 = 20 : x"},
+    hints:["Quanto al km? Oppure imposta la proporzione."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["8:12=20:x","8x=12*20"],feedback:"8 : 12 = 20 : x."},
+      {label:"Passo 2: Risolvi",answer:["x=30","30"],feedback:"x = 240/8 = 30 €."}
+    ], finalAnswer:["30"] },
+  { expr:"Problema", title:"Latte", problemText:"5 mucche producono 80 L di latte al giorno. Quanto producono 12 mucche?",
+    desc:"Direttamente proporzionali.",
+    tech:{name:"Tre semplice diretto",desc:"5 : 80 = 12 : x"},
+    hints:["Più mucche, più latte."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["5:80=12:x","5x=80*12"],feedback:"5 : 80 = 12 : x."},
+      {label:"Passo 2: Risolvi",answer:["x=192","192"],feedback:"x = 960/5 = 192 L."}
+    ], finalAnswer:["192"] },
+  { expr:"Problema", title:"Vagoni di treno", problemText:"Un treno con 8 vagoni può portare 480 passeggeri. Quanti vagoni servono per 600 passeggeri?",
+    desc:"Direttamente proporzionali: più vagoni, più passeggeri.",
+    tech:{name:"Tre semplice diretto",desc:"8 : 480 = x : 600"},
+    hints:["Quanti passeggeri per vagone? Oppure imposta la proporzione."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["8:480=x:600","480x=8*600"],feedback:"8 : 480 = x : 600."},
+      {label:"Passo 2: Risolvi",answer:["x=10","10"],feedback:"x = 4800/480 = 10 vagoni."}
+    ], finalAnswer:["10"] },
+  { expr:"Problema", title:"Galoppo", problemText:"Un cavallo al galoppo percorre 35 km in 50 minuti. Quanti km in 80 minuti?",
+    desc:"Direttamente proporzionali.",
+    tech:{name:"Tre semplice diretto",desc:"50 : 35 = 80 : x"},
+    hints:["Tempo e distanza alla stessa velocità: proporzionalità diretta."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["50:35=80:x","50x=35*80"],feedback:"50 : 35 = 80 : x."},
+      {label:"Passo 2: Risolvi",answer:["x=56","56"],feedback:"x = 2800/50 = 56 km."}
+    ], finalAnswer:["56"] },
+  { expr:"Problema", title:"Cibo per cani", problemText:"3 cani consumano un sacco di cibo in 12 giorni. In quanti giorni lo consumano 9 cani?",
+    desc:"Inversamente proporzionali: più cani = meno giorni.",
+    tech:{name:"Tre semplice inverso",desc:"3·12 = 9·x"},
+    hints:["Più cani consumano più velocemente."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["3*12=9*x","36=9x","9x=36"],feedback:"3·12 = 9·x = 36."},
+      {label:"Passo 2: Risolvi",answer:["x=4","4"],feedback:"36/9 = 4 giorni."}
+    ], finalAnswer:["4"] },
+  { expr:"Problema", title:"Tre composto", problemText:"3 operai in 8 giorni costruiscono un muretto di 24 m. Quanti metri costruiscono 5 operai in 12 giorni?",
+    desc:"Doppia proporzionalità diretta: più operai e più giorni = più metri.",
+    tech:{name:"Tre composto",desc:"Trova quanto fa 1 operaio in 1 giorno, poi moltiplica."},
+    hints:["Quanto fa 1 operaio in 1 giorno? Dividi 24 per 3 per 8.","Poi moltiplica per 5 operai e 12 giorni."],
+    steps:[
+      {label:"Passo 1: 1 operaio in 1 giorno",answer:["1","1m"],feedback:"24/(3·8) = 24/24 = 1 m al giorno."},
+      {label:"Passo 2: 5 operai in 12 giorni",answer:["60"],feedback:"1·5·12 = 60 m."}
+    ], finalAnswer:["60"] },
+],
+
+/* ══════ 15. PERCENTUALI E INTERESSI ══════ */
+percentuali: [
+  { expr:"15% di 80", title:"Calcolo percentuale", desc:"x% di N = (x·N)/100.",
+    tech:{name:"Percentuale di un numero",desc:"Per calcolare x% di N: moltiplica per x e dividi per 100."},
+    hint:"15·80 diviso 100.",
+    steps:[
+      {label:"Passo 1: Imposta",answer:["15*80/100","15·80/100","1200/100"],feedback:"15·80/100."},
+      {label:"Passo 2: Calcola",answer:["12"],feedback:"1200/100 = 12."}
+    ], finalAnswer:["12"] },
+  { expr:"25% di 200", title:"Calcolo percentuale (2)", desc:"Trova il 25% di 200.",
+    tech:{name:"Percentuale",desc:"25% = 1/4. È un quarto del numero."},
+    hint:"25% è un quarto.",
+    steps:[
+      {label:"Calcola",answer:["50"],feedback:"200/4 = 50."}
+    ], finalAnswer:["50"] },
+  { expr:"Problema", title:"Sconto", problemText:"Un oggetto costa 120 € e ha uno sconto del 20%. Quanto si paga?",
+    desc:"Calcola lo sconto, poi sottrai dal prezzo originale.",
+    tech:{name:"Sconto",desc:"Sconto = (% · prezzo)/100. Pagato = prezzo − sconto."},
+    hints:["Prima calcola quanto vale il 20% di 120.","Sottrai lo sconto dal prezzo."],
+    steps:[
+      {label:"Passo 1: Sconto",answer:["24"],feedback:"20·120/100 = 24 €."},
+      {label:"Passo 2: Prezzo finale",answer:["96"],feedback:"120 − 24 = 96 €."}
+    ], finalAnswer:["96"] },
+  { expr:"Problema", title:"Aumento", problemText:"Un prodotto costa 50 €. Subisce un aumento del 10%. Quanto costa ora?",
+    desc:"Calcola l'aumento, poi somma al prezzo.",
+    tech:{name:"Aumento",desc:"Nuovo prezzo = vecchio + (% · vecchio)/100"},
+    hints:["10% di 50 quanto fa?","Somma l'aumento al prezzo originale."],
+    steps:[
+      {label:"Passo 1: Aumento",answer:["5"],feedback:"10·50/100 = 5 €."},
+      {label:"Passo 2: Nuovo prezzo",answer:["55"],feedback:"50 + 5 = 55 €."}
+    ], finalAnswer:["55"] },
+  { expr:"Problema", title:"Trova la percentuale", problemText:"In una classe di 25 studenti, 20 sono promossi. Qual è la percentuale di promossi?",
+    desc:"% = (parte / totale) · 100.",
+    tech:{name:"Trova la percentuale",desc:"% = (parte/totale)·100"},
+    hints:["20 su 25, ovvero 20/25.","Moltiplica per 100."],
+    steps:[
+      {label:"Passo 1: Frazione",answer:["20/25","4/5","0,8","0.8"],feedback:"20/25 = 4/5 = 0,8."},
+      {label:"Passo 2: Percentuale",answer:["80","80%"],feedback:"0,8 · 100 = 80%."}
+    ], finalAnswer:["80"] },
+  { expr:"Problema", title:"Trova il totale", problemText:"Il 30% di una somma è 60 €. Quanto vale l'intera somma?",
+    desc:"Se 30% = 60, allora 100% = (60·100)/30.",
+    tech:{name:"Trova il totale",desc:"Totale = (parte · 100) / %"},
+    hints:["Imposta una proporzione: 30 : 60 = 100 : x.","x = (60·100)/30."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["30:60=100:x","30x=60*100","30x=6000"],feedback:"30 : 60 = 100 : x."},
+      {label:"Passo 2: Risolvi",answer:["x=200","200"],feedback:"6000/30 = 200 €."}
+    ], finalAnswer:["200"] },
+  { expr:"Problema", title:"Sconto e prezzo", problemText:"Un libro era 25 € e ora costa 20 €. Qual è la percentuale di sconto?",
+    desc:"Sconto = differenza. % sconto = (sconto/prezzo originale)·100.",
+    tech:{name:"% sconto",desc:"%sconto = (differenza / prezzo originale) · 100"},
+    hints:["Quanto si è risparmiato?","Quel risparmio diviso il prezzo originale, per 100."],
+    steps:[
+      {label:"Passo 1: Sconto in €",answer:["5"],feedback:"25 − 20 = 5 €."},
+      {label:"Passo 2: % sconto",answer:["20","20%"],feedback:"5/25 · 100 = 20%."}
+    ], finalAnswer:["20"] },
+  { expr:"Problema", title:"Iva", problemText:"Un articolo costa 100 € senza IVA. Con IVA al 22%, quanto costa?",
+    desc:"Aggiungi il 22% al prezzo.",
+    tech:{name:"Aumento percentuale",desc:"Nuovo = Vecchio · (1 + %/100)"},
+    hints:["22% di 100 è...?","Aggiungi al prezzo originale."],
+    steps:[
+      {label:"Passo 1: IVA",answer:["22"],feedback:"22% di 100 = 22 €."},
+      {label:"Passo 2: Prezzo finale",answer:["122"],feedback:"100 + 22 = 122 €."}
+    ], finalAnswer:["122"] },
+  { expr:"Problema", title:"Doppio sconto", problemText:"Un giubbotto da 200 € ha uno sconto del 30%. Pago in contanti e mi fanno un altro sconto del 10% sul nuovo prezzo. Quanto pago?",
+    desc:"Applica i due sconti uno dopo l'altro.",
+    tech:{name:"Sconti successivi",desc:"NON si sommano! Si applicano uno dopo l'altro."},
+    hints:["Prima il primo sconto sul prezzo originale.","Poi il secondo sconto sul prezzo già scontato."],
+    steps:[
+      {label:"Passo 1: Primo sconto",answer:["140"],feedback:"30% di 200 = 60. 200−60 = 140 €."},
+      {label:"Passo 2: Secondo sconto",answer:["126"],feedback:"10% di 140 = 14. 140−14 = 126 €."}
+    ], finalAnswer:["126"] },
+  { expr:"Problema", title:"Interesse semplice", problemText:"Deposito 1000 € al 4% annuo per 3 anni. Quanto interesse maturo?",
+    desc:"I = (C·r·t)/100 dove C=capitale, r=tasso, t=tempo in anni.",
+    tech:{name:"Interesse semplice",desc:"I = (C · r · t) / 100"},
+    hints:["I = (1000 · 4 · 3)/100.","Moltiplica capitale, tasso e tempo, poi dividi per 100."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["1000*4*3/100","12000/100"],feedback:"I = (1000·4·3)/100."},
+      {label:"Passo 2: Calcola",answer:["120"],feedback:"12000/100 = 120 €."}
+    ], finalAnswer:["120"] },
+  { expr:"Problema", title:"Montante", problemText:"Deposito 500 € al 5% annuo per 2 anni. Quanto avrò alla fine (capitale + interesse)?",
+    desc:"Montante = Capitale + Interesse.",
+    tech:{name:"Montante",desc:"M = C + I = C + (C·r·t)/100"},
+    hints:["Calcola prima l'interesse.","Somma capitale + interesse."],
+    steps:[
+      {label:"Passo 1: Interesse",answer:["50"],feedback:"(500·5·2)/100 = 50 €."},
+      {label:"Passo 2: Montante",answer:["550"],feedback:"500 + 50 = 550 €."}
+    ], finalAnswer:["550"] },
+  { expr:"Problema", title:"Trova il tasso", problemText:"Un capitale di 800 € fruttua 96 € di interesse in 3 anni. Qual è il tasso annuo?",
+    desc:"Da I = (C·r·t)/100 ricavi r = (I·100)/(C·t).",
+    tech:{name:"Tasso",desc:"r = (I · 100) / (C · t)"},
+    hints:["Inverti la formula dell'interesse.","r = (96·100)/(800·3)."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["96*100/(800*3)","9600/2400"],feedback:"r = (96·100)/(800·3)."},
+      {label:"Passo 2: Calcola",answer:["4","4%"],feedback:"9600/2400 = 4%."}
+    ], finalAnswer:["4"] },
+  { expr:"Problema", title:"Trova il tempo", problemText:"Un capitale di 2000 € al 3% annuo ha fruttato 180 €. Per quanti anni è stato investito?",
+    desc:"t = (I·100)/(C·r).",
+    tech:{name:"Tempo",desc:"t = (I · 100) / (C · r)"},
+    hints:["Inverti la formula.","t = (180·100)/(2000·3)."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["180*100/(2000*3)","18000/6000"],feedback:"t = (180·100)/(2000·3)."},
+      {label:"Passo 2: Calcola",answer:["3","3 anni","t=3"],feedback:"18000/6000 = 3 anni."}
+    ], finalAnswer:["3"] },
+  { expr:"Problema", title:"Voti in percentuale", problemText:"In una verifica Mia ha preso 27 risposte corrette su 30. Qual è la sua percentuale?",
+    desc:"% = (corrette/totale)·100.",
+    tech:{name:"Percentuale",desc:"%=(parte/totale)·100"},
+    hints:["27/30, poi moltiplica per 100."],
+    steps:[
+      {label:"Passo 1: Frazione",answer:["27/30","9/10","0,9","0.9"],feedback:"27/30 = 9/10."},
+      {label:"Passo 2: %",answer:["90","90%"],feedback:"9/10·100 = 90%."}
+    ], finalAnswer:["90"] },
+  { expr:"Problema", title:"Acqua e zucchero", problemText:"In 250 g di sciroppo ci sono 50 g di zucchero. Qual è la percentuale di zucchero?",
+    desc:"% = (zucchero/totale)·100.",
+    tech:{name:"Concentrazione",desc:"%=(massa pura/massa totale)·100"},
+    hints:["50/250, poi per 100."],
+    steps:[
+      {label:"Passo 1: Frazione",answer:["50/250","1/5","0,2","0.2"],feedback:"50/250 = 1/5."},
+      {label:"Passo 2: %",answer:["20","20%"],feedback:"1/5·100 = 20%."}
+    ], finalAnswer:["20"] },
+  { expr:"Problema", title:"Mancia", problemText:"Una cena costa 60 €. Aggiungo una mancia del 15%. Quanto pago in totale?",
+    desc:"Calcola la mancia e somma.",
+    tech:{name:"Aumento %",desc:"Totale = costo + (%·costo)/100"},
+    hints:["15% di 60.","Somma al costo."],
+    steps:[
+      {label:"Passo 1: Mancia",answer:["9"],feedback:"15·60/100 = 9 €."},
+      {label:"Passo 2: Totale",answer:["69"],feedback:"60 + 9 = 69 €."}
+    ], finalAnswer:["69"] },
+  { expr:"Problema", title:"Aumento e poi sconto", problemText:"Un articolo da 80 € aumenta del 25%, poi viene scontato del 20%. Quanto costa alla fine?",
+    desc:"Applica le due variazioni in sequenza.",
+    tech:{name:"Variazioni successive",desc:"Le percentuali NON si annullano! Si applica una dopo l'altra."},
+    hints:["Prima l'aumento sul prezzo iniziale.","Poi lo sconto sul prezzo aumentato."],
+    steps:[
+      {label:"Passo 1: Aumento",answer:["100"],feedback:"25% di 80 = 20. 80+20 = 100 €."},
+      {label:"Passo 2: Sconto",answer:["80"],feedback:"20% di 100 = 20. 100−20 = 80 €."}
+    ], finalAnswer:["80"] },
+],
+
+/* ══════ 16. STATISTICA ══════ */
+statistica: [
+  { expr:"Problema", title:"Frequenza relativa", problemText:"In una classe di 20 studenti, 8 hanno preso 7. Qual è la frequenza relativa del voto 7?",
+    desc:"f relativa = frequenza assoluta / totale.",
+    tech:{name:"Frequenza relativa",desc:"f = n / N (numero casi / totale)"},
+    hints:["Quanti hanno preso 7 diviso il totale.","8/20 si può semplificare."],
+    steps:[
+      {label:"Passo 1: Frazione",answer:["8/20","2/5","0,4","0.4"],feedback:"8/20 = 2/5."},
+      {label:"Passo 2: Decimale",answer:["0,4","0.4"],feedback:"2/5 = 0,4."}
+    ], finalAnswer:["0,4"] },
+  { expr:"Problema", title:"Frequenza percentuale", problemText:"Su 50 risposte, 35 sono corrette. Qual è la frequenza percentuale delle risposte corrette?",
+    desc:"f % = (frequenza assoluta / totale) · 100.",
+    tech:{name:"Frequenza percentuale",desc:"f% = (n/N)·100"},
+    hints:["35/50, poi moltiplica per 100."],
+    steps:[
+      {label:"Passo 1: Frazione",answer:["35/50","7/10","0,7","0.7"],feedback:"35/50 = 7/10."},
+      {label:"Passo 2: %",answer:["70","70%"],feedback:"7/10·100 = 70%."}
+    ], finalAnswer:["70"] },
+  { expr:"Problema", title:"Media aritmetica", problemText:"I voti di Marco sono: 7, 8, 6, 9, 5. Calcola la media.",
+    desc:"Media = (somma valori) / (numero valori).",
+    tech:{name:"Media aritmetica",desc:"Media = somma / N"},
+    hints:["Somma tutti i voti.","Dividi per quanti voti ci sono."],
+    steps:[
+      {label:"Passo 1: Somma",answer:["35"],feedback:"7+8+6+9+5 = 35."},
+      {label:"Passo 2: Dividi",answer:["7"],feedback:"35/5 = 7."}
+    ], finalAnswer:["7"] },
+  { expr:"Problema", title:"Media (2)", problemText:"Le altezze di 4 ragazzi sono 165, 170, 168, 173 cm. Calcola la media.",
+    desc:"Somma le altezze e dividi per 4.",
+    tech:{name:"Media",desc:"Media = somma/N"},
+    hints:["Somma tutte le altezze.","Poi dividi per 4."],
+    steps:[
+      {label:"Passo 1: Somma",answer:["676"],feedback:"165+170+168+173 = 676."},
+      {label:"Passo 2: Dividi",answer:["169"],feedback:"676/4 = 169 cm."}
+    ], finalAnswer:["169"] },
+  { expr:"Problema", title:"Moda", problemText:"In un'indagine i voti sono: 6, 8, 7, 8, 9, 8, 7. Qual è la moda?",
+    desc:"La moda è il valore che si ripete di più.",
+    tech:{name:"Moda",desc:"Il valore con frequenza più alta."},
+    hints:["Quale numero compare più volte?"],
+    steps:[{label:"Trova la moda",answer:["8"],feedback:"L'8 compare 3 volte: è la moda."}],
+    finalAnswer:["8"] },
+  { expr:"Problema", title:"Mediana (numero dispari)", problemText:"Calcola la mediana di: 4, 7, 2, 9, 5.",
+    desc:"Ordina i valori e prendi quello centrale.",
+    tech:{name:"Mediana (N dispari)",desc:"Ordina i valori. La mediana è quello al centro."},
+    hints:["Prima ordina i valori dal più piccolo al più grande.","Quello al centro è la mediana."],
+    steps:[
+      {label:"Passo 1: Ordina",answer:["2,4,5,7,9","2 4 5 7 9"],feedback:"Ordinati: 2, 4, 5, 7, 9."},
+      {label:"Passo 2: Centrale",answer:["5"],feedback:"Il 3° valore è 5 (ce ne sono 5)."}
+    ], finalAnswer:["5"] },
+  { expr:"Problema", title:"Mediana (numero pari)", problemText:"Calcola la mediana di: 3, 8, 5, 6, 9, 4.",
+    desc:"Ordina e fai la media dei due valori centrali.",
+    tech:{name:"Mediana (N pari)",desc:"Ordina. La mediana è la media dei due valori centrali."},
+    hints:["Ordina i valori.","Trova i due al centro e fai la media."],
+    steps:[
+      {label:"Passo 1: Ordina",answer:["3,4,5,6,8,9","3 4 5 6 8 9"],feedback:"Ordinati: 3, 4, 5, 6, 8, 9."},
+      {label:"Passo 2: Due centrali",answer:["5e6","5 e 6"],feedback:"I due al centro sono 5 e 6."},
+      {label:"Passo 3: Media",answer:["5,5","5.5"],feedback:"(5+6)/2 = 5,5."}
+    ], finalAnswer:["5,5"] },
+  { expr:"Problema", title:"Campo di variazione", problemText:"Le temperature di una settimana sono: 18, 22, 25, 20, 23, 19, 21. Calcola il campo di variazione.",
+    desc:"Campo di variazione = max − min.",
+    tech:{name:"Campo di variazione",desc:"Differenza tra il valore massimo e il minimo."},
+    hints:["Trova il valore più grande e il più piccolo.","Sottrai."],
+    steps:[
+      {label:"Passo 1: Massimo",answer:["25"],feedback:"Il max è 25."},
+      {label:"Passo 2: Minimo",answer:["18"],feedback:"Il min è 18."},
+      {label:"Passo 3: Differenza",answer:["7"],feedback:"25 − 18 = 7."}
+    ], finalAnswer:["7"] },
+  { expr:"Problema", title:"Frequenza assoluta", problemText:"In un gruppo: 5 hanno gli occhi azzurri, 8 castani, 7 verdi. Qual è la frequenza assoluta degli occhi castani?",
+    desc:"La frequenza assoluta è il numero di volte che il valore appare.",
+    tech:{name:"Frequenza assoluta",desc:"È il conteggio diretto."},
+    hint:"Il conteggio è già nel testo.",
+    steps:[{label:"Risposta",answer:["8"],feedback:"8 hanno gli occhi castani."}],
+    finalAnswer:["8"] },
+  { expr:"Problema", title:"Tabella di frequenza", problemText:"In una classe i voti di una verifica sono: 6, 7, 7, 8, 6, 9, 7, 8. Quante volte compare il 7?",
+    desc:"Conta le occorrenze del valore.",
+    tech:{name:"Frequenza assoluta",desc:"Conta quante volte appare ogni valore."},
+    hint:"Scorri la lista e conta.",
+    steps:[{label:"Conta i 7",answer:["3"],feedback:"Il 7 compare 3 volte."}],
+    finalAnswer:["3"] },
+  { expr:"Problema", title:"Media ponderata", problemText:"In una classe: 5 alunni hanno preso 6, 8 alunni 7, e 2 alunni 9. Qual è la media?",
+    desc:"Media = (somma di voto·numero)/totale.",
+    tech:{name:"Media ponderata",desc:"Σ(valore·frequenza) / Σfrequenza"},
+    hints:["Quanti totali? Quanto vale la somma considerando le frequenze?","(5·6 + 8·7 + 2·9) / 15."],
+    steps:[
+      {label:"Passo 1: Totale alunni",answer:["15"],feedback:"5+8+2 = 15."},
+      {label:"Passo 2: Somma pesata",answer:["104"],feedback:"5·6+8·7+2·9 = 30+56+18 = 104."},
+      {label:"Passo 3: Media",answer:["6,93","6.93"],feedback:"104/15 ≈ 6,93."}
+    ], finalAnswer:["6,93"] },
+  { expr:"Problema", title:"Moda con tabella", problemText:"In un'indagine sul colore preferito: rosso 5, blu 12, verde 8, giallo 4. Qual è la moda?",
+    desc:"La moda è il colore con frequenza più alta.",
+    tech:{name:"Moda",desc:"Valore con frequenza maggiore."},
+    hint:"Quale colore ha il numero più alto?",
+    steps:[{label:"Moda",answer:["blu"],feedback:"Il blu (12) è la moda."}],
+    finalAnswer:["blu"] },
+  { expr:"Problema", title:"Frequenza cumulata", problemText:"I voti sono: 5→2 alunni, 6→4, 7→5, 8→3. Qual è la frequenza cumulata fino al voto 7?",
+    desc:"Frequenza cumulata = somma delle frequenze fino a quel valore.",
+    tech:{name:"Frequenza cumulata",desc:"Somma cumulativa delle frequenze."},
+    hints:["Somma le frequenze dei voti 5, 6 e 7."],
+    steps:[
+      {label:"Calcola",answer:["11"],feedback:"2+4+5 = 11."}
+    ], finalAnswer:["11"] },
+  { expr:"Problema", title:"Confronto medie", problemText:"Anna ha preso 7, 8, 9. Marco ha preso 6, 8, 10. Qual è la differenza tra le loro medie?",
+    desc:"Calcola le due medie e fai la differenza.",
+    tech:{name:"Confronto medie",desc:"Calcola separatamente, poi sottrai."},
+    hints:["Media di Anna? Media di Marco?","Differenza tra le due medie."],
+    steps:[
+      {label:"Passo 1: Media Anna",answer:["8"],feedback:"(7+8+9)/3 = 8."},
+      {label:"Passo 2: Media Marco",answer:["8"],feedback:"(6+8+10)/3 = 8."},
+      {label:"Passo 3: Differenza",answer:["0"],feedback:"Le medie sono uguali!"}
+    ], finalAnswer:["0"] },
+  { expr:"Problema", title:"Mediana (7 valori)", problemText:"Calcola la mediana di: 12, 8, 15, 6, 10, 14, 9.",
+    desc:"Ordina e prendi il valore centrale.",
+    tech:{name:"Mediana",desc:"Con N dispari: il valore al centro."},
+    hints:["Ordina i 7 valori.","Il 4° valore è la mediana."],
+    steps:[
+      {label:"Passo 1: Ordina",answer:["6,8,9,10,12,14,15"],feedback:"6, 8, 9, 10, 12, 14, 15."},
+      {label:"Passo 2: Centrale",answer:["10"],feedback:"Il 4° valore è 10."}
+    ], finalAnswer:["10"] },
+  { expr:"Problema", title:"Frequenza relativa (2)", problemText:"In una scatola di 40 cioccolatini, 12 sono al latte. Frequenza relativa?",
+    desc:"f relativa = numero/totale.",
+    tech:{name:"Frequenza relativa",desc:"f = n/N"},
+    hints:["12/40, semplifica."],
+    steps:[
+      {label:"Calcola",answer:["12/40","3/10","0,3","0.3"],feedback:"12/40 = 3/10 = 0,3."}
+    ], finalAnswer:["0,3"] },
+],
+
+/* ══════ 17. TRIANGOLI NOTEVOLI ══════ */
+triangoli_not: [
+  { expr:"Triangolo rettangolo isoscele: cateto = 5", title:"Ipotenusa di rett. isoscele", desc:"In un triangolo rettangolo isoscele i due cateti sono uguali. Ipotenusa = cateto·√2.",
+    tech:{name:"Rettangolo isoscele",desc:"Se i cateti sono uguali (c), ipotenusa = c·√2"},
+    hint:"Pitagora: c² + c² = 2c², quindi i = c·√2.",
+    svgType:"right_tri", svgData:{a:5,b:5,find:"c"},
+    steps:[
+      {label:"Passo 1: Formula",answer:["5*√2","5√2","5·√2"],feedback:"i = c·√2 = 5√2."},
+      {label:"Passo 2: Approssima (√2≈1,41)",answer:["7,07","7.07"],feedback:"5·1,414 ≈ 7,07."}
+    ], finalAnswer:["5√2","7,07"] },
+  { expr:"Quadrato di lato 8", title:"Diagonale del quadrato", desc:"Diagonale = lato · √2.",
+    tech:{name:"Diagonale del quadrato",desc:"d = l·√2"},
+    hint:"La diagonale taglia il quadrato in due triangoli rettangoli isosceli.",
+    svgType:"rect_diag", svgData:{b:8,h:8},
+    steps:[
+      {label:"Passo 1: Formula",answer:["8*√2","8√2","8·√2"],feedback:"d = 8√2."},
+      {label:"Passo 2: Approssima",answer:["11,31","11.31"],feedback:"8·1,414 ≈ 11,31."}
+    ], finalAnswer:["8√2","11,31"] },
+  { expr:"Triangolo equilatero di lato 10", title:"Altezza dell'equilatero", desc:"h = l · √3 / 2.",
+    tech:{name:"Altezza equilatero",desc:"h = (l·√3)/2"},
+    hint:"L'altezza divide il triangolo in due triangoli rettangoli con angoli 30-60-90.",
+    svgType:"tri_eq", svgData:{l:10},
+    steps:[
+      {label:"Passo 1: Formula",answer:["10*√3/2","5*√3","5√3","5·√3"],feedback:"h = 10√3/2 = 5√3."},
+      {label:"Passo 2: Approssima (√3≈1,73)",answer:["8,66","8.66"],feedback:"5·1,732 ≈ 8,66."}
+    ], finalAnswer:["5√3","8,66"] },
+  { expr:"Quadrato con diagonale 10", title:"Lato dato la diagonale", desc:"l = d / √2.",
+    tech:{name:"Lato del quadrato",desc:"l = d/√2 (oppure d·√2/2)"},
+    hint:"Inverti la formula d = l·√2.",
+    svgType:"rect_diag", svgData:{b:7,h:7},
+    steps:[
+      {label:"Passo 1: Formula",answer:["10/√2","5*√2","5√2"],feedback:"l = 10/√2 = 5√2 (razionalizzando)."},
+      {label:"Passo 2: Approssima",answer:["7,07","7.07"],feedback:"5·1,414 ≈ 7,07."}
+    ], finalAnswer:["5√2","7,07"] },
+  { expr:"Triangolo equilatero con altezza 6", title:"Lato dato l'altezza", desc:"l = 2h / √3.",
+    tech:{name:"Lato equilatero",desc:"l = 2h/√3 = (2h·√3)/3"},
+    hint:"Inverti la formula h = l·√3/2.",
+    svgType:"tri_eq", svgData:{l:7},
+    steps:[
+      {label:"Passo 1: Formula",answer:["12/√3","4*√3","4√3"],feedback:"l = 12/√3 = 4√3 (razionalizzato)."},
+      {label:"Passo 2: Approssima",answer:["6,93","6.93"],feedback:"4·1,732 ≈ 6,93."}
+    ], finalAnswer:["4√3","6,93"] },
+  { expr:"Triangolo isoscele: base 16, lato obliquo 10", title:"Altezza triangolo isoscele", desc:"L'altezza divide la base a metà. Usa Pitagora.",
+    tech:{name:"Pitagora su isoscele",desc:"h = √(l² − (b/2)²)"},
+    hint:"Triangolo rettangolo: ipotenusa = lato obliquo, base/2 = cateto.",
+    svgType:"right_tri", svgData:{a:8,c:10,find:"b"},
+    steps:[
+      {label:"Passo 1: Metà base",answer:["8"],feedback:"16/2 = 8."},
+      {label:"Passo 2: Pitagora",answer:["√(100-64)","√36","6"],feedback:"h = √(10²−8²) = √36 = 6."}
+    ], finalAnswer:["6"] },
+  { expr:"Rombo con diagonali 10 e 24", title:"Lato del rombo", desc:"Le semidiagonali sono i cateti, il lato è l'ipotenusa.",
+    tech:{name:"Lato rombo da diagonali",desc:"l = √((d₁/2)² + (d₂/2)²)"},
+    hint:"Le diagonali del rombo si tagliano a metà ad angolo retto.",
+    svgType:"rhombus", svgData:{d1:10,d2:24},
+    steps:[
+      {label:"Passo 1: Semidiagonali",answer:["5e12","5 e 12"],feedback:"5 e 12."},
+      {label:"Passo 2: Pitagora",answer:["√(25+144)","√169","13"],feedback:"l = √(25+144) = √169 = 13."}
+    ], finalAnswer:["13"] },
+  { expr:"Quadrato di lato 6", title:"Diagonale (2)", desc:"d = l·√2.",
+    tech:{name:"Diagonale del quadrato",desc:"d = l·√2"},
+    hint:"Formula diretta.",
+    svgType:"rect_diag", svgData:{b:6,h:6},
+    steps:[
+      {label:"Calcola",answer:["6*√2","6√2","8,49","8.49"],feedback:"d = 6√2 ≈ 8,49."}
+    ], finalAnswer:["6√2"] },
+  { expr:"Triangolo equilatero di lato 12", title:"Altezza equilatero (2)", desc:"h = l·√3/2.",
+    tech:{name:"Altezza equilatero",desc:"h = (l·√3)/2"},
+    hint:"Sostituisci l = 12 nella formula.",
+    svgType:"tri_eq", svgData:{l:12},
+    steps:[
+      {label:"Passo 1: Formula",answer:["12*√3/2","6*√3","6√3"],feedback:"h = 6√3."},
+      {label:"Passo 2: Approssima",answer:["10,39","10.39"],feedback:"6·1,732 ≈ 10,39."}
+    ], finalAnswer:["6√3"] },
+  { expr:"Quadrato con area 50", title:"Lato dato l'area", desc:"l = √Area.",
+    tech:{name:"Lato dal quadrato",desc:"Se A = l², allora l = √A."},
+    hint:"Quale lato ha quadrato 50?",
+    steps:[
+      {label:"Passo 1: Radice",answer:["√50","5*√2","5√2"],feedback:"l = √50 = 5√2 (50=25·2)."},
+      {label:"Passo 2: Approssima",answer:["7,07","7.07"],feedback:"5·1,414 ≈ 7,07."}
+    ], finalAnswer:["5√2"] },
+  { expr:"Triangolo equilatero di lato 4", title:"Area equilatero", desc:"Area = (l²·√3)/4.",
+    tech:{name:"Area equilatero",desc:"A = l²√3 / 4"},
+    hint:"Calcola l² e moltiplica per √3/4.",
+    svgType:"tri_eq", svgData:{l:4},
+    steps:[
+      {label:"Passo 1: Formula",answer:["16*√3/4","4*√3","4√3"],feedback:"A = 16√3/4 = 4√3."},
+      {label:"Passo 2: Approssima",answer:["6,93","6.93"],feedback:"4·1,732 ≈ 6,93 cm²."}
+    ], finalAnswer:["4√3"] },
+  { expr:"Problema", title:"Rampa", problemText:"Una rampa di 10 scalini ha alzata 15 cm e pedata 20 cm. Quanto è lunga la rampa (la diagonale)?",
+    desc:"L'altezza totale è 10·15, la lunghezza orizzontale è 10·20. La rampa è l'ipotenusa.",
+    tech:{name:"Pitagora applicato a scale",desc:"L = √(altezza² + lunghezza²)"},
+    hints:["Altezza totale = 10·15. Lunghezza totale = 10·20.","Usa Pitagora con questi due valori."],
+    svgType:"right_tri", svgData:{a:150,b:200,find:"c"},
+    steps:[
+      {label:"Passo 1: Altezza tot",answer:["150"],feedback:"10·15 = 150 cm."},
+      {label:"Passo 2: Lunghezza tot",answer:["200"],feedback:"10·20 = 200 cm."},
+      {label:"Passo 3: Pitagora",answer:["√(22500+40000)","√62500","250"],feedback:"L = √(150²+200²) = √62500 = 250 cm."}
+    ], finalAnswer:["250"] },
+  { expr:"Problema", title:"Diagonale TV", problemText:"Una TV ha base 80 cm e altezza 45 cm. Quanto è lunga la diagonale?",
+    desc:"Pitagora: d = √(b²+h²).",
+    tech:{name:"Diagonale rettangolo",desc:"d = √(b²+h²)"},
+    hints:["Base e altezza sono i cateti. La diagonale è l'ipotenusa.","Calcola 80² + 45²."],
+    svgType:"rect_diag", svgData:{b:80,h:45},
+    steps:[
+      {label:"Passo 1: Quadrati",answer:["6400+2025","8425"],feedback:"80²=6400, 45²=2025."},
+      {label:"Passo 2: Radice",answer:["√8425","91,79","91.79"],feedback:"√8425 ≈ 91,79 cm."}
+    ], finalAnswer:["91,79"] },
+  { expr:"Triangolo isoscele con base 12 e lato 10", title:"Altezza isoscele (2)", desc:"L'altezza divide la base in due. Usa Pitagora.",
+    tech:{name:"Altezza isoscele",desc:"h = √(l² − (b/2)²)"},
+    hint:"Metà base = 6.",
+    svgType:"right_tri", svgData:{a:6,c:10,find:"b"},
+    steps:[
+      {label:"Passo 1: Metà base",answer:["6"],feedback:"12/2 = 6."},
+      {label:"Passo 2: Pitagora",answer:["√(100-36)","√64","8"],feedback:"h = √(100−36) = √64 = 8."}
+    ], finalAnswer:["8"] },
+  { expr:"Quadrato di lato 7", title:"Diagonale (3)", desc:"d = l·√2.",
+    tech:{name:"Diagonale quadrato",desc:"d = l√2"},
+    hint:"Sostituisci nella formula.",
+    svgType:"rect_diag", svgData:{b:7,h:7},
+    steps:[{label:"Calcola",answer:["7*√2","7√2","9,9","9.9"],feedback:"d = 7√2 ≈ 9,9 cm."}],
+    finalAnswer:["7√2"] },
+  { expr:"Triangolo rettangolo con angolo 45° e cateto 3", title:"Rett. isoscele (2)", desc:"Se un angolo è 45°, è isoscele. Ipotenusa = c·√2.",
+    tech:{name:"Triangolo 45-45-90",desc:"Ipotenusa = cateto·√2"},
+    hint:"Angolo 45° → triangolo isoscele.",
+    svgType:"right_tri", svgData:{a:3,b:3,find:"c"},
+    steps:[
+      {label:"Passo 1: Formula",answer:["3*√2","3√2"],feedback:"i = 3√2."},
+      {label:"Passo 2: Approssima",answer:["4,24","4.24"],feedback:"3·1,414 ≈ 4,24."}
+    ], finalAnswer:["3√2"] },
+],
+
+/* ══════ 18. CERCHIO E POLIGONI REGOLARI ══════ */
+cerchio: [
+  { expr:"Cerchio: r = 8", title:"Circonferenza", desc:"C = 2·π·r. Usa π ≈ 3,14.",
+    tech:{name:"Circonferenza",desc:"C = 2πr"},
+    hint:"Sostituisci r e moltiplica per 2π.",
+    svgType:"circle", svgData:{r:8},
+    steps:[
+      {label:"Passo 1: Formula",answer:["2*3,14*8","2*π*8","16*3,14","50,24","50.24"],feedback:"C = 2·3,14·8."},
+      {label:"Passo 2: Calcola",answer:["50,24","50.24"],feedback:"C ≈ 50,24."}
+    ], finalAnswer:["50,24"] },
+  { expr:"Cerchio: r = 4", title:"Area cerchio", desc:"A = π·r². Usa π ≈ 3,14.",
+    tech:{name:"Area cerchio",desc:"A = πr²"},
+    hint:"Eleva il raggio al quadrato e moltiplica per π.",
+    svgType:"circle", svgData:{r:4},
+    steps:[
+      {label:"Passo 1: r²",answer:["16"],feedback:"4² = 16."},
+      {label:"Passo 2: × π",answer:["50,24","50.24"],feedback:"3,14·16 = 50,24."}
+    ], finalAnswer:["50,24"] },
+  { expr:"Cerchio: C = 31,4", title:"Trova il raggio dalla circonferenza", desc:"r = C / (2π).",
+    tech:{name:"Inverso della circonferenza",desc:"r = C/(2π)"},
+    hint:"Inverti la formula C = 2πr.",
+    svgType:"circle", svgData:{r:5},
+    steps:[
+      {label:"Passo 1: Formula",answer:["31,4/(2*3,14)","31,4/6,28"],feedback:"r = 31,4/(2·3,14)."},
+      {label:"Passo 2: Calcola",answer:["5"],feedback:"31,4/6,28 = 5."}
+    ], finalAnswer:["5"] },
+  { expr:"Cerchio: A = 78,5", title:"Trova il raggio dall'area", desc:"r = √(A/π).",
+    tech:{name:"Inverso dell'area",desc:"r = √(A/π)"},
+    hint:"Dividi A per π, poi prendi la radice.",
+    svgType:"circle", svgData:{r:5},
+    steps:[
+      {label:"Passo 1: A/π",answer:["25","78,5/3,14"],feedback:"78,5/3,14 = 25."},
+      {label:"Passo 2: Radice",answer:["5"],feedback:"√25 = 5."}
+    ], finalAnswer:["5"] },
+  { expr:"Cerchio: d = 12", title:"Area dal diametro", desc:"r = d/2, poi A = πr².",
+    tech:{name:"Diametro e area",desc:"r = d/2, A = πr²"},
+    hint:"Trova prima il raggio, poi l'area.",
+    svgType:"circle", svgData:{r:6},
+    steps:[
+      {label:"Passo 1: Raggio",answer:["6"],feedback:"12/2 = 6."},
+      {label:"Passo 2: Area",answer:["113,04","113.04"],feedback:"3,14·36 = 113,04."}
+    ], finalAnswer:["113,04"] },
+  { expr:"Esagono regolare: lato = 6", title:"Apotema dell'esagono", desc:"Apotema = lato · numero fisso. Per esagono φ ≈ 0,866.",
+    tech:{name:"Apotema esagono",desc:"a = l · φ con φ ≈ 0,866"},
+    hint:"Apotema = lato · 0,866.",
+    steps:[
+      {label:"Calcola",answer:["6*0,866","5,196","5.196","5,2","5.2"],feedback:"6·0,866 = 5,196."}
+    ], finalAnswer:["5,196"] },
+  { expr:"Esagono regolare: lato = 4", title:"Area esagono", desc:"A = (perimetro · apotema) / 2.",
+    tech:{name:"Area poligono regolare",desc:"A = (P·a)/2 dove P=perimetro, a=apotema"},
+    hint:"Calcola perimetro (6 lati uguali), poi apotema (l·0,866), poi area.",
+    steps:[
+      {label:"Passo 1: Perimetro",answer:["24"],feedback:"6·4 = 24."},
+      {label:"Passo 2: Apotema",answer:["3,464","3.464","4*0,866"],feedback:"4·0,866 ≈ 3,464."},
+      {label:"Passo 3: Area",answer:["41,57","41.57"],feedback:"(24·3,464)/2 ≈ 41,57."}
+    ], finalAnswer:["41,57"] },
+  { expr:"Pentagono regolare: lato = 5", title:"Apotema pentagono", desc:"a = l · φ con φ ≈ 0,688.",
+    tech:{name:"Apotema pentagono",desc:"a = l · 0,688"},
+    hint:"Apotema = 5 · 0,688.",
+    steps:[
+      {label:"Calcola",answer:["5*0,688","3,44","3.44"],feedback:"5·0,688 = 3,44."}
+    ], finalAnswer:["3,44"] },
+  { expr:"Triangolo equilatero: lato = 10", title:"Apotema triangolo", desc:"Per triangolo equilatero φ ≈ 0,289.",
+    tech:{name:"Apotema triangolo equilatero",desc:"a = l · 0,289 (= l·√3/6)"},
+    hint:"a = 10·0,289.",
+    svgType:"tri_eq", svgData:{l:10},
+    steps:[{label:"Calcola",answer:["10*0,289","2,89","2.89"],feedback:"10·0,289 = 2,89."}],
+    finalAnswer:["2,89"] },
+  { expr:"Cerchio: r = 10", title:"Circonferenza (2)", desc:"C = 2πr.",
+    tech:{name:"Circonferenza",desc:"C = 2πr"},
+    hint:"Formula diretta.",
+    svgType:"circle", svgData:{r:10},
+    steps:[{label:"Calcola",answer:["62,8","62.8","2*3,14*10"],feedback:"C = 2·3,14·10 = 62,8."}],
+    finalAnswer:["62,8"] },
+  { expr:"Cerchio: r = 6", title:"Area cerchio (2)", desc:"A = πr².",
+    tech:{name:"Area cerchio",desc:"A = πr²"},
+    hint:"Eleva al quadrato e moltiplica per π.",
+    svgType:"circle", svgData:{r:6},
+    steps:[
+      {label:"Passo 1: r²",answer:["36"],feedback:"6² = 36."},
+      {label:"Passo 2: × π",answer:["113,04","113.04"],feedback:"3,14·36 = 113,04."}
+    ], finalAnswer:["113,04"] },
+  { expr:"Quadrato regolare di apotema 5", title:"Lato del quadrato dato apotema", desc:"Per il quadrato apotema = lato/2.",
+    tech:{name:"Apotema quadrato",desc:"a = l/2 (l'apotema è metà lato)"},
+    hint:"Apotema = lato/2 → lato = 2·apotema.",
+    steps:[{label:"Calcola lato",answer:["10"],feedback:"l = 2·5 = 10."}],
+    finalAnswer:["10"] },
+  { expr:"Problema", title:"Aiuola", problemText:"Un'aiuola circolare ha raggio 3 m. Quanti metri di staccionata servono per recintarla? Quanto vale l'area?",
+    desc:"La staccionata = circonferenza. L'area è la superficie.",
+    tech:{name:"Cerchio",desc:"C = 2πr, A = πr²"},
+    hints:["Per la staccionata serve la circonferenza.","Per l'area, π·r²."],
+    svgType:"circle", svgData:{r:3},
+    steps:[
+      {label:"Passo 1: Staccionata (C)",answer:["18,84","18.84"],feedback:"C = 2·3,14·3 = 18,84 m."},
+      {label:"Passo 2: Area",answer:["28,26","28.26"],feedback:"A = 3,14·9 = 28,26 m²."}
+    ], finalAnswer:["28,26"] },
+  { expr:"Esagono regolare: lato = 10", title:"Perimetro esagono", desc:"P = 6·l.",
+    tech:{name:"Perimetro esagono",desc:"6 lati uguali"},
+    hint:"6 volte il lato.",
+    steps:[{label:"Calcola",answer:["60"],feedback:"6·10 = 60."}],
+    finalAnswer:["60"] },
+  { expr:"Cerchio inscritto in quadrato: lato 10", title:"Cerchio inscritto", desc:"Il diametro del cerchio è uguale al lato del quadrato. r = l/2.",
+    tech:{name:"Cerchio inscritto",desc:"d = l, r = l/2"},
+    hint:"Il cerchio tocca i 4 lati: il diametro = lato del quadrato.",
+    steps:[
+      {label:"Passo 1: Raggio",answer:["5"],feedback:"r = 10/2 = 5."},
+      {label:"Passo 2: Area cerchio",answer:["78,5","78.5"],feedback:"3,14·25 = 78,5."}
+    ], finalAnswer:["78,5"] },
+  { expr:"Cerchio circoscritto a quadrato: lato 10", title:"Cerchio circoscritto", desc:"Il diametro è la diagonale del quadrato. d = l·√2.",
+    tech:{name:"Cerchio circoscritto",desc:"d = diagonale = l·√2"},
+    hint:"Il diametro coincide con la diagonale.",
+    steps:[
+      {label:"Passo 1: Diagonale",answer:["10*√2","10√2","14,14","14.14"],feedback:"d = 10√2 ≈ 14,14."},
+      {label:"Passo 2: Raggio",answer:["5*√2","5√2","7,07","7.07"],feedback:"r = d/2 = 5√2 ≈ 7,07."}
+    ], finalAnswer:["7,07"] },
+  { expr:"Settore circolare: r=4, angolo=90°", title:"Area settore", desc:"Area settore = (angolo/360) · π·r².",
+    tech:{name:"Settore circolare",desc:"A = (α/360)·πr²"},
+    hint:"È un quarto di cerchio (90°/360°).",
+    svgType:"circle", svgData:{r:4},
+    steps:[
+      {label:"Passo 1: Area cerchio intero",answer:["50,24","50.24"],feedback:"3,14·16 = 50,24."},
+      {label:"Passo 2: Frazione (90/360)",answer:["1/4","0,25","0.25"],feedback:"90/360 = 1/4."},
+      {label:"Passo 3: Area settore",answer:["12,56","12.56"],feedback:"50,24/4 = 12,56."}
+    ], finalAnswer:["12,56"] },
+],
+
 };
 
 /* ────────── STATO APP ────────── */
