@@ -511,6 +511,61 @@ espressioni: [
       {label:"Passo 2: Moltiplica",answer:["16+6-1"],feedback:"3 × 2 = 6."},
       {label:"Passo 3: Calcola",answer:["21"],feedback:"16 + 6 = 22, poi 22 − 1 = 21."}
     ], finalAnswer:["21"] },
+  { expr:"(−3) + 5 × 2", title:"Con numero negativo", desc:"Prima la moltiplicazione, poi la somma algebrica.",
+    tech:{name:"Somma con negativo",desc:"−3 + 10 = 7. Occhio al segno."},
+    hint:"Moltiplica 5 per 2, poi somma algebricamente.",
+    steps:[
+      {label:"Passo 1: Moltiplica",answer:["-3+10"],feedback:"5 × 2 = 10."},
+      {label:"Passo 2: Somma",answer:["7"],feedback:"−3 + 10 = 7."}
+    ], finalAnswer:["7"] },
+  { expr:"2³ − (4 + 3) × 2", title:"Potenza e parentesi", desc:"Potenza, parentesi, moltiplicazione, sottrazione.",
+    tech:{name:"Ordine completo",desc:"Potenze, parentesi, × e ÷, + e −"},
+    hint:"Calcola 2³ e la parentesi separatamente.",
+    steps:[
+      {label:"Passo 1: Potenza",answer:["8-(4+3)*2","8-7*2"],feedback:"2³ = 8."},
+      {label:"Passo 2: Parentesi",answer:["8-7*2","8-14"],feedback:"4+3 = 7."},
+      {label:"Passo 3: Moltiplica",answer:["8-14"],feedback:"7·2 = 14."},
+      {label:"Passo 4: Sottrai",answer:["-6"],feedback:"8 − 14 = −6."}
+    ], finalAnswer:["-6"] },
+  { expr:"30 ÷ 5 − 2² × 1", title:"Con potenza e divisione", desc:"Potenza, divisione, moltiplicazione, sottrazione.",
+    tech:{name:"Ordine completo",desc:"Potenze prima di ×÷, prima di +−"},
+    hint:"2² e poi le operazioni in ordine.",
+    steps:[
+      {label:"Passo 1: Potenza",answer:["30/5-4*1","30/5-4"],feedback:"2² = 4."},
+      {label:"Passo 2: Dividi",answer:["6-4"],feedback:"30/5 = 6."},
+      {label:"Passo 3: Calcola",answer:["2"],feedback:"6 − 4 = 2."}
+    ], finalAnswer:["2"] },
+  { expr:"[(6 + 2) × 3 − 4] ÷ 5", title:"Espressione complessa", desc:"Parentesi annidate, poi divisione.",
+    tech:{name:"Parentesi complesse",desc:"Risolvi sempre dall'interno verso l'esterno."},
+    hint:"Tonde → quadre → divisione.",
+    steps:[
+      {label:"Passo 1: Tonde",answer:["[8*3-4]/5","(8*3-4)/5"],feedback:"6+2 = 8."},
+      {label:"Passo 2: Moltiplica in quadre",answer:["[24-4]/5","(24-4)/5","20/5"],feedback:"8·3 = 24."},
+      {label:"Passo 3: Quadre",answer:["20/5"],feedback:"24−4 = 20."},
+      {label:"Passo 4: Dividi",answer:["4"],feedback:"20/5 = 4."}
+    ], finalAnswer:["4"] },
+  { expr:"−(2 − 5) × 3", title:"Meno davanti a parentesi", desc:"Il − davanti cambia il segno del risultato.",
+    tech:{name:"Meno davanti",desc:"Il − davanti inverte il segno."},
+    hint:"Calcola prima la parentesi, poi cambia il segno.",
+    steps:[
+      {label:"Passo 1: Parentesi",answer:["-(-3)*3","3*3","-(-3)·3"],feedback:"2−5 = −3."},
+      {label:"Passo 2: Meno davanti",answer:["3*3","3·3"],feedback:"−(−3) = 3."},
+      {label:"Passo 3: Moltiplica",answer:["9"],feedback:"3·3 = 9."}
+    ], finalAnswer:["9"] },
+  { expr:"3² + 2³ − 4", title:"Due potenze", desc:"Calcola le potenze, poi somma e sottrai.",
+    tech:{name:"Potenze multiple",desc:"Ogni potenza si calcola separatamente."},
+    hint:"3² e 2³ separatamente.",
+    steps:[
+      {label:"Passo 1: Potenze",answer:["9+8-4"],feedback:"3²=9, 2³=8."},
+      {label:"Passo 2: Calcola",answer:["13"],feedback:"9+8−4 = 13."}
+    ], finalAnswer:["13"] },
+  { expr:"100 ÷ 4 ÷ 5", title:"Divisioni in serie", desc:"Le divisioni si fanno da sinistra a destra.",
+    tech:{name:"Divisioni in serie",desc:"Da sinistra a destra, una alla volta."},
+    hint:"Prima 100÷4, poi il risultato ÷5.",
+    steps:[
+      {label:"Passo 1: Prima divisione",answer:["25/5"],feedback:"100/4 = 25."},
+      {label:"Passo 2: Seconda",answer:["5"],feedback:"25/5 = 5."}
+    ], finalAnswer:["5"] },
 ],
 
 /* ══════ 2. FRAZIONI ══════ */
@@ -588,6 +643,55 @@ frazioni: [
       {label:"Passo 2: Semplifica in croce",answer:["1/1*3/2","3/2","1*3/1*2"],feedback:"Il 3 e il 9 (÷3), il 2 e il 4 (÷2) si semplificano!"},
       {label:"Passo 3: Risultato",answer:["3/2","1.5","1,5"],feedback:"3/2. Perfetto!"}
     ], finalAnswer:["3/2"] },
+  { expr:"2/5 + 3/4 − 1/2", title:"Tre frazioni miste", desc:"Trova mcm(5,4,2) = 20.",
+    tech:{name:"mcm tre frazioni",desc:"Denominatore comune di tutti."},
+    hint:"Il mcm tra 5, 4 e 2 è 20.",
+    steps:[
+      {label:"Passo 1: Trasforma",answer:["8/20+15/20-10/20"],feedback:"2/5=8/20, 3/4=15/20, 1/2=10/20."},
+      {label:"Passo 2: Calcola",answer:["13/20"],feedback:"8+15−10 = 13."}
+    ], finalAnswer:["13/20"] },
+  { expr:"(2/3)²", title:"Potenza di frazione", desc:"(a/b)ⁿ = aⁿ/bⁿ.",
+    tech:{name:"Potenza di frazione",desc:"Eleva numeratore e denominatore."},
+    hint:"Eleva al quadrato sia il 2 che il 3.",
+    steps:[
+      {label:"Calcola",answer:["4/9"],feedback:"2²/3² = 4/9."}
+    ], finalAnswer:["4/9"] },
+  { expr:"Problema", title:"Frazione di una classe", problemText:"In una classe di 25 studenti, 2/5 sono ragazze. Quante sono?",
+    desc:"Per calcolare frazione di un numero: frazione × numero.",
+    tech:{name:"Frazione di un numero",desc:"(a/b) × N"},
+    hints:["Moltiplica 2/5 per 25.","Puoi semplificare il 5 al denominatore con il 25."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["2/5*25","50/5"],feedback:"2/5 · 25."},
+      {label:"Passo 2: Calcola",answer:["10"],feedback:"10 ragazze."}
+    ], finalAnswer:["10"] },
+  { expr:"Problema", title:"Torta avanzata", problemText:"Da una torta mangio 3/8 a pranzo e 1/4 a cena. Quanta torta resta?",
+    desc:"Somma le parti mangiate, poi sottrai dall'intero.",
+    tech:{name:"Frazioni in problema",desc:"Intero − somma parti mangiate."},
+    hints:["Somma 3/8 + 1/4.","Sottrai da 1 (intera torta)."],
+    steps:[
+      {label:"Passo 1: Parti mangiate",answer:["3/8+1/4","3/8+2/8","5/8"],feedback:"1/4=2/8. 3/8+2/8=5/8."},
+      {label:"Passo 2: Avanzo",answer:["3/8","1-5/8"],feedback:"1 − 5/8 = 3/8."}
+    ], finalAnswer:["3/8"] },
+  { expr:"(3/4) : (1/8)", title:"Divisione di frazioni (2)", desc:"Capovolgi la seconda e moltiplica.",
+    tech:{name:"Reciproco",desc:"a/b : c/d = a/b · d/c"},
+    hint:"Capovolgi 1/8 e semplifica.",
+    steps:[
+      {label:"Passo 1: Reciproco",answer:["3/4*8/1","3/4*8"],feedback:"1/8 → 8/1."},
+      {label:"Passo 2: Semplifica",answer:["3*2/1","6"],feedback:"4 e 8 si semplificano (÷4): 2 al numeratore."},
+      {label:"Passo 3: Risultato",answer:["6"],feedback:"3·2 = 6."}
+    ], finalAnswer:["6"] },
+  { expr:"1 − 2/3 + 1/6", title:"Con numero intero", desc:"L'intero 1 = 6/6 (usa il mcm).",
+    tech:{name:"Intero come frazione",desc:"1 = N/N per qualsiasi N."},
+    hint:"Trasforma 1 in sesti (6/6).",
+    steps:[
+      {label:"Passo 1: Trasforma",answer:["6/6-4/6+1/6"],feedback:"1=6/6, 2/3=4/6."},
+      {label:"Passo 2: Calcola",answer:["3/6","1/2"],feedback:"6−4+1 = 3 → 3/6 = 1/2."}
+    ], finalAnswer:["1/2"] },
+  { expr:"(1/2)³", title:"Potenza di frazione (2)", desc:"(a/b)ⁿ = aⁿ/bⁿ.",
+    tech:{name:"Potenza di frazione",desc:"Eleva numeratore e denominatore."},
+    hint:"Eleva al cubo entrambi.",
+    steps:[{label:"Calcola",answer:["1/8"],feedback:"1³/2³ = 1/8."}],
+    finalAnswer:["1/8"] },
 ],
 
 /* ══════ 3. POTENZE ══════ */
@@ -660,6 +764,53 @@ potenze: [
       {label:"Passo 1: Scrivi tutti gli esponenti",answer:["2^(2+3+1)","2^6"],feedback:"2+3+1=6."},
       {label:"Passo 2: Calcola",answer:["64"],feedback:"2⁶ = 64."}
     ], finalAnswer:["64","2^6"] },
+  { expr:"(−2)³", title:"Potenza con base negativa dispari", desc:"Base negativa, esponente dispari → risultato negativo.",
+    tech:{name:"Base negativa",desc:"Esponente dispari: negativo. Pari: positivo."},
+    hint:"(−2)·(−2)·(−2). Quanti segni meno?",
+    steps:[
+      {label:"Passo 1: Segno",answer:["-","negativo","meno"],feedback:"3 segni meno → risultato negativo."},
+      {label:"Passo 2: Calcola",answer:["-8"],feedback:"(−2)³ = −8."}
+    ], finalAnswer:["-8"] },
+  { expr:"(−3)²", title:"Base negativa pari", desc:"Base negativa, esponente pari → risultato positivo.",
+    tech:{name:"Base negativa pari",desc:"I segni meno si cancellano a coppie."},
+    hint:"(−3)·(−3). Che segno?",
+    steps:[
+      {label:"Calcola",answer:["9"],feedback:"(−3)² = 9 (positivo)."}
+    ], finalAnswer:["9"] },
+  { expr:"6² × 4²", title:"Stesso esponente diverse basi", desc:"aⁿ × bⁿ = (a·b)ⁿ.",
+    tech:{name:"Stesso esponente",desc:"Combina le basi, esponente resta."},
+    hint:"Puoi combinare le basi: (6·4)².",
+    steps:[
+      {label:"Passo 1: Combina basi",answer:["24^2"],feedback:"(6·4)² = 24²."},
+      {label:"Passo 2: Calcola",answer:["576"],feedback:"24² = 576."}
+    ], finalAnswer:["576"] },
+  { expr:"(2³)² × 2", title:"Potenza di potenza × base", desc:"Prima la potenza di potenza, poi somma gli esponenti.",
+    tech:{name:"Combinazione regole",desc:"(aⁿ)ᵐ = aⁿˣᵐ, poi stessa base: somma esponenti."},
+    hint:"(2³)² = 2⁶, poi × 2 = 2⁷.",
+    steps:[
+      {label:"Passo 1: Potenza di potenza",answer:["2^6*2","64*2"],feedback:"(2³)² = 2⁶ = 64."},
+      {label:"Passo 2: Moltiplica per 2",answer:["2^7","128"],feedback:"2⁶·2 = 2⁷ = 128."}
+    ], finalAnswer:["128","2^7"] },
+  { expr:"(3²)³ ÷ 3⁴", title:"Potenza di potenza ÷ potenza", desc:"Prima sviluppa, poi quoziente.",
+    tech:{name:"Combinazione",desc:"(3²)³ = 3⁶, poi 3⁶÷3⁴ = 3²."},
+    hint:"(3²)³ prima, poi dividi.",
+    steps:[
+      {label:"Passo 1: Potenza di potenza",answer:["3^6/3^4"],feedback:"(3²)³ = 3⁶."},
+      {label:"Passo 2: Quoziente",answer:["3^2","9"],feedback:"3⁶÷3⁴ = 3² = 9."}
+    ], finalAnswer:["9","3^2"] },
+  { expr:"(1/2)⁴", title:"Potenza di frazione", desc:"(a/b)ⁿ = aⁿ/bⁿ.",
+    tech:{name:"Potenza di frazione",desc:"Eleva numeratore e denominatore."},
+    hint:"1⁴ al numeratore, 2⁴ al denominatore.",
+    steps:[
+      {label:"Calcola",answer:["1/16"],feedback:"1⁴/2⁴ = 1/16."}
+    ], finalAnswer:["1/16"] },
+  { expr:"5² + 2³", title:"Somma di potenze", desc:"Calcola ogni potenza, poi somma.",
+    tech:{name:"Potenze non simili",desc:"Basi diverse: calcola separatamente e somma."},
+    hint:"Non puoi combinare: calcola 5² e 2³ singolarmente.",
+    steps:[
+      {label:"Passo 1: Potenze",answer:["25+8"],feedback:"5²=25, 2³=8."},
+      {label:"Passo 2: Somma",answer:["33"],feedback:"25+8 = 33."}
+    ], finalAnswer:["33"] },
 ],
 
 /* ══════ 4. EQUAZIONI DI PRIMO GRADO ══════ */
@@ -738,6 +889,58 @@ equazioni: [
       {label:"Passo 1: Sposta il 8",answer:["-2x=2-8","-2x=-6"],feedback:"Sposta +8 → −8."},
       {label:"Passo 2: Dividi per −2",answer:["x=3","3"],feedback:"−6 ÷ (−2) = 3."}
     ], finalAnswer:["x=3","3"] },
+  { expr:"x/2 + 3 = 7", title:"Equazione con frazione", desc:"Sposta il 3, poi moltiplica per 2.",
+    tech:{name:"Equazione con frazione",desc:"Isola x/a prima, poi moltiplica per a."},
+    hint:"Sposta il 3 dall'altra parte, poi libera la x.",
+    steps:[
+      {label:"Passo 1: Sposta il 3",answer:["x/2=4"],feedback:"x/2 = 7−3 = 4."},
+      {label:"Passo 2: Moltiplica per 2",answer:["x=8","8"],feedback:"x = 2·4 = 8."}
+    ], finalAnswer:["x=8","8"] },
+  { expr:"2(x − 1) + 3(x + 2) = 19", title:"Due parentesi", desc:"Distribuisci entrambe, poi risolvi.",
+    tech:{name:"Doppia distribuzione",desc:"Distribuisci ogni parentesi, poi raggruppa."},
+    hint:"2x−2 e 3x+6 sono i due sviluppi.",
+    steps:[
+      {label:"Passo 1: Distribuisci",answer:["2x-2+3x+6=19"],feedback:"2(x−1)=2x−2, 3(x+2)=3x+6."},
+      {label:"Passo 2: Raggruppa",answer:["5x+4=19"],feedback:"2x+3x=5x, −2+6=+4."},
+      {label:"Passo 3: Sposta il 4",answer:["5x=15"],feedback:"19−4 = 15."},
+      {label:"Passo 4: Dividi",answer:["x=3","3"],feedback:"15/5 = 3."}
+    ], finalAnswer:["x=3","3"] },
+  { expr:"(x + 1)/3 = 4", title:"Binomio fratto", desc:"Moltiplica entrambi i lati per 3.",
+    tech:{name:"Denominatore comune",desc:"Moltiplica per il denominatore per eliminarlo."},
+    hint:"Moltiplica per 3, poi risolvi.",
+    steps:[
+      {label:"Passo 1: Moltiplica per 3",answer:["x+1=12"],feedback:"3·4 = 12."},
+      {label:"Passo 2: Sposta",answer:["x=11","11"],feedback:"x = 12−1 = 11."}
+    ], finalAnswer:["x=11","11"] },
+  { expr:"6x + 4 = 6x + 4", title:"Identità", desc:"Se semplificando arrivi a 0=0, è identità (vera per ogni x).",
+    tech:{name:"Identità",desc:"Ogni x è soluzione."},
+    hint:"Sposta tutto a sinistra. Cosa resta?",
+    steps:[
+      {label:"Passo 1: Raggruppa",answer:["0=0","6x-6x=4-4"],feedback:"6x−6x = 0, 4−4 = 0."},
+      {label:"Passo 2: Tipo di equazione",answer:["identita","identità","sempre","ogni x","infinite"],feedback:"Vera per qualsiasi x: è un'identità."}
+    ], finalAnswer:["identita","identità"] },
+  { expr:"2x + 5 = 2x + 9", title:"Impossibile", desc:"Se arrivi a qualcosa come 5=9, è impossibile.",
+    tech:{name:"Impossibile",desc:"Nessuna soluzione."},
+    hint:"Sposta le x. Cosa succede?",
+    steps:[
+      {label:"Passo 1: Raggruppa",answer:["0=4","5=9","2x-2x=9-5"],feedback:"Le x si annullano: 5=9 è falso."},
+      {label:"Passo 2: Tipo",answer:["impossibile","nessuna","no soluzione"],feedback:"Nessuna x può renderla vera: impossibile."}
+    ], finalAnswer:["impossibile"] },
+  { expr:"3(x − 4) = 2x − 6", title:"Parentesi e raggruppamento (2)", desc:"Distribuisci, poi porta le x da un lato.",
+    tech:{name:"Distribuzione + equazione",desc:"Espandi, raggruppa, risolvi."},
+    hint:"3x−12 a sinistra.",
+    steps:[
+      {label:"Passo 1: Distribuisci",answer:["3x-12=2x-6"],feedback:"3(x−4) = 3x−12."},
+      {label:"Passo 2: Raggruppa",answer:["3x-2x=-6+12","x=6"],feedback:"3x−2x = −6+12 → x=6."},
+      {label:"Passo 3: Risultato",answer:["x=6","6"],feedback:"x = 6."}
+    ], finalAnswer:["x=6","6"] },
+  { expr:"x/3 − 1 = 2", title:"Equazione fratta (2)", desc:"Sposta il −1, poi moltiplica per 3.",
+    tech:{name:"Equazione fratta",desc:"Isola la frazione, poi elimina il denominatore."},
+    hint:"x/3 = 3, poi moltiplica per 3.",
+    steps:[
+      {label:"Passo 1: Isola x/3",answer:["x/3=3"],feedback:"x/3 = 2+1 = 3."},
+      {label:"Passo 2: Moltiplica",answer:["x=9","9"],feedback:"x = 3·3 = 9."}
+    ], finalAnswer:["x=9","9"] },
 ],
 
 /* ══════ 5. MONOMI E POLINOMI ══════ */
@@ -802,6 +1005,53 @@ monomi: [
     steps:[
       {label:"Passo 1: Calcola",answer:["10a^3b^4","10a³b⁴"],feedback:"10a³b⁴."}
     ], finalAnswer:["10a^3b^4","10a³b⁴"] },
+  { expr:"6x³ ÷ 2x", title:"Divisione di monomi", desc:"Dividi coefficienti, sottrai esponenti.",
+    tech:{name:"Divisione monomi",desc:"Coefficienti si dividono, esponenti si sottraggono."},
+    hint:"6÷2 e x³÷x.",
+    steps:[
+      {label:"Calcola",answer:["3x^2","3x²"],feedback:"6/2=3, x³/x = x²."}
+    ], finalAnswer:["3x^2","3x²"] },
+  { expr:"12a⁵b² ÷ 4a²b", title:"Divisione con due lettere", desc:"Dividi coefficienti e sottrai esponenti lettera per lettera.",
+    tech:{name:"Divisione monomi",desc:"Ogni lettera separatamente."},
+    hint:"12÷4, a⁵÷a², b²÷b.",
+    steps:[
+      {label:"Calcola",answer:["3a^3b","3a³b"],feedback:"3a³b."}
+    ], finalAnswer:["3a^3b","3a³b"] },
+  { expr:"(x + 2)(x + 3)", title:"Prodotto di binomi (2)", desc:"Moltiplica ogni termine per ogni termine.",
+    tech:{name:"FOIL",desc:"(a+b)(c+d) = ac + ad + bc + bd"},
+    hint:"x·x + x·3 + 2·x + 2·3.",
+    steps:[
+      {label:"Passo 1: Espandi",answer:["x^2+3x+2x+6","x²+3x+2x+6"],feedback:"Tutti i prodotti."},
+      {label:"Passo 2: Combina",answer:["x^2+5x+6","x²+5x+6"],feedback:"3x+2x = 5x."}
+    ], finalAnswer:["x^2+5x+6","x²+5x+6"] },
+  { expr:"6x + 9", title:"Raccogli a fattor comune", desc:"Trova il fattore comune e raccoglilo.",
+    tech:{name:"Raccoglimento",desc:"Cerca il MCD dei coefficienti e delle lettere comuni."},
+    hint:"Cosa hanno in comune 6x e 9?",
+    steps:[
+      {label:"Passo 1: MCD",answer:["3"],feedback:"MCD(6,9) = 3."},
+      {label:"Passo 2: Raccogli",answer:["3(2x+3)","3*(2x+3)"],feedback:"3·(2x+3)."}
+    ], finalAnswer:["3(2x+3)"] },
+  { expr:"4x² − 8x", title:"Raccogli con lettera", desc:"Raccogli il fattore numerico E la x.",
+    tech:{name:"Raccoglimento",desc:"Raccogli tutto quello che c'è in comune."},
+    hint:"Cosa c'è in entrambi? Un numero e una lettera.",
+    steps:[
+      {label:"Passo 1: Fattore comune",answer:["4x"],feedback:"4 e x sono comuni."},
+      {label:"Passo 2: Raccogli",answer:["4x(x-2)"],feedback:"4x·(x−2)."}
+    ], finalAnswer:["4x(x-2)"] },
+  { expr:"(a + b)(a − b + 2)", title:"Prodotto di trinomio e binomio", desc:"Moltiplica ogni termine del primo per ogni termine del secondo.",
+    tech:{name:"Distribuzione estesa",desc:"a·(a−b+2) + b·(a−b+2)"},
+    hint:"Fai 2 gruppi: a·tutto + b·tutto.",
+    steps:[
+      {label:"Passo 1: Espandi",answer:["a^2-ab+2a+ab-b^2+2b","a²-ab+2a+ab-b²+2b"],feedback:"Tutti i prodotti."},
+      {label:"Passo 2: Semplifica (−ab+ab)",answer:["a^2+2a-b^2+2b","a²+2a-b²+2b"],feedback:"−ab e +ab si cancellano."}
+    ], finalAnswer:["a^2+2a-b^2+2b","a²+2a-b²+2b"] },
+  { expr:"(3x − 1)(x + 4)", title:"Binomi con coefficienti", desc:"FOIL con coefficienti più grandi.",
+    tech:{name:"FOIL",desc:"(a+b)(c+d) = ac + ad + bc + bd"},
+    hint:"3x·x, 3x·4, −1·x, −1·4.",
+    steps:[
+      {label:"Passo 1: Espandi",answer:["3x^2+12x-x-4","3x²+12x-x-4"],feedback:"Tutti i quattro prodotti."},
+      {label:"Passo 2: Combina",answer:["3x^2+11x-4","3x²+11x-4"],feedback:"12x−x = 11x."}
+    ], finalAnswer:["3x^2+11x-4","3x²+11x-4"] },
 ],
 
 /* ══════ 6. PRODOTTI NOTEVOLI ══════ */
@@ -873,6 +1123,50 @@ prodotti: [
       {label:"Passo 1: Espandi",answer:["x^2+5x-2x-10","x²+5x-2x-10"],feedback:"FOIL applicato."},
       {label:"Passo 2: Somma simili",answer:["x^2+3x-10","x²+3x-10"],feedback:"5x−2x = 3x."}
     ], finalAnswer:["x^2+3x-10","x²+3x-10"] },
+  { expr:"(5x + 2)²", title:"Quadrato con coefficiente alto", desc:"a=5x, b=2.",
+    tech:{name:"Quadrato di binomio",desc:"(5x+2)² = (5x)² + 2·5x·2 + 2²"},
+    hint:"(5x)² = 25x², 2·5x·2 = 20x, 2² = 4.",
+    steps:[
+      {label:"Passo 1: Tre pezzi",answer:["25x^2+2*5x*2+4","25x^2+20x+4","25x²+20x+4"],feedback:"a²+2ab+b² = 25x²+20x+4."},
+      {label:"Passo 2: Risultato",answer:["25x^2+20x+4","25x²+20x+4"],feedback:"Perfetto!"}
+    ], finalAnswer:["25x^2+20x+4","25x²+20x+4"] },
+  { expr:"(4x − 3)(4x + 3)", title:"Differenza di quadrati (4)", desc:"(a−b)(a+b) = a² − b².",
+    tech:{name:"Differenza di quadrati",desc:"a=4x, b=3"},
+    hint:"(4x)² − 3².",
+    steps:[
+      {label:"Calcola",answer:["16x^2-9","16x²-9"],feedback:"16x² − 9."}
+    ], finalAnswer:["16x^2-9","16x²-9"] },
+  { expr:"(x + 1)³", title:"Cubo di binomio", desc:"(a+b)³ = a³ + 3a²b + 3ab² + b³.",
+    tech:{name:"Cubo di binomio",desc:"a³ + 3a²b + 3ab² + b³"},
+    hint:"4 termini: a³, 3a²b, 3ab², b³.",
+    steps:[
+      {label:"Passo 1: 4 pezzi",answer:["x^3+3x^2+3x+1","x³+3x²+3x+1"],feedback:"x³+3x²·1+3x·1+1³."},
+      {label:"Passo 2: Risultato",answer:["x^3+3x^2+3x+1","x³+3x²+3x+1"],feedback:"Esatto."}
+    ], finalAnswer:["x^3+3x^2+3x+1","x³+3x²+3x+1"] },
+  { expr:"(2x − 1)³", title:"Cubo (2)", desc:"(a−b)³ = a³ − 3a²b + 3ab² − b³. Segni alternati.",
+    tech:{name:"Cubo di differenza",desc:"a³ − 3a²b + 3ab² − b³"},
+    hint:"a=2x, b=1. Segni: +, −, +, −.",
+    steps:[
+      {label:"Espandi",answer:["8x^3-12x^2+6x-1","8x³-12x²+6x-1"],feedback:"(2x)³ = 8x³, ecc."}
+    ], finalAnswer:["8x^3-12x^2+6x-1","8x³-12x²+6x-1"] },
+  { expr:"(x + 10)²", title:"Quadrato con numero grande", desc:"(a+b)² = a² + 2ab + b².",
+    tech:{name:"Quadrato di binomio",desc:"a=x, b=10"},
+    hint:"x² + 20x + 100.",
+    steps:[
+      {label:"Calcola",answer:["x^2+20x+100","x²+20x+100"],feedback:"Perfetto."}
+    ], finalAnswer:["x^2+20x+100","x²+20x+100"] },
+  { expr:"(x − 8)(x + 8)", title:"Differenza di quadrati (5)", desc:"(a+b)(a−b) = a² − b².",
+    tech:{name:"Differenza di quadrati",desc:"a=x, b=8"},
+    hint:"x² − 64.",
+    steps:[{label:"Calcola",answer:["x^2-64","x²-64"],feedback:"x² − 64."}],
+    finalAnswer:["x^2-64","x²-64"] },
+  { expr:"(3a − 2b)²", title:"Quadrato con due lettere", desc:"a=3a, b=2b. Le lettere sono diverse!",
+    tech:{name:"Quadrato di binomio",desc:"(3a)² − 2·(3a)·(2b) + (2b)²"},
+    hint:"Calcola i tre pezzi.",
+    steps:[
+      {label:"Passo 1: Tre pezzi",answer:["9a^2-2*3a*2b+4b^2","9a^2-12ab+4b^2","9a²-12ab+4b²"],feedback:"(3a)²=9a², 2·3a·2b=12ab, (2b)²=4b²."},
+      {label:"Passo 2: Risultato",answer:["9a^2-12ab+4b^2","9a²-12ab+4b²"],feedback:"9a² − 12ab + 4b²."}
+    ], finalAnswer:["9a^2-12ab+4b^2","9a²-12ab+4b²"] },
 ],
 
 /* ══════ 7. GEOMETRIA PIANA ══════ */
@@ -952,6 +1246,60 @@ geometria: [
       {label:"Passo 1: Prodotto diagonali",answer:["48"],feedback:"6 × 8 = 48."},
       {label:"Passo 2: Dividi per 2",answer:["24","a=24"],feedback:"48 / 2 = 24."}
     ], finalAnswer:["24"] },
+  { expr:"Rettangolo: A=72, b=8", title:"Trova l'altezza", desc:"Da A = b·h ricavi h = A/b.",
+    tech:{name:"Formula inversa",desc:"h = A/b"},
+    hint:"Inverti la formula dell'area.",
+    svgType:"rect", svgData:{b:8,h:9},
+    steps:[
+      {label:"Calcola h",answer:["9","h=9"],feedback:"72/8 = 9."}
+    ], finalAnswer:["9"] },
+  { expr:"Triangolo: A=42, b=12", title:"Trova l'altezza del triangolo", desc:"Da A = (b·h)/2 ricavi h = 2A/b.",
+    tech:{name:"Formula inversa triangolo",desc:"h = (2·A)/b"},
+    hint:"L'area è metà di b·h, quindi raddoppia l'area e dividi per b.",
+    svgType:"tri", svgData:{b:12,h:7},
+    steps:[
+      {label:"Passo 1: 2A",answer:["84"],feedback:"2·42 = 84."},
+      {label:"Passo 2: ÷ b",answer:["7","h=7"],feedback:"84/12 = 7."}
+    ], finalAnswer:["7"] },
+  { expr:"Quadrato: P=36", title:"Lato dato il perimetro", desc:"Per il quadrato: l = P/4.",
+    tech:{name:"Lato del quadrato",desc:"l = P/4 (4 lati uguali)"},
+    hint:"4 lati uguali: dividi il perimetro per 4.",
+    svgType:"rect", svgData:{b:9,h:9},
+    steps:[
+      {label:"Calcola lato",answer:["9","l=9"],feedback:"36/4 = 9."}
+    ], finalAnswer:["9"] },
+  { expr:"Cerchio: A = 200,96", title:"Raggio dall'area", desc:"r = √(A/π).",
+    tech:{name:"Inverso area cerchio",desc:"r = √(A/π)"},
+    hint:"Dividi per π e prendi la radice.",
+    svgType:"circle", svgData:{r:8},
+    steps:[
+      {label:"Passo 1: A/π",answer:["64","200,96/3,14"],feedback:"200,96/3,14 = 64."},
+      {label:"Passo 2: Radice",answer:["8","r=8"],feedback:"√64 = 8."}
+    ], finalAnswer:["8"] },
+  { expr:"Trapezio: A=84, B=14, b=10", title:"Altezza del trapezio", desc:"A = (B+b)·h/2 → h = 2A/(B+b).",
+    tech:{name:"Formula inversa trapezio",desc:"h = 2A/(B+b)"},
+    hint:"Inverti la formula dell'area.",
+    svgType:"trap", svgData:{B:14,b:10,h:7},
+    steps:[
+      {label:"Passo 1: B+b",answer:["24"],feedback:"14+10 = 24."},
+      {label:"Passo 2: 2A",answer:["168"],feedback:"2·84 = 168."},
+      {label:"Passo 3: Dividi",answer:["7","h=7"],feedback:"168/24 = 7."}
+    ], finalAnswer:["7"] },
+  { expr:"Rombo: A=60, d₁=12", title:"Diagonale del rombo", desc:"A = (d₁·d₂)/2 → d₂ = 2A/d₁.",
+    tech:{name:"Formula inversa rombo",desc:"d₂ = 2A/d₁"},
+    hint:"Raddoppia l'area, poi dividi per la diagonale nota.",
+    svgType:"rhombus", svgData:{d1:12,d2:10},
+    steps:[
+      {label:"Passo 1: 2A",answer:["120"],feedback:"2·60 = 120."},
+      {label:"Passo 2: ÷ d₁",answer:["10","d2=10"],feedback:"120/12 = 10."}
+    ], finalAnswer:["10"] },
+  { expr:"Parallelogramma: A=96, h=8", title:"Base del parallelogramma", desc:"Da A = b·h ricavi b = A/h.",
+    tech:{name:"Formula inversa",desc:"b = A/h"},
+    hint:"Inverti la formula.",
+    svgType:"para", svgData:{b:12,h:8},
+    steps:[
+      {label:"Calcola b",answer:["12","b=12"],feedback:"96/8 = 12."}
+    ], finalAnswer:["12"] },
 ],
 
 /* ══════ 8. TEOREMA DI PITAGORA ══════ */
@@ -1036,6 +1384,54 @@ pitagora: [
       {label:"Passo 1: Differenza",answer:["400-256","144"],feedback:"20²=400, 16²=256."},
       {label:"Passo 2: Radice",answer:["12","a=12"],feedback:"√144 = 12."}
     ], finalAnswer:["12"] },
+  { expr:"a=20, b=21, c=?", title:"Terna pitagorica 20-21-29", desc:"c = √(a²+b²).",
+    tech:{name:"Pitagora",desc:"c = √(a²+b²)"},
+    hint:"400 + 441 = 841.",
+    svgType:"right_tri", svgData:{a:20,b:21,find:"c"},
+    steps:[
+      {label:"Passo 1: Quadrati",answer:["400+441","841"],feedback:"20²=400, 21²=441."},
+      {label:"Passo 2: Radice",answer:["29","c=29"],feedback:"√841 = 29."}
+    ], finalAnswer:["29"] },
+  { expr:"a=7, b=24, c=?", title:"Terna 7-24-25", desc:"c = √(49+576).",
+    tech:{name:"Pitagora",desc:"c = √(a²+b²)"},
+    hint:"49+576 = 625.",
+    svgType:"right_tri", svgData:{a:7,b:24,find:"c"},
+    steps:[
+      {label:"Passo 1: Quadrati",answer:["49+576","625"],feedback:"7²=49, 24²=576."},
+      {label:"Passo 2: Radice",answer:["25","c=25"],feedback:"√625 = 25."}
+    ], finalAnswer:["25"] },
+  { expr:"a=2, b=3, c=?", title:"Risultato non esatto", desc:"c = √(4+9) = √13.",
+    tech:{name:"Pitagora",desc:"c = √(a²+b²)"},
+    hint:"4+9 = 13. La radice non è esatta.",
+    svgType:"right_tri", svgData:{a:2,b:3,find:"c"},
+    steps:[
+      {label:"Passo 1: Somma",answer:["13"],feedback:"4+9 = 13."},
+      {label:"Passo 2: Radice",answer:["√13","3,61","3.61"],feedback:"√13 ≈ 3,61."}
+    ], finalAnswer:["√13","3,61"] },
+  { expr:"c=10, a=8, b=?", title:"Cateto (6)", desc:"b = √(c²−a²) = √36.",
+    tech:{name:"Pitagora cateto",desc:"b = √(c²−a²)"},
+    hint:"100 − 64.",
+    svgType:"right_tri", svgData:{a:8,c:10,find:"b"},
+    steps:[
+      {label:"Passo 1: Differenza",answer:["100-64","36"],feedback:"10²=100, 8²=64."},
+      {label:"Passo 2: Radice",answer:["6","b=6"],feedback:"√36 = 6."}
+    ], finalAnswer:["6"] },
+  { expr:"a=11, b=60, c=?", title:"Terna 11-60-61", desc:"c = √(121+3600).",
+    tech:{name:"Pitagora",desc:"c = √(a²+b²)"},
+    hint:"121+3600 = 3721.",
+    svgType:"right_tri", svgData:{a:11,b:60,find:"c"},
+    steps:[
+      {label:"Passo 1: Quadrati",answer:["121+3600","3721"],feedback:"11²=121, 60²=3600."},
+      {label:"Passo 2: Radice",answer:["61","c=61"],feedback:"√3721 = 61."}
+    ], finalAnswer:["61"] },
+  { expr:"a=1, b=1, c=?", title:"Triangolo 1-1-?", desc:"c = √(1+1) = √2.",
+    tech:{name:"Pitagora con risultato √2",desc:"È il triangolo rettangolo isoscele!"},
+    hint:"1+1 = 2.",
+    svgType:"right_tri", svgData:{a:1,b:1,find:"c"},
+    steps:[
+      {label:"Passo 1: Somma",answer:["2"],feedback:"1+1 = 2."},
+      {label:"Passo 2: Radice",answer:["√2","1,41","1.41"],feedback:"√2 ≈ 1,41."}
+    ], finalAnswer:["√2"] },
 ],
 
 /* ══════ 9. APPLICAZIONI DI PITAGORA ══════ */
@@ -1132,6 +1528,65 @@ app_pitagora: [
       {label:"Passo 1: Differenza",answer:["100-64","36"],feedback:"10²=100, 8²=64."},
       {label:"Passo 2: Radice",answer:["6","d=6"],feedback:"√36 = 6 m."}
     ], finalAnswer:["6"] },
+  { expr:"Problema", title:"Aquilone", problemText:"Un aquilone vola a 24 m di altezza. Il filo è teso e lungo 30 m. A che distanza dalla verticale dell'aquilone si trova la persona?",
+    desc:"Filo = ipotenusa, altezza = cateto verticale.",
+    tech:{name:"Pitagora cateto",desc:"d = √(filo² − altezza²)"},
+    hints:["Il filo è la diagonale, l'altezza è verticale.","30² − 24² = ?"],
+    svgType:"right_tri", svgData:{a:24,c:30,find:"b"},
+    steps:[
+      {label:"Passo 1: Differenza",answer:["900-576","324"],feedback:"30²=900, 24²=576."},
+      {label:"Passo 2: Radice",answer:["18"],feedback:"√324 = 18 m."}
+    ], finalAnswer:["18"] },
+  { expr:"Problema", title:"Diagonale del cubo", problemText:"Un cubo ha spigolo 6 cm. Quanto misura la diagonale di una faccia (la diagonale del quadrato)?",
+    desc:"Faccia = quadrato di lato 6. Diagonale = lato·√2.",
+    tech:{name:"Diagonale del quadrato",desc:"d = l·√2"},
+    hints:["La faccia è un quadrato.","Diagonale del quadrato = lato·√2."],
+    steps:[
+      {label:"Calcola",answer:["6*√2","6√2","8,49","8.49"],feedback:"6√2 ≈ 8,49 cm."}
+    ], finalAnswer:["6√2"] },
+  { expr:"Problema", title:"Sentiero diagonale", problemText:"Un parco rettangolare misura 60 m × 80 m. Camminando in diagonale invece che lungo i bordi, quanti metri si risparmiano?",
+    desc:"Calcola la diagonale, poi confronta con base+altezza.",
+    tech:{name:"Confronto percorsi",desc:"Differenza tra somma lati e diagonale."},
+    hints:["Diagonale = √(60²+80²).","Somma dei due lati = 60+80."],
+    svgType:"rect_diag", svgData:{b:80,h:60},
+    steps:[
+      {label:"Passo 1: Diagonale",answer:["100"],feedback:"√(3600+6400) = √10000 = 100 m."},
+      {label:"Passo 2: Lungo i bordi",answer:["140"],feedback:"60+80 = 140 m."},
+      {label:"Passo 3: Risparmio",answer:["40"],feedback:"140 − 100 = 40 m."}
+    ], finalAnswer:["40"] },
+  { expr:"Problema", title:"Ponte sospeso", problemText:"I cavi di un ponte sospeso scendono di 30 m da una torre alta e si fissano a 40 m di distanza alla base. Quanto è lungo ciascun cavo?",
+    desc:"Cavo = ipotenusa di un triangolo rettangolo.",
+    tech:{name:"Ipotenusa",desc:"L = √(altezza² + distanza²)"},
+    hints:["Altezza e distanza sono i cateti.","30² + 40² = ?"],
+    svgType:"right_tri", svgData:{a:30,b:40,find:"c"},
+    steps:[
+      {label:"Passo 1: Quadrati",answer:["900+1600","2500"],feedback:"30²=900, 40²=1600."},
+      {label:"Passo 2: Radice",answer:["50"],feedback:"√2500 = 50 m."}
+    ], finalAnswer:["50"] },
+  { expr:"Problema", title:"Quadrato e diagonale", problemText:"Un quadrato ha la diagonale di 10 cm. Quanto misura il lato?",
+    desc:"l = d/√2.",
+    tech:{name:"Lato dato la diagonale",desc:"l = d/√2 = d·√2/2"},
+    hints:["Inverti la formula d = l·√2.","l = 10/√2."],
+    steps:[
+      {label:"Calcola",answer:["5*√2","5√2","7,07","7.07"],feedback:"l = 10/√2 = 5√2 ≈ 7,07 cm."}
+    ], finalAnswer:["5√2"] },
+  { expr:"Problema", title:"Cammino in città", problemText:"Da casa devo andare a scuola: 3 isolati a est e 4 isolati a nord. Se ogni isolato è 100 m, quanto cammino se vado a piedi (in linea retta non si può, vado lungo le strade)? E quanto sarebbe in linea retta?",
+    desc:"A piedi = somma. In linea retta = ipotenusa.",
+    tech:{name:"Distanza vera vs cammino",desc:"Cammino = a+b. Distanza diretta = √(a²+b²)."},
+    hints:["A piedi devi sommare est + nord (in metri).","In linea retta usi Pitagora."],
+    steps:[
+      {label:"Passo 1: A piedi (m)",answer:["700"],feedback:"(3+4)·100 = 700 m."},
+      {label:"Passo 2: In linea retta",answer:["500"],feedback:"√(300²+400²) = √250000 = 500 m."}
+    ], finalAnswer:["500"] },
+  { expr:"Problema", title:"Antenna sul tetto", problemText:"Un'antenna alta 5 m è fissata sul tetto di un edificio. Un cavo di sostegno parte dalla cima dell'antenna e raggiunge il tetto a 12 m di distanza. Quanto è lungo il cavo?",
+    desc:"Antenna e distanza sono i cateti, il cavo è l'ipotenusa.",
+    tech:{name:"Ipotenusa",desc:"L = √(altezza² + distanza²)"},
+    hints:["5² + 12² = ?","Trova l'ipotenusa."],
+    svgType:"right_tri", svgData:{a:5,b:12,find:"c"},
+    steps:[
+      {label:"Passo 1: Quadrati",answer:["25+144","169"],feedback:"5²=25, 12²=144."},
+      {label:"Passo 2: Radice",answer:["13"],feedback:"√169 = 13 m."}
+    ], finalAnswer:["13"] },
 ],
 
 /* ══════ 10. FUNZIONI LINEARI ══════ */
@@ -1226,6 +1681,61 @@ funzioni: [
       {label:"Costo per 10 km",answer:["35","y=35"],feedback:"3·10+5 = 35 €."},
       {label:"Costo per 20 km",answer:["65","y=65"],feedback:"3·20+5 = 65 €."}
     ], finalAnswer:["65"] },
+  { expr:"y = 0,5x + 2", title:"Coefficiente decimale", problemText:"Calcola y per x = 0, 4, 10.",
+    desc:"Sostituisci x e calcola. 0,5 è la pendenza, 2 è l'intercetta.",
+    tech:{name:"Sostituzione",desc:"y = 0,5x + 2"},
+    hints:["0,5 · 0 = 0, poi +2.","0,5 · 10 = 5, poi +2."],
+    steps:[
+      {label:"x=0 → y=?",answer:["2"],feedback:"0,5·0+2 = 2."},
+      {label:"x=4 → y=?",answer:["4"],feedback:"0,5·4+2 = 4."},
+      {label:"x=10 → y=?",answer:["7"],feedback:"0,5·10+2 = 7."}
+    ], finalAnswer:["7"] },
+  { expr:"Problema", title:"Riconosci la pendenza", problemText:"Una retta passa per (0, 4) e (3, 13). Trova la pendenza m.",
+    desc:"m = (y₂−y₁)/(x₂−x₁).",
+    tech:{name:"Pendenza",desc:"m = Δy/Δx"},
+    hints:["Quanto cambia y? E x?","(13−4)/(3−0)."],
+    steps:[
+      {label:"Passo 1: Δy",answer:["9"],feedback:"13 − 4 = 9."},
+      {label:"Passo 2: Δx",answer:["3"],feedback:"3 − 0 = 3."},
+      {label:"Passo 3: m",answer:["3","m=3"],feedback:"9/3 = 3."}
+    ], finalAnswer:["3"] },
+  { expr:"Problema", title:"Crescente o decrescente?", problemText:"La funzione y = −3x + 7 è crescente o decrescente?",
+    desc:"Se m > 0 → crescente. Se m < 0 → decrescente.",
+    tech:{name:"Segno della pendenza",desc:"Il segno di m determina l'andamento."},
+    hint:"Guarda il segno del coefficiente di x.",
+    steps:[
+      {label:"Risposta",answer:["decrescente","decresce"],feedback:"m = −3 < 0 → decrescente."}
+    ], finalAnswer:["decrescente"] },
+  { expr:"Problema", title:"Funzione costante", problemText:"La funzione y = 5 (senza x) è una retta. Che caratteristica ha?",
+    desc:"Quando non c'è la x, y resta sempre 5: retta orizzontale.",
+    tech:{name:"Funzione costante",desc:"y = costante → retta orizzontale (m=0)."},
+    hint:"Per ogni x, y vale sempre 5.",
+    steps:[
+      {label:"Risposta",answer:["orizzontale","retta orizzontale","costante","parallela asse x"],feedback:"È una retta orizzontale parallela all'asse x."}
+    ], finalAnswer:["orizzontale"] },
+  { expr:"y = 4x − 12", title:"Intersezione asse x", problemText:"Trova dove la retta y = 4x − 12 incrocia l'asse x.",
+    desc:"Sull'asse x, y=0. Risolvi 0 = 4x − 12.",
+    tech:{name:"Asse x",desc:"Poni y=0."},
+    hints:["Imponi y = 0.","4x = 12, quindi x = ?"],
+    steps:[
+      {label:"Passo 1: Equazione",answer:["0=4x-12","4x=12"],feedback:"y = 0 → 4x − 12 = 0."},
+      {label:"Passo 2: Risolvi",answer:["x=3","3"],feedback:"x = 12/4 = 3."}
+    ], finalAnswer:["3"] },
+  { expr:"y = 2x − 1", title:"Trova y per x grande", problemText:"Calcola y per x = 100.",
+    desc:"Sostituisci direttamente.",
+    tech:{name:"Sostituzione",desc:"y = 2·100 − 1"},
+    hint:"2·100 − 1.",
+    steps:[
+      {label:"Calcola",answer:["199","y=199"],feedback:"2·100 − 1 = 199."}
+    ], finalAnswer:["199"] },
+  { expr:"Problema", title:"Pendenza zero", problemText:"Due punti (3, 7) e (8, 7) appartengono alla stessa retta. Calcola la pendenza.",
+    desc:"m = (y₂−y₁)/(x₂−x₁). Se y non cambia, m = 0.",
+    tech:{name:"Retta orizzontale",desc:"Quando i due y sono uguali, m = 0."},
+    hints:["Cosa succede quando i due punti hanno la stessa y?","Δy = 0."],
+    steps:[
+      {label:"Passo 1: Δy",answer:["0"],feedback:"7 − 7 = 0."},
+      {label:"Passo 2: Pendenza",answer:["0","m=0"],feedback:"0/5 = 0. Retta orizzontale."}
+    ], finalAnswer:["0"] },
 ],
 
 /* ══════ 11. PROBLEMI CON EQUAZIONI ══════ */
@@ -1316,6 +1826,67 @@ problemi: [
       {label:"Passo 2: Equazione",answer:["0.6=0.1*(2+x)","0,6=0,1*(2+x)","0.1*(2+x)=0.6"],feedback:"0,6 = 0,1·(2+x)."},
       {label:"Passo 3: Risolvi",answer:["x=4","4"],feedback:"2+x=6 → x=4 litri d'acqua."}
     ], finalAnswer:["4"] },
+  { expr:"Problema", title:"Numeri pari consecutivi", problemText:"La somma di tre numeri pari consecutivi è 72. Quali sono?",
+    desc:"Tre pari consecutivi: x, x+2, x+4.",
+    tech:{name:"Pari consecutivi",desc:"Differenza di 2 tra ognuno."},
+    hints:["x, x+2, x+4. Somma = 3x + 6.","3x + 6 = 72."],
+    steps:[
+      {label:"Passo 1: Equazione",answer:["3x+6=72","x+x+2+x+4=72"],feedback:"Somma = 3x+6 = 72."},
+      {label:"Passo 2: Risolvi",answer:["x=22","22"],feedback:"3x = 66 → x = 22."},
+      {label:"Passo 3: Tutti i numeri",answer:["22,24,26","22 24 26"],feedback:"22, 24, 26."}
+    ], finalAnswer:["22"] },
+  { expr:"Problema", title:"Padre e figlio", problemText:"Un padre ha 40 anni, il figlio 10. Tra quanti anni il padre avrà il doppio dell'età del figlio?",
+    desc:"Tra x anni: padre = 40+x, figlio = 10+x. Padre = 2·figlio.",
+    tech:{name:"Età",desc:"Imposta un'equazione tra due età che cambiano."},
+    hints:["Tra x anni quante avranno?","40+x = 2(10+x)."],
+    steps:[
+      {label:"Passo 1: Equazione",answer:["40+x=2*(10+x)","40+x=2(10+x)"],feedback:"Padre = doppio del figlio."},
+      {label:"Passo 2: Espandi",answer:["40+x=20+2x"],feedback:"2(10+x) = 20+2x."},
+      {label:"Passo 3: Risolvi",answer:["x=20","20"],feedback:"40−20 = 2x−x → x = 20 anni."}
+    ], finalAnswer:["20"] },
+  { expr:"Problema", title:"Due auto si incontrano", problemText:"Due auto partono da città distanti 300 km e si vengono incontro. Una va a 60 km/h, l'altra a 90 km/h. Dopo quanto tempo si incontrano?",
+    desc:"Si avvicinano alla velocità di 60+90 = 150 km/h. Tempo = distanza / velocità relativa.",
+    tech:{name:"Moto opposto",desc:"Le velocità si sommano quando le auto si vengono incontro."},
+    hints:["Quanto si avvicinano in un'ora?","Tempo = 300 / (60+90)."],
+    steps:[
+      {label:"Passo 1: Velocità totale",answer:["150"],feedback:"60+90 = 150 km/h."},
+      {label:"Passo 2: Tempo",answer:["2","2 ore"],feedback:"300/150 = 2 ore."}
+    ], finalAnswer:["2"] },
+  { expr:"Problema", title:"Differenza di età", problemText:"Anna ha il triplo dell'età di Bruno. Insieme hanno 48 anni. Quanti anni ha Anna?",
+    desc:"Bruno = x, Anna = 3x. Somma 4x = 48.",
+    tech:{name:"Sistema con multiplo",desc:"Una età è multipla dell'altra."},
+    hints:["x + 3x = 48.","Trova x, poi calcola Anna."],
+    steps:[
+      {label:"Passo 1: Equazione",answer:["x+3x=48","4x=48"],feedback:"Bruno+Anna = 48."},
+      {label:"Passo 2: Bruno",answer:["x=12","12"],feedback:"4x=48 → x=12."},
+      {label:"Passo 3: Anna",answer:["36"],feedback:"3·12 = 36 anni."}
+    ], finalAnswer:["36"] },
+  { expr:"Problema", title:"Perimetro e lati", problemText:"Un rettangolo ha la base lunga 5 cm più dell'altezza. Il perimetro è 50 cm. Trova le dimensioni.",
+    desc:"Altezza = x, base = x+5. P = 2(x + x+5) = 2(2x+5) = 4x+10.",
+    tech:{name:"Perimetro con incognita",desc:"Indica un lato come x, l'altro come funzione di x."},
+    hints:["Altezza=x, base=x+5.","P = 2(b+h) = 2(2x+5)."],
+    steps:[
+      {label:"Passo 1: Equazione",answer:["2*(2x+5)=50","4x+10=50"],feedback:"2(2x+5) = 50."},
+      {label:"Passo 2: Altezza",answer:["x=10","10"],feedback:"4x = 40 → x=10."},
+      {label:"Passo 3: Base",answer:["15"],feedback:"x+5 = 15."}
+    ], finalAnswer:["15"] },
+  { expr:"Problema", title:"Spese al supermercato", problemText:"Maria spende il triplo di Luca al supermercato. In totale spendono 64 €. Quanto ha speso Luca?",
+    desc:"Luca = x, Maria = 3x. Somma 4x = 64.",
+    tech:{name:"Multiplo",desc:"Una grandezza è multipla dell'altra."},
+    hints:["Luca=x, Maria=3x.","x+3x = 64."],
+    steps:[
+      {label:"Passo 1: Equazione",answer:["x+3x=64","4x=64"],feedback:"Luca + Maria = 64."},
+      {label:"Passo 2: Risolvi",answer:["x=16","16"],feedback:"x = 16 €."}
+    ], finalAnswer:["16"] },
+  { expr:"Problema", title:"Inseguimento", problemText:"Una bicicletta a 20 km/h parte. Dopo 1 ora, una moto a 60 km/h le va incontro dalla stessa direzione. Dopo quanto tempo (dall'avvio della moto) la raggiunge?",
+    desc:"In un'ora la bici ha già fatto 20 km di vantaggio. La moto si avvicina di (60−20)=40 km/h.",
+    tech:{name:"Inseguimento",desc:"La differenza di velocità chiude il vantaggio."},
+    hints:["La bici ha 20 km di vantaggio quando parte la moto.","La moto recupera 40 km/h."],
+    steps:[
+      {label:"Passo 1: Vantaggio bici",answer:["20","20km"],feedback:"20 km/h · 1h = 20 km."},
+      {label:"Passo 2: Differenza velocità",answer:["40"],feedback:"60−20 = 40 km/h."},
+      {label:"Passo 3: Tempo",answer:["0,5","0.5","30 min"],feedback:"20/40 = 0,5 ore = 30 minuti."}
+    ], finalAnswer:["0,5"] },
 ],
 
 /* ══════ 12. RADICALI ══════ */
