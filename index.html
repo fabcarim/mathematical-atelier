@@ -3340,16 +3340,26 @@ function autoCompleteExercise(finalVal) {
   fr.className = 'text-3xl md:text-4xl font-headline font-black text-secondary anim-ok';
 
   const btn = document.getElementById('btn-check');
+  // Mostra un breve feedback di completamento, poi avanza automaticamente
   if (currentExIdx < exs.length - 1) {
-    btn.innerHTML = 'Prossimo esercizio <span class="material-symbols-outlined">arrow_forward</span>';
-    btn.disabled = false;
-    btn.onclick = () => { currentExIdx++; loadExercise(); window.scrollTo(0,0); };
+    btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Esercizio completato!';
+    btn.disabled = true;
+    btn.className = btn.className.replace('bg-primary','bg-secondary');
+    renderPills();
+    // Dopo 1.2 secondi vai automaticamente al prossimo esercizio
+    setTimeout(() => {
+      currentExIdx++;
+      loadExercise();
+      window.scrollTo({top:0, behavior:'smooth'});
+    }, 1200);
   } else {
+    // Ultimo esercizio dell'argomento: resta qui con celebrazione
     btn.innerHTML = 'Argomento completato! <span class="material-symbols-outlined">celebration</span>';
     btn.className = btn.className.replace('bg-primary','bg-secondary');
     btn.disabled = false;
+    btn.onclick = () => { navigate('home'); };
+    renderPills();
   }
-  renderPills();
 }
 
 /* Suggerimento progressivo */
