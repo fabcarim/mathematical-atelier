@@ -2860,6 +2860,10 @@ function norm(s) {
        .replace(/⁴/g,'^4').replace(/⁵/g,'^5').replace(/⁶/g,'^6').replace(/⁷/g,'^7')
        .replace(/⁸/g,'^8').replace(/⁹/g,'^9');
   r = r.toLowerCase();
+  // sqrt(N) → √N (entrambe le notazioni accettate)
+  r = r.replace(/sqrt\(([^)]+)\)/g, '√$1').replace(/sqrt(\d+)/g, '√$1');
+  // Rimuovi prefisso "x=" per accettare sia "x=3" che "3"
+  r = r.replace(/^[a-z]=/, '');
   return r;
 }
 
@@ -3185,12 +3189,15 @@ function loadExercise() {
   if (isDone && currentExIdx < exs.length - 1) {
     btn.innerHTML = 'Prossimo esercizio <span class="material-symbols-outlined">arrow_forward</span>';
     btn.disabled = false;
+    btn.onclick = () => { currentExIdx++; loadExercise(); window.scrollTo(0,0); };
   } else if (isDone) {
     btn.innerHTML = 'Completato! <span class="material-symbols-outlined">check_circle</span>';
     btn.className = btn.className.replace('bg-primary','bg-secondary');
+    btn.onclick = null;
   } else {
     btn.innerHTML = 'Verifica risultato <span class="material-symbols-outlined">arrow_forward</span>';
     btn.className = btn.className.replace('bg-secondary','bg-primary');
+    btn.onclick = handleFinalCheck;
   }
 
   renderPills();
@@ -3247,7 +3254,15 @@ function renderSteps() {
       const ans = completedAnswers[i] || '';
       cont = `<div class="flex-1 pb-2"><div class="flex justify-between items-start mb-1 flex-wrap gap-1"><span class="font-label text-xs text-on-surface-variant uppercase font-bold">${step.label}</span><span class="text-secondary text-xs font-bold">✓ Verificato</span></div><div class="text-xl md:text-2xl font-headline font-medium text-on-surface">${ans}</div>${step.feedback && state==='completed' && !step.prefilled?`<p class="mt-1 text-xs text-secondary flex items-center gap-1"><span class="material-symbols-outlined text-xs">check_circle</span>${step.feedback}</p>`:''}</div>`;
     } else if (state === 'active') {
-      cont = `<div class="flex-1"><div class="mb-1"><span class="font-label text-xs text-primary uppercase font-bold tracking-widest">${step.label}</span></div><div class="relative"><input id="input-${i}" data-step="${i}" class="step-input w-full text-xl md:text-2xl font-headline font-bold text-primary bg-primary-fixed/30 border-none rounded-2xl px-4 py-3 focus:ring-4 focus:ring-primary/10 transition-all outline-none" placeholder="Scrivi la risposta..." type="text" autocomplete="off" inputmode="text"/></div><p id="fb-${i}" class="mt-2 text-xs text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-xs">lightbulb</span>Scrivi la risposta e premi Invio.</p></div>`;
+      // Math keyboard: bottoni che inseriscono simboli speciali nel cursore dell'input
+      const mathKeys = [
+        {s:'√',l:'radice'},{s:'²',l:'quadrato'},{s:'³',l:'cubo'},{s:'^',l:'potenza'},
+        {s:'π',l:'pi greco'},{s:'·',l:'per'},{s:'÷',l:'diviso'},{s:'(',l:'apri'},{s:')',l:'chiudi'}
+      ];
+      const kbHtml = '<div class="flex flex-wrap gap-1 mt-2 mb-1">' +
+        mathKeys.map(k => `<button type="button" onclick="insertSymbol(${i},'${k.s}')" title="${k.l}" class="w-9 h-9 md:w-10 md:h-10 bg-surface-container-low hover:bg-primary-fixed text-primary font-headline font-bold rounded-lg active:scale-95 transition-all text-base">${k.s}</button>`).join('') +
+        '</div>';
+      cont = `<div class="flex-1"><div class="mb-1"><span class="font-label text-xs text-primary uppercase font-bold tracking-widest">${step.label}</span></div><div class="relative"><input id="input-${i}" data-step="${i}" class="step-input w-full text-xl md:text-2xl font-headline font-bold text-primary bg-primary-fixed/30 border-none rounded-2xl px-4 py-3 focus:ring-4 focus:ring-primary/10 transition-all outline-none" placeholder="Scrivi la risposta..." type="text" autocomplete="off" inputmode="text"/></div>${kbHtml}<p id="fb-${i}" class="mt-2 text-xs text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-xs">lightbulb</span>Scrivi e premi Invio (o usa i bottoni per i simboli).</p></div>`;
     } else {
       cont = `<div class="flex-1"><div class="mb-1"><span class="font-label text-xs text-outline uppercase font-bold tracking-widest">${step.label}</span></div><div class="w-full h-14 border-2 border-dashed border-outline-variant rounded-2xl flex items-center px-4"><span class="text-outline-variant font-headline italic text-sm">In attesa del passo precedente...</span></div></div>`;
     }
@@ -3281,6 +3296,12 @@ function onStepKey(e) {
     const allDone = stepStates.every(s => s === 'completed');
     document.getElementById('btn-check').disabled = !allDone;
     renderSteps();
+
+    // Auto-completamento: se questo era l'ultimo step E la risposta finale combacia,
+    // segna l'esercizio come completato senza richiedere il click su "Verifica risultato"
+    if (allDone && checkAns(val, ex.finalAnswer || step.answer)) {
+      autoCompleteExercise(val);
+    }
   } else {
     // Errato
     e.target.classList.add('anim-err');
@@ -3288,6 +3309,47 @@ function onStepKey(e) {
     if (fb) fb.innerHTML = '<span class="material-symbols-outlined text-xs text-error">close</span><span class="text-error">Non è corretto. Riprova!</span>';
     setTimeout(() => e.target.classList.remove('anim-err'), 400);
   }
+}
+
+/* Inserisce un simbolo nella posizione del cursore dell'input dello step attivo */
+function insertSymbol(stepIdx, sym) {
+  const inp = document.getElementById('input-' + stepIdx);
+  if (!inp) return;
+  const start = inp.selectionStart || inp.value.length;
+  const end = inp.selectionEnd || inp.value.length;
+  inp.value = inp.value.slice(0, start) + sym + inp.value.slice(end);
+  inp.focus();
+  // Riposiziona il cursore dopo il simbolo inserito
+  const pos = start + sym.length;
+  inp.setSelectionRange(pos, pos);
+}
+
+/* Auto-completa l'esercizio quando l'ultimo step è già la risposta finale.
+   Compila il risultato finale, salva il progresso e prepara il bottone "Prossimo". */
+function autoCompleteExercise(finalVal) {
+  const exs = EXERCISES[currentTopicId] || [];
+  if (exerciseCompleted[currentExIdx]) return;
+
+  exerciseCompleted[currentExIdx] = true;
+  if (!progress[currentTopicId]) progress[currentTopicId] = new Set();
+  progress[currentTopicId].add(currentExIdx);
+  saveProgress();
+
+  const fr = document.getElementById('final-result');
+  fr.textContent = finalVal;
+  fr.className = 'text-3xl md:text-4xl font-headline font-black text-secondary anim-ok';
+
+  const btn = document.getElementById('btn-check');
+  if (currentExIdx < exs.length - 1) {
+    btn.innerHTML = 'Prossimo esercizio <span class="material-symbols-outlined">arrow_forward</span>';
+    btn.disabled = false;
+    btn.onclick = () => { currentExIdx++; loadExercise(); window.scrollTo(0,0); };
+  } else {
+    btn.innerHTML = 'Argomento completato! <span class="material-symbols-outlined">celebration</span>';
+    btn.className = btn.className.replace('bg-primary','bg-secondary');
+    btn.disabled = false;
+  }
+  renderPills();
 }
 
 /* Suggerimento progressivo */
