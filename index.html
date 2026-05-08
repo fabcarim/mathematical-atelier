@@ -2855,6 +2855,8 @@ function norm(s) {
   r = r.replace(/\s+/g, '');
   // Unifica simboli operazione
   r = r.replace(/×/g, '*').replace(/·/g, '*').replace(/÷/g, '/').replace(/,/g, '.');
+  // Normalizza il segno meno (− unicode → - standard)
+  r = r.replace(/−/g, '-').replace(/–/g, '-').replace(/—/g, '-');
   // Converti apici Unicode in ^n
   r = r.replace(/⁰/g,'^0').replace(/¹/g,'^1').replace(/²/g,'^2').replace(/³/g,'^3')
        .replace(/⁴/g,'^4').replace(/⁵/g,'^5').replace(/⁶/g,'^6').replace(/⁷/g,'^7')
@@ -2867,25 +2869,78 @@ function norm(s) {
   return r;
 }
 
+/* Versione "loose" della normalizzazione: rimuove tutte le parentesi e i *
+   per un confronto più tollerante (ignora struttura cosmetica). */
+function normLoose(s) {
+  return norm(s).replace(/\*/g,'').replace(/[()\[\]{}]/g,'');
+}
+
+/* Confronta i termini di due espressioni dopo splitTerms (commutatività). */
+function termsEqual(a, b) {
+  const ta = splitTerms(a);
+  const tb = splitTerms(b);
+  if (ta.length !== tb.length) return false;
+  const s1 = [...ta].sort();
+  const s2 = [...tb].sort();
+  return s1.every((t, i) => t === s2[i]);
+}
+
 /* Confronta la risposta con le risposte accettate.
-   Prova anche a riordinare i termini sommati/sottratti per catturare ordini diversi. */
+   Strategia a 3 livelli (dal più stretto al più rilassato):
+   1. Match esatto (con/senza *)
+   2. Match per termini (commutativo: x+5 == 5+x)
+   3. Match "loose" (ignora parentesi e * - x+(5) == x+5) */
 function checkAns(input, accepted) {
   const ni = norm(input);
-  const niNoMul = ni.replace(/\*/g, ''); // versione senza *
-  // Confronto diretto (con e senza *)
-  if (accepted.some(a => {
+  const niNoMul = ni.replace(/\*/g, '');
+  const niLoose = normLoose(input);
+
+  for (const a of accepted) {
     const na = norm(a);
-    return na === ni || na === niNoMul || na.replace(/\*/g,'') === niNoMul;
-  })) return true;
-  // Prova a confrontare i termini come insieme (ordine diverso)
-  const inputTerms = splitTerms(niNoMul);
-  return accepted.some(a => {
-    const aTerms = splitTerms(norm(a).replace(/\*/g,''));
-    if (inputTerms.length !== aTerms.length) return false;
-    const sorted1 = [...inputTerms].sort();
-    const sorted2 = [...aTerms].sort();
-    return sorted1.every((t, i) => t === sorted2[i]);
-  });
+    const naNoMul = na.replace(/\*/g, '');
+    const naLoose = normLoose(a);
+    // Livello 1: match diretto
+    if (na === ni || na === niNoMul || naNoMul === niNoMul) return true;
+    // Livello 2: stessi termini in ordine diverso
+    if (termsEqual(niNoMul, naNoMul)) return true;
+    // Livello 3: ignora parentesi e *
+    if (naLoose === niLoose) return true;
+    // Livello 3b: stessi termini dopo rimozione parentesi
+    if (termsEqual(niLoose, naLoose)) return true;
+  }
+  return false;
+}
+
+/* Verifica se la risposta è "vicina" a quella corretta - per dare suggerimenti
+   utili invece di un secco "sbagliato". Restituisce un suggerimento o null. */
+function getCloseHint(input, accepted) {
+  const ni = norm(input);
+  const niLoose = normLoose(input);
+  for (const a of accepted) {
+    const na = norm(a);
+    const naLoose = normLoose(a);
+    const inputTerms = splitTerms(niLoose);
+    const aTerms = splitTerms(naLoose);
+    // Stessi termini ma ordine diverso (già accettato, ma per sicurezza)
+    if (termsEqual(niLoose, naLoose)) return "Quasi! Controlla l'ordine dei termini.";
+    // Numero termini diverso
+    if (Math.abs(inputTerms.length - aTerms.length) === 1) {
+      return inputTerms.length < aTerms.length
+        ? 'Manca un termine. Hai considerato tutti i pezzi?'
+        : 'Hai un termine in più. Controlla i calcoli.';
+    }
+    // Stessi numeri ma segni diversi
+    const inputAbs = ni.replace(/[+\-]/g,'');
+    const naAbs = na.replace(/[+\-]/g,'');
+    if (inputAbs === naAbs && ni !== na) return 'Attenzione ai segni (+ e −).';
+    // Confronto rough: stesse cifre ma diverse
+    const inputDigits = ni.replace(/\D/g,'');
+    const naDigits = na.replace(/\D/g,'');
+    if (inputDigits.length === naDigits.length && inputDigits !== naDigits) {
+      return 'I numeri non tornano. Ricalcola con calma.';
+    }
+  }
+  return null;
 }
 
 /* Splitta un'espressione nei suoi termini additivi preservando i segni.
@@ -3256,8 +3311,9 @@ function renderSteps() {
     } else if (state === 'active') {
       // Math keyboard: bottoni che inseriscono simboli speciali nel cursore dell'input
       const mathKeys = [
+        {s:'+',l:'più'},{s:'−',l:'meno'},{s:'·',l:'per'},{s:'÷',l:'diviso'},{s:'/',l:'fratto'},
         {s:'√',l:'radice'},{s:'²',l:'quadrato'},{s:'³',l:'cubo'},{s:'^',l:'potenza'},
-        {s:'π',l:'pi greco'},{s:'·',l:'per'},{s:'÷',l:'diviso'},{s:'(',l:'apri'},{s:')',l:'chiudi'}
+        {s:'π',l:'pi greco'},{s:'(',l:'apri'},{s:')',l:'chiudi'}
       ];
       const kbHtml = '<div class="flex flex-wrap gap-1 mt-2 mb-1">' +
         mathKeys.map(k => `<button type="button" onclick="insertSymbol(${i},'${k.s}')" title="${k.l}" class="w-9 h-9 md:w-10 md:h-10 bg-surface-container-low hover:bg-primary-fixed text-primary font-headline font-bold rounded-lg active:scale-95 transition-all text-base">${k.s}</button>`).join('') +
@@ -3303,10 +3359,12 @@ function onStepKey(e) {
       autoCompleteExercise(val);
     }
   } else {
-    // Errato
+    // Errato — prova a dare un suggerimento mirato se è vicino
     e.target.classList.add('anim-err');
     const fb = document.getElementById(`fb-${i}`);
-    if (fb) fb.innerHTML = '<span class="material-symbols-outlined text-xs text-error">close</span><span class="text-error">Non è corretto. Riprova!</span>';
+    const closeHint = getCloseHint(val, step.answer);
+    const msg = closeHint || 'Non è corretto. Riprova!';
+    if (fb) fb.innerHTML = '<span class="material-symbols-outlined text-xs text-error">close</span><span class="text-error">' + msg + '</span>';
     setTimeout(() => e.target.classList.remove('anim-err'), 400);
   }
 }
