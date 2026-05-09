@@ -2840,6 +2840,8 @@ let lastSessionDate = null; // per streak giornaliero (futuro)
 let stepAttempts = {};
 /* Flag: l'esercizio corrente è stato completato senza errori (per bonus XP) */
 let perfectExercise = true;
+/* Tracciamento storico errori per esercizio: { topicId: { exIdx: {errors:N, revealed:bool, completed:bool} } } */
+let errorStats = {};
 /* Modalità allenamento misto */
 let mixedMode = false;
 let mixedExercises = []; // array di {topicId, exIdx}
@@ -2849,6 +2851,7 @@ async function loadProgress() {
   progress = {};
   streak = 0;
   totalXp = 0;
+  errorStats = {};
   if (currentUser) {
     try {
       const doc = await db.collection('progress').doc(currentUser.uid).get();
@@ -2857,7 +2860,8 @@ async function loadProgress() {
         for (const k in d) {
           if (k === '_streak') streak = d[k] || 0;
           else if (k === '_xp') totalXp = d[k] || 0;
-          else if (k.startsWith('_')) {} // riservato ad altri meta
+          else if (k === '_errors') errorStats = d[k] || {};
+          else if (k.startsWith('_')) {}
           else progress[k] = new Set(d[k]);
         }
       }
@@ -2876,6 +2880,7 @@ function loadFromLocal() {
       for (const k in d) {
         if (k === '_streak') streak = d[k] || 0;
         else if (k === '_xp') totalXp = d[k] || 0;
+        else if (k === '_errors') errorStats = d[k] || {};
         else if (!k.startsWith('_')) progress[k] = new Set(d[k]);
       }
     }
@@ -2886,10 +2891,23 @@ async function saveProgress() {
   for (const k in progress) d[k] = [...progress[k]];
   d._streak = streak;
   d._xp = totalXp;
+  d._errors = errorStats;
   localStorage.setItem('mathAtelier_progress', JSON.stringify(d));
   if (currentUser) {
     try { await db.collection('progress').doc(currentUser.uid).set(d); } catch(e) {}
   }
+}
+
+/* Registra un errore su uno specifico esercizio */
+function recordError(topicId, exIdx) {
+  if (!errorStats[topicId]) errorStats[topicId] = {};
+  if (!errorStats[topicId][exIdx]) errorStats[topicId][exIdx] = {errors:0, revealed:false};
+  errorStats[topicId][exIdx].errors++;
+}
+function recordRevealed(topicId, exIdx) {
+  if (!errorStats[topicId]) errorStats[topicId] = {};
+  if (!errorStats[topicId][exIdx]) errorStats[topicId][exIdx] = {errors:0, revealed:false};
+  errorStats[topicId][exIdx].revealed = true;
 }
 
 /* ────────── NORMALIZZAZIONE AVANZATA ────────── */
@@ -3457,15 +3475,17 @@ function onStepKey(e) {
     document.getElementById('btn-check').disabled = !allDone;
     renderSteps();
 
-    // Auto-completamento: se questo era l'ultimo step E la risposta finale combacia,
-    // segna l'esercizio come completato senza richiedere il click su "Verifica risultato"
-    if (allDone && checkAns(val, ex.finalAnswer || step.answer)) {
+    // Auto-completamento: se è stato completato l'ultimo step (allDone), basta
+    // così — niente click su "Verifica risultato". L'ultimo step corretto è la
+    // conferma del risultato finale.
+    if (allDone) {
       autoCompleteExercise(val);
     }
   } else {
-    // Errato — incrementa contatore tentativi, prova a dare un suggerimento mirato
+    // Errato — incrementa contatore tentativi, registra l'errore globale
     stepAttempts[i] = (stepAttempts[i] || 0) + 1;
     perfectExercise = false;
+    recordError(currentTopicId, currentExIdx);
     e.target.classList.add('anim-err');
     const fb = document.getElementById(`fb-${i}`);
     const closeHint = getCloseHint(val, step.answer);
@@ -3489,6 +3509,7 @@ function revealStepAnswer(i) {
   completedAnswers[i] = sol;
   stepStates[i] = 'completed';
   perfectExercise = false;
+  recordRevealed(currentTopicId, currentExIdx);
   if (i + 1 < ex.steps.length && stepStates[i+1] === 'locked') {
     stepStates[i+1] = 'active';
   }
@@ -3685,37 +3706,125 @@ function handleFinalCheck() {
 function renderStats() {
   const c = document.getElementById('stats-content');
   let totalDone = 0, totalAll = 0;
-  let html = '';
 
+  // === Calcola statistiche aggregate ===
+  // 1. Errori per topic
+  const topicErrors = {}; // topicId -> totale errori
+  // 2. Esercizi più sbagliati (top 5)
+  const allExerciseErrors = []; // [{topicId, exIdx, errors, revealed, title}]
+  // 3. Esercizi rivelati (Vedi soluzione usato)
+  let revealedCount = 0;
+
+  Object.keys(errorStats).forEach(tid => {
+    Object.keys(errorStats[tid]).forEach(idx => {
+      const stats = errorStats[tid][idx];
+      const errs = stats.errors || 0;
+      topicErrors[tid] = (topicErrors[tid] || 0) + errs;
+      if (stats.revealed) revealedCount++;
+      const ex = (EXERCISES[tid] || [])[parseInt(idx)];
+      if (ex && errs > 0) {
+        allExerciseErrors.push({
+          topicId: tid, exIdx: parseInt(idx),
+          errors: errs, revealed: stats.revealed,
+          title: ex.title,
+          topicName: (TOPICS.find(t=>t.id===tid)||{}).name || tid
+        });
+      }
+    });
+  });
+  // Top 5 esercizi più difficili
+  allExerciseErrors.sort((a,b) => b.errors - a.errors);
+  const topHardExercises = allExerciseErrors.slice(0, 5);
+
+  // === HTML Topics list ===
+  let topicHtml = '';
   TOPICS.forEach(t => {
     const exs = EXERCISES[t.id] || [];
     const done = progress[t.id] ? progress[t.id].size : 0;
     totalDone += done;
     totalAll += exs.length;
     const pct = exs.length ? Math.round(done/exs.length*100) : 0;
-
-    html += `<div class="flex items-center gap-4 p-4 bg-surface-container-low rounded-2xl mb-3">
-      <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${pct===100?'bg-secondary text-on-secondary':'bg-primary-container'}">
-        <span class="material-symbols-outlined ${pct===100?'':'text-on-primary-container'}">${pct===100?'check_circle':t.icon}</span>
+    const errs = topicErrors[t.id] || 0;
+    topicHtml += `<div class="flex items-center gap-4 p-3 bg-surface-container-low rounded-2xl mb-2">
+      <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${pct===100?'bg-secondary text-on-secondary':'bg-primary-container'}">
+        <span class="material-symbols-outlined text-base ${pct===100?'':'text-on-primary-container'}">${pct===100?'check_circle':t.icon}</span>
       </div>
-      <div class="flex-1">
-        <p class="font-headline font-bold text-sm">${t.name}</p>
+      <div class="flex-1 min-w-0">
+        <p class="font-headline font-bold text-sm truncate">${t.name}</p>
         <div class="w-full h-1.5 bg-surface-container-highest rounded-full overflow-hidden mt-1">
           <div class="h-full ${pct===100?'bg-secondary':'bg-primary'} rounded-full" style="width:${pct}%"></div>
         </div>
       </div>
-      <span class="font-label font-bold text-sm ${pct===100?'text-secondary':'text-primary'}">${done}/${exs.length}</span>
+      <div class="text-right">
+        <span class="font-label font-bold text-xs ${pct===100?'text-secondary':'text-primary'}">${done}/${exs.length}</span>
+        ${errs>0?`<div class="text-[10px] text-error font-label">⚠ ${errs} errori</div>`:''}
+      </div>
     </div>`;
   });
 
+  // === HTML Top Hard Exercises ===
+  let hardHtml = '';
+  if (topHardExercises.length > 0) {
+    hardHtml = '<h3 class="font-headline font-bold text-base mt-6 mb-3 flex items-center gap-2"><span class="material-symbols-outlined text-error">priority_high</span>Dove Mia ha più difficoltà</h3>';
+    topHardExercises.forEach(item => {
+      hardHtml += `<button onclick="navigate('work','${item.topicId}',${item.exIdx})" class="w-full text-left flex items-center gap-3 p-3 bg-error-container/40 rounded-xl mb-2 active:scale-[0.98] transition-all hover:bg-error-container/60">
+        <div class="w-8 h-8 rounded-lg bg-error text-on-error flex items-center justify-center font-headline font-bold text-sm">${item.errors}</div>
+        <div class="flex-1 min-w-0">
+          <p class="font-headline font-bold text-sm truncate">${item.title}</p>
+          <p class="text-[11px] text-on-surface-variant">${item.topicName}${item.revealed?' · soluzione vista':''}</p>
+        </div>
+        <span class="material-symbols-outlined text-on-surface-variant text-base">chevron_right</span>
+      </button>`;
+    });
+  }
+
+  // === Dashboard summary ===
   const gPct = totalAll ? Math.round(totalDone/totalAll*100) : 0;
+  const totalErrors = Object.values(topicErrors).reduce((a,b)=>a+b, 0);
+  // Topic con più difficoltà
+  let toughestTopic = null;
+  let maxErr = 0;
+  Object.keys(topicErrors).forEach(tid => {
+    if (topicErrors[tid] > maxErr) { maxErr = topicErrors[tid]; toughestTopic = tid; }
+  });
+  const toughName = toughestTopic ? (TOPICS.find(t=>t.id===toughestTopic)||{}).name : null;
+
   c.innerHTML = `
-    <div class="bg-primary-fixed p-6 rounded-3xl mb-6 text-center">
-      <p class="text-5xl font-headline font-black text-primary mb-2">${gPct}%</p>
-      <p class="text-on-primary-fixed text-sm">Esercizi completati: ${totalDone} su ${totalAll}</p>
+    <!-- Hero card progresso totale -->
+    <div class="bg-primary-fixed p-5 rounded-3xl mb-4 text-center">
+      <p class="text-4xl font-headline font-black text-primary mb-1">${gPct}%</p>
+      <p class="text-on-primary-fixed text-sm">${totalDone} di ${totalAll} esercizi completati</p>
     </div>
-    ${html}
-    <button onclick="if(confirm('Vuoi davvero azzerare tutto il progresso?')){localStorage.removeItem('mathAtelier_progress');progress={};navigate('home');}" class="mt-6 w-full p-3 rounded-xl bg-error-container text-on-error-container font-label font-bold text-sm active:scale-95 transition-all">
+    <!-- Riga di KPI -->
+    <div class="grid grid-cols-3 gap-2 mb-6">
+      <div class="bg-tertiary-fixed/40 p-3 rounded-2xl text-center">
+        <div class="font-headline font-extrabold text-tertiary text-2xl">${streak}</div>
+        <div class="text-[10px] font-label text-tertiary uppercase tracking-wider">🔥 Streak</div>
+      </div>
+      <div class="bg-secondary-container/40 p-3 rounded-2xl text-center">
+        <div class="font-headline font-extrabold text-secondary text-2xl">${totalXp}</div>
+        <div class="text-[10px] font-label text-secondary uppercase tracking-wider">⭐ XP</div>
+      </div>
+      <div class="bg-error-container/40 p-3 rounded-2xl text-center">
+        <div class="font-headline font-extrabold text-error text-2xl">${totalErrors}</div>
+        <div class="text-[10px] font-label text-error uppercase tracking-wider">⚠ Errori</div>
+      </div>
+    </div>
+    ${toughName?`<div class="mb-4 p-3 bg-surface-container-low rounded-2xl flex items-center gap-3">
+      <span class="material-symbols-outlined text-tertiary">emoji_objects</span>
+      <div class="text-sm"><b>Argomento più difficile:</b> ${toughName} (${maxErr} errori)</div>
+    </div>`:''}
+    ${revealedCount>0?`<div class="mb-4 p-3 bg-surface-container-low rounded-2xl flex items-center gap-3">
+      <span class="material-symbols-outlined text-on-surface-variant">lightbulb</span>
+      <div class="text-sm"><b>Soluzioni viste:</b> ${revealedCount} (esercizi su cui ripassare)</div>
+    </div>`:''}
+
+    ${hardHtml}
+
+    <h3 class="font-headline font-bold text-base mt-6 mb-3">Progresso per argomento</h3>
+    ${topicHtml}
+
+    <button onclick="if(confirm('Vuoi davvero azzerare tutto il progresso?')){localStorage.removeItem('mathAtelier_progress');progress={};errorStats={};streak=0;totalXp=0;saveProgress();navigate('home');}" class="mt-6 w-full p-3 rounded-xl bg-error-container text-on-error-container font-label font-bold text-sm active:scale-95 transition-all">
       Azzera progresso
     </button>`;
 }
