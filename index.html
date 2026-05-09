@@ -51,6 +51,9 @@ h1,h2,h3,.font-headline { font-family:'Lexend',sans-serif; }
 .anim-enter { animation:fadeIn .35s ease-out; }
 .anim-ok { animation:pulse-ok .5s ease-out; }
 .anim-err { animation:shake .35s ease-out; }
+@keyframes fall { to { transform:translateY(110vh) rotate(720deg); } }
+@keyframes fadeOut { from{opacity:1} to{opacity:0; transform:translateY(8px)} }
+.anim-leave { animation: fadeOut .25s ease-in forwards; }
 /* Schermata attiva/nascosta */
 .screen { display:none; }
 .screen.active { display:flex; flex-direction:column; }
@@ -128,8 +131,25 @@ svg.geo { max-width:100%; height:auto; }
     <h2 id="home-greeting" class="text-2xl md:text-3xl font-headline font-extrabold text-on-surface mb-2">Ciao! 👋</h2>
     <p class="text-on-surface-variant">Scegli un argomento per esercitarti.</p>
   </div>
+  <!-- Streak + XP card -->
+  <div class="mb-4 grid grid-cols-2 gap-3">
+    <div class="bg-tertiary-fixed/50 p-3 rounded-2xl flex items-center gap-3">
+      <div class="w-10 h-10 bg-tertiary-fixed rounded-xl flex items-center justify-center text-xl">🔥</div>
+      <div>
+        <div id="streak-num" class="font-headline font-extrabold text-tertiary text-xl leading-tight">0</div>
+        <div class="font-label text-[10px] text-tertiary uppercase tracking-wider">Streak</div>
+      </div>
+    </div>
+    <div class="bg-secondary-container/40 p-3 rounded-2xl flex items-center gap-3">
+      <div class="w-10 h-10 bg-secondary-container rounded-xl flex items-center justify-center text-xl">⭐</div>
+      <div>
+        <div id="xp-num" class="font-headline font-extrabold text-secondary text-xl leading-tight">0</div>
+        <div class="font-label text-[10px] text-secondary uppercase tracking-wider">Punti XP</div>
+      </div>
+    </div>
+  </div>
   <!-- Barra progresso globale -->
-  <div class="mb-8 bg-surface-container-low p-4 rounded-2xl">
+  <div class="mb-6 bg-surface-container-low p-4 rounded-2xl">
     <div class="flex justify-between items-center mb-2">
       <span class="font-label text-xs font-bold text-on-surface-variant uppercase tracking-wider">Progresso totale</span>
       <span id="global-progress-text" class="font-headline font-bold text-primary text-sm">0%</span>
@@ -138,6 +158,15 @@ svg.geo { max-width:100%; height:auto; }
       <div id="global-progress-bar" class="h-full bg-secondary rounded-full transition-all duration-500" style="width:0%"></div>
     </div>
   </div>
+  <!-- Allenamento misto card -->
+  <button id="mixed-card" class="w-full mb-6 p-4 rounded-2xl bg-gradient-to-r from-primary to-primary-container text-on-primary text-left active:scale-[0.98] transition-all flex items-center gap-4 shadow-lg">
+    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl">🎲</div>
+    <div class="flex-1">
+      <div class="font-headline font-bold text-base">Allenamento Misto</div>
+      <div class="text-xs opacity-80">10 esercizi a caso da tutti gli argomenti</div>
+    </div>
+    <span class="material-symbols-outlined">arrow_forward</span>
+  </button>
   <!-- Griglia argomenti -->
   <div id="topics-grid" class="topic-grid"></div>
   <p class="text-center text-[10px] text-outline mt-8 font-label">v1.0</p>
@@ -2803,19 +2832,36 @@ let completedAnswers = [];
 let hintIdx = 0;
 /* Progresso: { topicId: Set di indici completati } */
 let progress = {};
+/* Gamification: streak (esercizi consecutivi al primo tentativo), XP totale */
+let streak = 0;
+let totalXp = 0;
+let lastSessionDate = null; // per streak giornaliero (futuro)
+/* Tentativi per il passo corrente (per Vedi Soluzione) */
+let stepAttempts = {};
+/* Flag: l'esercizio corrente è stato completato senza errori (per bonus XP) */
+let perfectExercise = true;
+/* Modalità allenamento misto */
+let mixedMode = false;
+let mixedExercises = []; // array di {topicId, exIdx}
 
 /* Carica progresso da Firestore (o localStorage se offline) */
 async function loadProgress() {
   progress = {};
+  streak = 0;
+  totalXp = 0;
   if (currentUser) {
     try {
       const doc = await db.collection('progress').doc(currentUser.uid).get();
       if (doc.exists) {
         const d = doc.data();
-        for (const k in d) progress[k] = new Set(d[k]);
+        for (const k in d) {
+          if (k === '_streak') streak = d[k] || 0;
+          else if (k === '_xp') totalXp = d[k] || 0;
+          else if (k.startsWith('_')) {} // riservato ad altri meta
+          else progress[k] = new Set(d[k]);
+        }
       }
     } catch(e) {
-      // Fallback a localStorage se Firestore non raggiungibile
       loadFromLocal();
     }
   } else {
@@ -2827,16 +2873,20 @@ function loadFromLocal() {
     const s = localStorage.getItem('mathAtelier_progress');
     if (s) {
       const d = JSON.parse(s);
-      for (const k in d) progress[k] = new Set(d[k]);
+      for (const k in d) {
+        if (k === '_streak') streak = d[k] || 0;
+        else if (k === '_xp') totalXp = d[k] || 0;
+        else if (!k.startsWith('_')) progress[k] = new Set(d[k]);
+      }
     }
   } catch(e) {}
 }
 async function saveProgress() {
   const d = {};
   for (const k in progress) d[k] = [...progress[k]];
-  // Salva sempre in locale
+  d._streak = streak;
+  d._xp = totalXp;
   localStorage.setItem('mathAtelier_progress', JSON.stringify(d));
-  // Salva su Firestore se loggato
   if (currentUser) {
     try { await db.collection('progress').doc(currentUser.uid).set(d); } catch(e) {}
   }
@@ -3053,6 +3103,35 @@ function renderHome() {
   const gPct = totalAll ? Math.round(totalDone/totalAll*100) : 0;
   document.getElementById('global-progress-bar').style.width = gPct + '%';
   document.getElementById('global-progress-text').textContent = gPct + '%';
+
+  // Streak + XP
+  document.getElementById('streak-num').textContent = streak;
+  document.getElementById('xp-num').textContent = totalXp;
+
+  // Allenamento misto: collega bottone (idempotente)
+  const mixedBtn = document.getElementById('mixed-card');
+  if (mixedBtn) mixedBtn.onclick = startMixedMode;
+}
+
+/* Avvia la modalità allenamento misto: 10 esercizi a caso da TUTTI i topic */
+function startMixedMode() {
+  // Costruisce un pool di esercizi (topicId, exIdx) da tutti i topic
+  const pool = [];
+  Object.keys(EXERCISES).forEach(tid => {
+    EXERCISES[tid].forEach((_, i) => pool.push({topicId: tid, exIdx: i}));
+  });
+  // Mescola e prendi 10
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  mixedExercises = pool.slice(0, 10);
+  mixedMode = true;
+  // Carica il primo
+  const first = mixedExercises[0];
+  currentTopicId = first.topicId;
+  currentExIdx = first.exIdx;
+  navigate('work', first.topicId, first.exIdx);
 }
 
 /* ────────── LISTA ESERCIZI ────────── */
@@ -3071,6 +3150,10 @@ function renderList() {
   list.innerHTML = '';
   exs.forEach((ex, i) => {
     const isDone = progress[currentTopicId]?.has(i);
+    // Stelle difficoltà: derivate dal numero di step
+    const nSteps = (ex.steps && ex.steps.length) || 1;
+    const difficulty = nSteps <= 1 ? 1 : (nSteps <= 3 ? 2 : 3);
+    const stars = '●'.repeat(difficulty) + '○'.repeat(3 - difficulty);
     const btn = document.createElement('button');
     btn.className = `flex items-center gap-4 p-4 rounded-2xl transition-all active:scale-[0.98] ${isDone ? 'bg-secondary-container/30' : 'bg-surface-container-low hover:bg-surface-container'}`;
     btn.onclick = () => navigate('work', currentTopicId, i);
@@ -3081,6 +3164,7 @@ function renderList() {
       <div class="flex-1 text-left">
         <p class="font-headline font-bold text-sm">${ex.title}</p>
         <p class="text-xs text-on-surface-variant mt-0.5 line-clamp-1">${ex.problemText || ex.expr}</p>
+        <p class="text-[10px] mt-1 font-label tracking-wider ${difficulty===1?'text-secondary':difficulty===2?'text-primary':'text-tertiary'}">${stars}</p>
       </div>
       <span class="material-symbols-outlined text-on-surface-variant text-xl">chevron_right</span>`;
     list.appendChild(btn);
@@ -3164,6 +3248,22 @@ function loadExercise() {
   const exs = EXERCISES[currentTopicId] || [];
   const ex = exs[currentExIdx];
   if (!ex) return;
+
+  // Reset tracking per nuovo esercizio
+  stepAttempts = {};
+  perfectExercise = true;
+
+  // Fade-in del workspace per transizione fluida
+  const ws = document.getElementById('screen-work');
+  if (ws) {
+    ws.style.opacity = '0';
+    ws.style.transform = 'translateY(8px)';
+    setTimeout(() => {
+      ws.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
+      ws.style.opacity = '1';
+      ws.style.transform = 'translateY(0)';
+    }, 30);
+  }
 
   const topic = TOPICS.find(t => t.id === currentTopicId);
   const isDone = progress[currentTopicId]?.has(currentExIdx);
@@ -3318,7 +3418,11 @@ function renderSteps() {
       const kbHtml = '<div class="flex flex-wrap gap-1 mt-2 mb-1">' +
         mathKeys.map(k => `<button type="button" onclick="insertSymbol(${i},'${k.s}')" title="${k.l}" class="w-9 h-9 md:w-10 md:h-10 bg-surface-container-low hover:bg-primary-fixed text-primary font-headline font-bold rounded-lg active:scale-95 transition-all text-base">${k.s}</button>`).join('') +
         '</div>';
-      cont = `<div class="flex-1"><div class="mb-1"><span class="font-label text-xs text-primary uppercase font-bold tracking-widest">${step.label}</span></div><div class="relative"><input id="input-${i}" data-step="${i}" class="step-input w-full text-xl md:text-2xl font-headline font-bold text-primary bg-primary-fixed/30 border-none rounded-2xl px-4 py-3 focus:ring-4 focus:ring-primary/10 transition-all outline-none" placeholder="Scrivi la risposta..." type="text" autocomplete="off" inputmode="text"/></div>${kbHtml}<p id="fb-${i}" class="mt-2 text-xs text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-xs">lightbulb</span>Scrivi e premi Invio (o usa i bottoni per i simboli).</p></div>`;
+      // Bottone "Vedi soluzione" appare solo dopo 3 tentativi falliti su questo step
+      const attempts = stepAttempts[i] || 0;
+      const showSolBtn = attempts >= 3 ?
+        `<button type="button" onclick="revealStepAnswer(${i})" class="mt-2 text-xs font-label font-bold text-tertiary bg-tertiary-fixed/40 px-3 py-1.5 rounded-full active:scale-95 transition-all"><span class="material-symbols-outlined text-xs align-middle">lightbulb</span> Vedi soluzione di questo passo</button>` : '';
+      cont = `<div class="flex-1"><div class="mb-1"><span class="font-label text-xs text-primary uppercase font-bold tracking-widest">${step.label}</span></div><div class="relative"><input id="input-${i}" data-step="${i}" class="step-input w-full text-xl md:text-2xl font-headline font-bold text-primary bg-primary-fixed/30 border-none rounded-2xl px-4 py-3 focus:ring-4 focus:ring-primary/10 transition-all outline-none" placeholder="Scrivi la risposta..." type="text" autocomplete="off" inputmode="text"/></div>${kbHtml}<p id="fb-${i}" class="mt-2 text-xs text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-xs">lightbulb</span>Scrivi e premi Invio (o usa i bottoni per i simboli).</p>${showSolBtn}</div>`;
     } else {
       cont = `<div class="flex-1"><div class="mb-1"><span class="font-label text-xs text-outline uppercase font-bold tracking-widest">${step.label}</span></div><div class="w-full h-14 border-2 border-dashed border-outline-variant rounded-2xl flex items-center px-4"><span class="text-outline-variant font-headline italic text-sm">In attesa del passo precedente...</span></div></div>`;
     }
@@ -3359,14 +3463,73 @@ function onStepKey(e) {
       autoCompleteExercise(val);
     }
   } else {
-    // Errato — prova a dare un suggerimento mirato se è vicino
+    // Errato — incrementa contatore tentativi, prova a dare un suggerimento mirato
+    stepAttempts[i] = (stepAttempts[i] || 0) + 1;
+    perfectExercise = false;
     e.target.classList.add('anim-err');
     const fb = document.getElementById(`fb-${i}`);
     const closeHint = getCloseHint(val, step.answer);
     const msg = closeHint || 'Non è corretto. Riprova!';
     if (fb) fb.innerHTML = '<span class="material-symbols-outlined text-xs text-error">close</span><span class="text-error">' + msg + '</span>';
     setTimeout(() => e.target.classList.remove('anim-err'), 400);
+    // Se l'utente ha sbagliato 3 volte, ri-renderizza per mostrare il bottone "Vedi soluzione"
+    if (stepAttempts[i] === 3) {
+      setTimeout(() => renderSteps(), 500);
+    }
   }
+}
+
+/* Rivela la prima risposta accettata per uno step (dopo 3 errori).
+   Lo step viene marcato completato con icona lampadina (no XP). */
+function revealStepAnswer(i) {
+  const ex = (EXERCISES[currentTopicId]||[])[currentExIdx];
+  if (!ex) return;
+  const step = ex.steps[i];
+  const sol = (step.answer && step.answer[0]) || '';
+  completedAnswers[i] = sol;
+  stepStates[i] = 'completed';
+  perfectExercise = false;
+  if (i + 1 < ex.steps.length && stepStates[i+1] === 'locked') {
+    stepStates[i+1] = 'active';
+  }
+  const allDone = stepStates.every(s => s === 'completed');
+  if (allDone) {
+    document.getElementById('btn-check').disabled = false;
+  }
+  renderSteps();
+  if (allDone && checkAns(sol, ex.finalAnswer || step.answer)) {
+    autoCompleteExercise(sol);
+  }
+}
+
+/* Toast +XP che vola in alto a destra per ~1.5 secondi */
+function showXpToast(xp, perfect) {
+  const t = document.createElement('div');
+  t.className = 'fixed top-20 right-4 z-[60] bg-secondary text-on-secondary px-4 py-2 rounded-2xl font-headline font-bold shadow-lg flex items-center gap-2 anim-enter';
+  t.innerHTML = '⭐ +' + xp + ' XP' + (perfect ? ' <span class="text-xs opacity-80">(perfetto!)</span>' : '');
+  document.body.appendChild(t);
+  setTimeout(() => t.style.transition = 'opacity 0.4s, transform 0.4s', 1100);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(-20px)'; }, 1200);
+  setTimeout(() => t.remove(), 1700);
+}
+
+/* Coriandoli SVG che cadono per ~3 secondi */
+function showConfetti() {
+  const colors = ['#004790','#1b6d24','#743800','#aac7ff','#a3f69c','#ffb786'];
+  const wrap = document.createElement('div');
+  wrap.className = 'fixed inset-0 pointer-events-none z-[55] overflow-hidden';
+  for (let i = 0; i < 60; i++) {
+    const p = document.createElement('div');
+    const size = 6 + Math.random() * 8;
+    const x = Math.random() * 100;
+    const delay = Math.random() * 0.5;
+    const dur = 2 + Math.random() * 1.5;
+    const col = colors[Math.floor(Math.random()*colors.length)];
+    p.style.cssText = 'position:absolute;left:' + x + '%;top:-20px;width:' + size + 'px;height:' + size + 'px;background:' + col + ';border-radius:' + (Math.random()<0.5?'50%':'2px') + ';animation:fall ' + dur + 's ease-in ' + delay + 's forwards;transform:rotate(' + (Math.random()*360) + 'deg)';
+    wrap.appendChild(p);
+  }
+  document.body.appendChild(wrap);
+  setTimeout(() => wrap.remove(), 4000);
 }
 
 /* Inserisce un simbolo nella posizione del cursore dell'input dello step attivo */
@@ -3391,31 +3554,71 @@ function autoCompleteExercise(finalVal) {
   exerciseCompleted[currentExIdx] = true;
   if (!progress[currentTopicId]) progress[currentTopicId] = new Set();
   progress[currentTopicId].add(currentExIdx);
+
+  // === Calcolo XP e streak ===
+  let xpGained = 10; // base
+  if (perfectExercise) {
+    xpGained += 5; // bonus se nessun errore
+    streak++;
+  } else {
+    streak = 0; // streak reset su errori
+  }
+  // Bonus se completi tutto il topic
+  const topicDone = progress[currentTopicId].size === exs.length;
+  if (topicDone && !mixedMode) xpGained += 10;
+  totalXp += xpGained;
   saveProgress();
+
+  // Toast XP
+  showXpToast(xpGained, perfectExercise);
 
   const fr = document.getElementById('final-result');
   fr.textContent = finalVal;
   fr.className = 'text-3xl md:text-4xl font-headline font-black text-secondary anim-ok';
 
   const btn = document.getElementById('btn-check');
-  // Mostra un breve feedback di completamento, poi avanza automaticamente
+  // Modalità misto: avanza al prossimo della lista
+  if (mixedMode) {
+    const idxInMixed = mixedExercises.findIndex(m => m.topicId === currentTopicId && m.exIdx === currentExIdx);
+    if (idxInMixed < mixedExercises.length - 1) {
+      btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Esercizio completato!';
+      btn.disabled = true;
+      btn.className = btn.className.replace('bg-primary','bg-secondary');
+      renderPills();
+      setTimeout(() => {
+        const next = mixedExercises[idxInMixed + 1];
+        currentTopicId = next.topicId;
+        currentExIdx = next.exIdx;
+        loadExercise();
+        window.scrollTo({top:0, behavior:'smooth'});
+      }, 1200);
+    } else {
+      btn.innerHTML = 'Allenamento completato! <span class="material-symbols-outlined">celebration</span>';
+      btn.className = btn.className.replace('bg-primary','bg-secondary');
+      btn.disabled = false;
+      btn.onclick = () => { mixedMode = false; navigate('home'); };
+      showConfetti();
+      renderPills();
+    }
+    return;
+  }
+  // Modalità topic normale
   if (currentExIdx < exs.length - 1) {
     btn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> Esercizio completato!';
     btn.disabled = true;
     btn.className = btn.className.replace('bg-primary','bg-secondary');
     renderPills();
-    // Dopo 1.2 secondi vai automaticamente al prossimo esercizio
     setTimeout(() => {
       currentExIdx++;
       loadExercise();
       window.scrollTo({top:0, behavior:'smooth'});
     }, 1200);
   } else {
-    // Ultimo esercizio dell'argomento: resta qui con celebrazione
     btn.innerHTML = 'Argomento completato! <span class="material-symbols-outlined">celebration</span>';
     btn.className = btn.className.replace('bg-primary','bg-secondary');
     btn.disabled = false;
     btn.onclick = () => { navigate('home'); };
+    if (topicDone) showConfetti();
     renderPills();
   }
 }
