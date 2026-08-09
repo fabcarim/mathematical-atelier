@@ -2,9 +2,15 @@
 <html lang="it">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Matematica"/>
+<meta name="theme-color" content="#004790"/>
+<link rel="manifest" href="./manifest.json"/>
+<link rel="icon" type="image/svg+xml" href="./icon.svg"/>
+<link rel="apple-touch-icon" href="./icon.svg"/>
 <title>Mathematical Atelier</title>
 <!-- Firebase SDK (compat per uso senza bundler) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -167,6 +173,15 @@ svg.geo { max-width:100%; height:auto; }
     </div>
     <span class="material-symbols-outlined">arrow_forward</span>
   </button>
+  <!-- Teoria & Termini card -->
+  <button id="theory-card" class="w-full mb-6 p-4 rounded-2xl bg-gradient-to-r from-tertiary-container to-tertiary text-white text-left active:scale-[0.98] transition-all flex items-center gap-4 shadow-lg">
+    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-2xl">📖</div>
+    <div class="flex-1">
+      <div class="font-headline font-bold text-base">Teoria &amp; Termini</div>
+      <div class="text-xs opacity-90">Impara i nomi e le definizioni con le flashcard</div>
+    </div>
+    <span class="material-symbols-outlined">arrow_forward</span>
+  </button>
   <!-- Griglia argomenti -->
   <div id="topics-grid" class="topic-grid"></div>
   <p class="text-center text-[10px] text-outline mt-8 font-label">v1.0</p>
@@ -189,6 +204,48 @@ svg.geo { max-width:100%; height:auto; }
     </div>
   </div>
   <div id="exercises-list" class="flex flex-col gap-3"></div>
+</main>
+
+<!-- ═══════════ SCHERMATA: TEORIA & TERMINI ═══════════ -->
+<main id="screen-theory" class="screen flex-1 mt-16 mb-20 px-4 md:px-8 lg:px-16 max-w-3xl mx-auto w-full pt-6">
+  <div class="mb-4">
+    <span class="material-symbols-outlined text-4xl text-tertiary mb-1">menu_book</span>
+    <h2 class="text-2xl font-headline font-extrabold text-on-surface mb-1">Teoria &amp; Termini</h2>
+    <p class="text-on-surface-variant text-sm">Ripassa i nomi e le definizioni. Tocca la carta per girarla.</p>
+  </div>
+  <!-- Selettore argomento -->
+  <div id="theory-topic-chips" class="flex flex-wrap gap-2 mb-4"></div>
+  <!-- Selettore modalità -->
+  <div class="flex gap-2 mb-4">
+    <button id="theory-mode-cards" class="flex-1 py-2 rounded-xl font-label font-bold text-sm transition-all">Flashcard</button>
+    <button id="theory-mode-quiz" class="flex-1 py-2 rounded-xl font-label font-bold text-sm transition-all">Quiz</button>
+  </div>
+  <!-- Contatore -->
+  <div class="flex justify-between items-center mb-2">
+    <span id="theory-counter" class="font-label text-xs font-bold text-on-surface-variant uppercase tracking-wider"></span>
+    <button id="theory-shuffle" class="text-xs font-label font-bold text-tertiary flex items-center gap-1"><span class="material-symbols-outlined text-sm">shuffle</span>Mescola</button>
+  </div>
+  <!-- Area flashcard -->
+  <div id="theory-card-area">
+    <div id="theory-flashcard" class="w-full min-h-[220px] rounded-3xl bg-surface-container-low border-2 border-tertiary-fixed p-6 flex flex-col items-center justify-center text-center cursor-pointer active:scale-[0.99] transition-all select-none">
+      <span id="theory-face-label" class="font-label text-xs font-bold uppercase tracking-widest text-tertiary mb-3">Termine</span>
+      <div id="theory-face-text" class="text-xl md:text-2xl font-headline font-bold text-on-surface"></div>
+      <span class="mt-4 text-xs text-outline flex items-center gap-1"><span class="material-symbols-outlined text-sm">touch_app</span>tocca per girare</span>
+    </div>
+    <div class="flex gap-3 mt-4">
+      <button id="theory-prev" class="flex-1 py-3 rounded-xl bg-surface-container-high text-on-surface font-label font-bold text-sm active:scale-95 transition-all">← Indietro</button>
+      <button id="theory-next" class="flex-1 py-3 rounded-xl bg-tertiary text-white font-label font-bold text-sm active:scale-95 transition-all">Avanti →</button>
+    </div>
+  </div>
+  <!-- Area quiz -->
+  <div id="theory-quiz-area" class="hidden">
+    <div class="w-full rounded-3xl bg-surface-container-low border-2 border-tertiary-fixed p-6 mb-4">
+      <span class="font-label text-xs font-bold uppercase tracking-widest text-tertiary mb-3 block">Quale termine corrisponde a questa definizione?</span>
+      <div id="theory-quiz-def" class="text-base md:text-lg font-body text-on-surface leading-relaxed"></div>
+    </div>
+    <div id="theory-quiz-options" class="flex flex-col gap-3"></div>
+    <div id="theory-quiz-feedback" class="mt-4 text-center font-headline font-bold text-lg"></div>
+  </div>
 </main>
 
 <!-- ═══════════ SCHERMATA 3: WORKSPACE ═══════════ -->
@@ -243,6 +300,8 @@ svg.geo { max-width:100%; height:auto; }
             </h3>
             <span class="text-xs font-label font-bold text-secondary bg-secondary-container px-2 py-1 rounded-full">Validazione attiva</span>
           </div>
+          <!-- Promemoria della domanda: sticky, resta in alto mentre si scorre (utile su iPad) -->
+          <div id="w-work-question" class="sticky top-16 z-20 mb-5 p-4 bg-primary-fixed rounded-2xl border-l-4 border-primary shadow-md"></div>
           <!-- Legenda notazione -->
           <div class="mb-5 p-3 bg-surface-container-low rounded-xl flex flex-wrap gap-x-4 gap-y-1 text-xs font-label text-on-surface-variant">
             <span><b class="text-primary">^</b> = potenza (x^2)</span>
@@ -451,6 +510,14 @@ const TOPICS = [
   { id:"statistica",    icon:"bar_chart",      name:"Statistica",           desc:"Frequenze, media, moda, mediana", isProb:true },
   { id:"triangoli_not", icon:"details",        name:"Triangoli Notevoli",   desc:"45°, 30°-60° con radici", hasSvg:true },
   { id:"cerchio",       icon:"circle",         name:"Cerchio e Poligoni",   desc:"Circonferenza, area, apotema", hasSvg:true },
+  { id:"numeri_relativi", icon:"exposure", name:"Numeri Relativi", desc:"Interi con segno: somma, prodotto, regola dei segni" },
+  { id:"notazione_sci", icon:"speed", name:"Notazione Scientifica", desc:"Potenze di 10 e ordini di grandezza", isProb:true },
+  { id:"scomposizione", icon:"call_split", name:"Scomposizione", desc:"Raccoglimento, differenza di quadrati, trinomi" },
+  { id:"frazioni_algebriche", icon:"functions", name:"Frazioni Algebriche", desc:"Semplificazione e operazioni con le frazioni letterali" },
+  { id:"sistemi", icon:"account_tree", name:"Sistemi Lineari", desc:"Due equazioni, due incognite: sostituzione e riduzione", isProb:true },
+  { id:"disequazioni", icon:"unfold_more", name:"Disequazioni", desc:"Primo grado e cambio di verso" },
+  { id:"probabilita", icon:"casino", name:"Probabilità", desc:"Casi favorevoli su casi possibili", isProb:true },
+  { id:"solidi", icon:"deployed_code", name:"Solidi: Aree e Volumi", desc:"Cubo, cilindro, cono, piramide, sfera", isProb:true },
 ];
 
 /* ────────── BANCA DATI ESERCIZI ──────────
@@ -2821,6 +2888,749 @@ cerchio: [
     ], finalAnswer:["12,56"] },
 ],
 
+numeri_relativi: [
+  { expr:"(+7) + (+5)", title:"Somma di concordi positivi", desc:"Due numeri con lo stesso segno: sommi i valori assoluti e tieni il segno comune.",
+    tech:{name:"Numeri concordi",desc:"Due numeri relativi sono concordi quando hanno lo stesso segno. Per sommarli si sommano i valori assoluti e si mantiene il segno comune."},
+    hint:"Hanno lo stesso segno: sono concordi. Cosa fai con i valori assoluti?",
+    steps:[
+      {label:"Passo 1: Somma i valori assoluti",answer:["7+5"],feedback:"Sono concordi (+ e +): 7 + 5 = 12."},
+      {label:"Passo 2: Metti il segno comune",answer:["+12","12"],feedback:"Segno + comune → +12."}
+    ], finalAnswer:["12","+12"] },
+  { expr:"(−4) + (−9)", title:"Somma di concordi negativi", desc:"Stesso segno (entrambi negativi): sommi i valori assoluti e il segno resta −.",
+    tech:{name:"Numeri concordi negativi",desc:"Concordi negativi: si sommano i valori assoluti e si mette il segno meno."},
+    hint:"Entrambi negativi, quindi concordi. Il risultato che segno avrà?",
+    steps:[
+      {label:"Passo 1: Somma i valori assoluti",answer:["4+9"],feedback:"4 + 9 = 13."},
+      {label:"Passo 2: Metti il segno",answer:["-13"],feedback:"Entrambi negativi → −13."}
+    ], finalAnswer:["-13"] },
+  { expr:"(+8) + (−3)", title:"Somma di discordi", desc:"Segni diversi: fai la differenza dei valori assoluti e tieni il segno del maggiore.",
+    tech:{name:"Numeri discordi",desc:"Discordi = segni diversi. Si fa la differenza dei valori assoluti e si tiene il segno del numero con valore assoluto maggiore."},
+    hint:"Segni diversi: sono discordi. Si fa la differenza, non la somma.",
+    steps:[
+      {label:"Passo 1: Differenza dei valori assoluti",answer:["8-3"],feedback:"Discordi: 8 − 3 = 5."},
+      {label:"Passo 2: Segno del maggiore",answer:["+5","5"],feedback:"Vince l'8 (positivo) → +5."}
+    ], finalAnswer:["5","+5"] },
+  { expr:"(−6) + (+2)", title:"Discordi, vince il negativo", desc:"Differenza dei valori assoluti; il segno è quello del numero più grande in valore assoluto.",
+    tech:{name:"Numeri discordi",desc:"Differenza dei valori assoluti, con il segno del termine di valore assoluto maggiore."},
+    hint:"Chi ha il valore assoluto più grande, −6 o +2?",
+    steps:[
+      {label:"Passo 1: Differenza dei valori assoluti",answer:["6-2"],feedback:"6 − 2 = 4."},
+      {label:"Passo 2: Segno del maggiore",answer:["-4"],feedback:"Vince il −6 (valore assoluto 6) → −4."}
+    ], finalAnswer:["-4"] },
+  { expr:"(+5) − (+9)", title:"Sottrazione = somma dell'opposto", desc:"Sottrarre un numero significa sommare il suo opposto.",
+    tech:{name:"Sottrazione tra relativi",desc:"a − b = a + (−b): si somma l'opposto del secondo numero. L'opposto di +9 è −9."},
+    hint:"Trasforma la sottrazione in una somma: qual è l'opposto di +9?",
+    steps:[
+      {label:"Passo 1: Somma l'opposto",answer:["5+(-9)","5-9"],feedback:"L'opposto di +9 è −9: 5 + (−9)."},
+      {label:"Passo 2: Calcola (discordi)",answer:["-4"],feedback:"Discordi: 9 − 5 = 4, vince il 9 → −4."}
+    ], finalAnswer:["-4"] },
+  { expr:"(−3) − (−7)", title:"Sottrarre un numero negativo", desc:"L'opposto di −7 è +7: la sottrazione diventa un'addizione.",
+    tech:{name:"Sottrarre l'opposto",desc:"L'opposto di −7 è +7, quindi −3 − (−7) = −3 + 7. Meno per meno diventa più."},
+    hint:"Occhio: l'opposto di −7 è +7. Cosa diventa la sottrazione?",
+    steps:[
+      {label:"Passo 1: Somma l'opposto",answer:["-3+7"],feedback:"L'opposto di −7 è +7: −3 + 7."},
+      {label:"Passo 2: Calcola (discordi)",answer:["4","+4"],feedback:"Discordi: 7 − 3 = 4, vince il 7 → +4."}
+    ], finalAnswer:["4","+4"] },
+  { expr:"|−7| + |+3|", title:"Valore assoluto", desc:"Il valore assoluto è la distanza dallo zero: è sempre positivo.",
+    tech:{name:"Valore assoluto",desc:"|a| è la distanza del numero dallo zero, quindi sempre positiva: |−7| = 7 e |+3| = 3."},
+    hint:"Il valore assoluto toglie il segno: quanto valgono |−7| e |+3|?",
+    steps:[
+      {label:"Passo 1: Togli le barrette",answer:["7+3"],feedback:"|−7| = 7 e |+3| = 3."},
+      {label:"Passo 2: Somma",answer:["10"],feedback:"7 + 3 = 10."}
+    ], finalAnswer:["10"] },
+  { expr:"(−4) × (+6)", title:"Regola dei segni: discordi", desc:"Nel prodotto, segni discordi danno risultato negativo.",
+    tech:{name:"Regola dei segni (discordi)",desc:"Nel prodotto di numeri discordi (− per +) il risultato è negativo; si moltiplicano i valori assoluti."},
+    hint:"Meno per più fa... quale segno? Poi moltiplica i valori assoluti.",
+    steps:[
+      {label:"Passo 1: Moltiplica i valori assoluti",answer:["4*6","4×6","24"],feedback:"4 × 6 = 24."},
+      {label:"Passo 2: Applica la regola dei segni",answer:["-24"],feedback:"Discordi (− × +) → segno − : −24."}
+    ], finalAnswer:["-24"] },
+  { expr:"(−5) × (−3)", title:"Regola dei segni: concordi", desc:"Meno per meno fa più: due segni uguali danno risultato positivo.",
+    tech:{name:"Regola dei segni (concordi)",desc:"Nel prodotto di numeri concordi (− per −, oppure + per +) il risultato è positivo."},
+    hint:"Meno per meno fa più. Poi moltiplica i valori assoluti.",
+    steps:[
+      {label:"Passo 1: Moltiplica i valori assoluti",answer:["5*3","5×3","15"],feedback:"5 × 3 = 15."},
+      {label:"Passo 2: Applica la regola dei segni",answer:["+15","15"],feedback:"Concordi (− × −) → +15."}
+    ], finalAnswer:["15","+15"] },
+  { expr:"(−36) ÷ (+9)", title:"Regola dei segni nella divisione", desc:"Nella divisione vale la stessa regola dei segni del prodotto.",
+    tech:{name:"Regola dei segni nella divisione",desc:"Come nel prodotto: discordi → risultato negativo, concordi → positivo. Qui − ÷ + dà negativo."},
+    hint:"Stessa regola del prodotto: − diviso + che segno dà?",
+    steps:[
+      {label:"Passo 1: Dividi i valori assoluti",answer:["36/9","36÷9","4"],feedback:"36 ÷ 9 = 4."},
+      {label:"Passo 2: Applica la regola dei segni",answer:["-4"],feedback:"Discordi (− ÷ +) → −4."}
+    ], finalAnswer:["-4"] },
+  { expr:"(−2) × [(+4) − (+9)]", title:"Parentesi e prodotto", desc:"Prima risolvi la parentesi, poi applica la regola dei segni.",
+    tech:{name:"Relativi con parentesi",desc:"Si risolve prima la parentesi (sottrazione di relativi), poi si applica la regola dei segni nel prodotto."},
+    hint:"Risolvi prima la parentesi: (+4) − (+9). Che numero ottieni?",
+    steps:[
+      {label:"Passo 1: Risolvi la parentesi",answer:["-2*(-5)","(-2)*(-5)","-2×(-5)"],feedback:"4 − 9 = −5, quindi (−2) × (−5)."},
+      {label:"Passo 2: Prodotto (regola dei segni)",answer:["+10","10"],feedback:"Concordi (− × −) → +10, e 2 × 5 = 10."}
+    ], finalAnswer:["10","+10"] },
+  { expr:"(−3) + (−4) × (+2)", title:"Precedenza con i relativi", desc:"Prima la moltiplicazione, poi la somma algebrica.",
+    tech:{name:"Precedenza con relativi",desc:"Anche con i numeri relativi la moltiplicazione va prima della somma. La regola dei segni si applica dentro il prodotto."},
+    hint:"Cosa viene prima, il prodotto o la somma?",
+    steps:[
+      {label:"Passo 1: Moltiplica",answer:["-3+(-8)","-3-8"],feedback:"Discordi: (−4) × (+2) = −8."},
+      {label:"Passo 2: Somma algebrica",answer:["-11"],feedback:"−3 + (−8) = −11 (concordi negativi)."}
+    ], finalAnswer:["-11"] },
+],
+notazione_sci: [
+  { expr:"4500", title:"Scrivi in notazione scientifica", desc:"Sposta la virgola fino a ottenere un numero tra 1 e 10, poi conta gli spostamenti.",
+    tech:{name:"Notazione scientifica",desc:"Un numero si scrive come m × 10ⁿ, dove m (la mantissa) è compresa tra 1 e 10, e n (l'esponente) conta di quanti posti hai spostato la virgola."},
+    hint:"Dove metti la virgola per avere un numero tra 1 e 10?",
+    steps:[
+      {label:"Passo 1: Trova la mantissa",answer:["4.5"],feedback:"Sposto la virgola: 4500 → 4.5. La mantissa è 4.5 (tra 1 e 10)."},
+      {label:"Passo 2: Trova l'esponente",answer:["3"],feedback:"Ho spostato la virgola di 3 posti verso sinistra → esponente 3."},
+      {label:"Passo 3: Scrivi il numero",answer:["4.5×10³","4.5*10^3","4.5·10^3"],feedback:"4500 = 4.5 × 10³."}
+    ], finalAnswer:["4.5×10³","4.5*10^3","4.5·10^3"] },
+  { expr:"60000", title:"Mantissa intera", desc:"Anche 6 è una mantissa valida, perché è compresa tra 1 e 10.",
+    tech:{name:"Mantissa",desc:"La mantissa è il numero 'm' che moltiplica la potenza di 10: deve stare tra 1 (incluso) e 10 (escluso)."},
+    hint:"Di quanti posti sposti la virgola da 60000 a 6?",
+    steps:[
+      {label:"Passo 1: Trova la mantissa",answer:["6"],feedback:"60000 → 6. La mantissa è 6."},
+      {label:"Passo 2: Trova l'esponente",answer:["4"],feedback:"Virgola spostata di 4 posti → esponente 4."},
+      {label:"Passo 3: Scrivi il numero",answer:["6×10⁴","6*10^4","6·10^4"],feedback:"60000 = 6 × 10⁴."}
+    ], finalAnswer:["6×10⁴","6*10^4","6·10^4"] },
+  { expr:"0.0008", title:"Esponente negativo", desc:"Con i numeri minori di 1 l'esponente della potenza di 10 diventa negativo.",
+    tech:{name:"Esponente negativo",desc:"Se il numero è minore di 1 si sposta la virgola verso destra e l'esponente della potenza di 10 è negativo."},
+    hint:"Sposti la virgola verso destra: l'esponente sarà negativo.",
+    steps:[
+      {label:"Passo 1: Trova la mantissa",answer:["8"],feedback:"0.0008 → 8. La mantissa è 8."},
+      {label:"Passo 2: Trova l'esponente",answer:["-4"],feedback:"Virgola spostata di 4 posti verso destra → esponente −4."},
+      {label:"Passo 3: Scrivi il numero",answer:["8×10^-4","8*10^-4","8·10^-4"],feedback:"0.0008 = 8 × 10⁻⁴."}
+    ], finalAnswer:["8×10^-4","8*10^-4","8·10^-4"] },
+  { expr:"0.00035", title:"Numero piccolo con due cifre", desc:"La mantissa può avere la virgola: qui è 3.5.",
+    tech:{name:"Esponente negativo",desc:"Numero piccolo (minore di 1) → esponente negativo. La mantissa resta comunque tra 1 e 10."},
+    hint:"Porta la virgola subito dopo il primo 3: quanti spostamenti fai?",
+    steps:[
+      {label:"Passo 1: Trova la mantissa",answer:["3.5"],feedback:"0.00035 → 3.5."},
+      {label:"Passo 2: Trova l'esponente",answer:["-4"],feedback:"4 spostamenti verso destra → esponente −4."},
+      {label:"Passo 3: Scrivi il numero",answer:["3.5×10^-4","3.5*10^-4","3.5·10^-4"],feedback:"0.00035 = 3.5 × 10⁻⁴."}
+    ], finalAnswer:["3.5×10^-4","3.5*10^-4","3.5·10^-4"] },
+  { expr:"2.5 × 10³", title:"Torna alla forma decimale", desc:"Moltiplicare per 10³ significa spostare la virgola di 3 posti verso destra.",
+    tech:{name:"Da notazione scientifica a decimale",desc:"Con esponente positivo n si sposta la virgola di n posti verso destra (il numero diventa più grande)."},
+    hint:"10³ = 1000: quanto fa 2.5 × 1000?",
+    steps:[
+      {label:"Passo 1: Espandi la potenza di 10",answer:["2.5*1000","2.5×1000"],feedback:"10³ = 1000."},
+      {label:"Passo 2: Moltiplica",answer:["2500"],feedback:"2.5 × 1000 = 2500."}
+    ], finalAnswer:["2500"] },
+  { expr:"4 × 10⁻²", title:"Decimale da esponente negativo", desc:"Esponente negativo: la virgola si sposta verso sinistra e il numero diventa piccolo.",
+    tech:{name:"Esponente negativo verso decimale",desc:"10⁻ⁿ = 1/10ⁿ. Con esponente negativo il numero risulta minore di 1."},
+    hint:"10⁻² = 0.01. Quanto fa 4 × 0.01?",
+    steps:[
+      {label:"Passo 1: Espandi la potenza di 10",answer:["4*0.01","4×0.01"],feedback:"10⁻² = 0.01."},
+      {label:"Passo 2: Moltiplica",answer:["0.04"],feedback:"4 × 0.01 = 0.04."}
+    ], finalAnswer:["0.04"] },
+  { expr:"10⁴ × 10³", title:"Prodotto di potenze di 10", desc:"Stessa base 10: gli esponenti si sommano.",
+    tech:{name:"Prodotto di potenze di 10",desc:"10ⁿ × 10ᵐ = 10ⁿ⁺ᵐ. Con la stessa base gli esponenti si sommano."},
+    hint:"Stessa base: cosa fai con gli esponenti quando moltiplichi?",
+    steps:[
+      {label:"Passo 1: Somma gli esponenti",answer:["10^7"],feedback:"4 + 3 = 7."},
+      {label:"Passo 2: Scrivi il risultato",answer:["10^7","10⁷","10000000"],feedback:"10⁴ × 10³ = 10⁷ (cioè 10 000 000)."}
+    ], finalAnswer:["10^7","10⁷","10000000"] },
+  { expr:"10⁶ ÷ 10²", title:"Quoziente di potenze di 10", desc:"Stessa base 10: gli esponenti si sottraggono.",
+    tech:{name:"Quoziente di potenze di 10",desc:"10ⁿ ÷ 10ᵐ = 10ⁿ⁻ᵐ. Con la stessa base gli esponenti si sottraggono."},
+    hint:"Divisione con stessa base: sottrai gli esponenti.",
+    steps:[
+      {label:"Passo 1: Sottrai gli esponenti",answer:["10^4"],feedback:"6 − 2 = 4."},
+      {label:"Passo 2: Scrivi il risultato",answer:["10^4","10⁴","10000"],feedback:"10⁶ ÷ 10² = 10⁴ (cioè 10 000)."}
+    ], finalAnswer:["10^4","10⁴","10000"] },
+  { expr:"(2 × 10³) × (3 × 10⁴)", title:"Prodotto in notazione scientifica", desc:"Moltiplica le mantisse tra loro e somma gli esponenti delle potenze di 10.",
+    tech:{name:"Prodotto in notazione scientifica",desc:"(a × 10ⁿ) × (b × 10ᵐ) = (a × b) × 10ⁿ⁺ᵐ: mantissa per mantissa, esponenti sommati."},
+    hint:"Mantisse: 2 × 3. Esponenti: 3 + 4.",
+    steps:[
+      {label:"Passo 1: Moltiplica le mantisse",answer:["6"],feedback:"2 × 3 = 6."},
+      {label:"Passo 2: Somma gli esponenti",answer:["7"],feedback:"3 + 4 = 7."},
+      {label:"Passo 3: Scrivi il risultato",answer:["6×10⁷","6*10^7","6·10^7"],feedback:"= 6 × 10⁷."}
+    ], finalAnswer:["6×10⁷","6*10^7","6·10^7"] },
+  { expr:"(8 × 10⁵) ÷ (2 × 10²)", title:"Quoziente in notazione scientifica", desc:"Dividi le mantisse e sottrai gli esponenti.",
+    tech:{name:"Quoziente in notazione scientifica",desc:"(a × 10ⁿ) ÷ (b × 10ᵐ) = (a ÷ b) × 10ⁿ⁻ᵐ."},
+    hint:"Mantisse: 8 ÷ 2. Esponenti: 5 − 2.",
+    steps:[
+      {label:"Passo 1: Dividi le mantisse",answer:["4"],feedback:"8 ÷ 2 = 4."},
+      {label:"Passo 2: Sottrai gli esponenti",answer:["3"],feedback:"5 − 2 = 3."},
+      {label:"Passo 3: Scrivi il risultato",answer:["4×10³","4*10^3","4·10^3"],feedback:"= 4 × 10³."}
+    ], finalAnswer:["4×10³","4*10^3","4·10^3"] },
+  { expr:"(5 × 10³) × (4 × 10²)", title:"Prodotto con riporto della mantissa", desc:"Se la mantissa esce dall'intervallo 1–10, va sistemata!",
+    tech:{name:"Aggiustare la mantissa",desc:"Se dopo il prodotto la mantissa è ≥ 10, la si riscrive in notazione scientifica e si aumenta l'esponente di conseguenza."},
+    hint:"5 × 4 fa 20, ma la mantissa deve stare tra 1 e 10. Come la sistemi?",
+    steps:[
+      {label:"Passo 1: Moltiplica le mantisse",answer:["20"],feedback:"5 × 4 = 20."},
+      {label:"Passo 2: Somma gli esponenti",answer:["5"],feedback:"3 + 2 = 5, quindi per ora 20 × 10⁵."},
+      {label:"Passo 3: Sistema la mantissa",answer:["2×10⁶","2*10^6","2·10^6"],feedback:"20 = 2 × 10¹, quindi 20 × 10⁵ = 2 × 10⁶."}
+    ], finalAnswer:["2×10⁶","2*10^6","2·10^6"] },
+  { expr:"6300", title:"Ordine di grandezza", desc:"L'ordine di grandezza è la potenza di 10 più vicina al numero.",
+    tech:{name:"Ordine di grandezza",desc:"Scrivi il numero come m × 10ⁿ: se la mantissa m è minore di 5 l'ordine di grandezza è 10ⁿ, se è 5 o più è 10ⁿ⁺¹."},
+    hint:"6300 = 6.3 × 10³. La mantissa 6.3 è minore o maggiore di 5?",
+    steps:[
+      {label:"Passo 1: Scrivi in notazione scientifica",answer:["6.3×10³","6.3*10^3","6.3·10^3"],feedback:"6300 = 6.3 × 10³."},
+      {label:"Passo 2: Guarda la mantissa",answer:["10^4","10⁴","10000"],feedback:"6.3 ≥ 5 → si arrotonda per eccesso: ordine di grandezza 10⁴."}
+    ], finalAnswer:["10^4","10⁴","10000"] },
+],
+scomposizione: [
+  { expr:"2x + 2", title:"Raccoglimento totale (facile)", desc:"Cerca il fattore comune a tutti i termini.",
+    tech:{name:"Raccoglimento a fattor comune",desc:"Il fattore comune è il numero (o la lettera) che compare in TUTTI i termini. Lo si mette 'fuori' e si divide ogni termine per esso."},
+    hint:"Quale numero divide sia 2x sia 2? Mettilo fuori dalla parentesi.",
+    steps:[
+      {label:"Passo 1: Individua il fattore comune",answer:["2"],feedback:"Sia 2x che 2 sono divisibili per 2."},
+      {label:"Passo 2: Raccogli il 2",answer:["2(x+1)","2*(x+1)"],feedback:"2·x=2x e 2·1=2. Perfetto!"}
+    ], finalAnswer:["2(x+1)","2*(x+1)"] },
+  { expr:"3x² + 6x", title:"Raccoglimento con lettera", desc:"Il fattore comune può contenere anche la lettera.",
+    tech:{name:"Raccoglimento a fattor comune",desc:"Fattore comune = massimo comune divisore dei coefficienti moltiplicato per le lettere comuni col grado più basso."},
+    hint:"Il numero 3 è comune, ma anche una x: entrambi i termini contengono almeno una x.",
+    steps:[
+      {label:"Passo 1: Trova il fattore comune",answer:["3x","3*x"],feedback:"3 divide 3 e 6; la x compare in entrambi i termini."},
+      {label:"Passo 2: Raccogli 3x",answer:["3x(x+2)","3*x*(x+2)"],feedback:"3x·x=3x² e 3x·2=6x."}
+    ], finalAnswer:["3x(x+2)","3*x*(x+2)"] },
+  { expr:"4x³ − 8x²", title:"Raccoglimento (grado alto)", desc:"Prendi la potenza di x col grado più basso.",
+    tech:{name:"Raccoglimento a fattor comune",desc:"Grado = esponente della lettera. Si raccoglie la potenza col grado MINORE presente in tutti i termini."},
+    hint:"Il MCD dei numeri è 4. La x compare come x³ e x²: prendi x².",
+    steps:[
+      {label:"Passo 1: Trova il fattore comune",answer:["4x^2","4x²","4*x^2"],feedback:"4 divide 4 e 8; la potenza minima è x²."},
+      {label:"Passo 2: Raccogli 4x²",answer:["4x^2(x-2)","4x²(x-2)","4*x^2*(x-2)"],feedback:"4x²·x=4x³ e 4x²·2=8x²."}
+    ], finalAnswer:["4x^2(x-2)","4x²(x-2)","4*x^2*(x-2)"] },
+  { expr:"10a²b − 15ab²", title:"Raccoglimento con due lettere", desc:"Cerca ciò che è comune tra numeri e lettere.",
+    tech:{name:"Raccoglimento a fattor comune",desc:"Si raccoglie il MCD dei coefficienti e ogni lettera comune col grado minimo."},
+    hint:"MCD(10,15)=5. Sia a che b compaiono in entrambi: prendi 5ab.",
+    steps:[
+      {label:"Passo 1: Fattore comune",answer:["5ab","5*a*b"],feedback:"5·ab è comune a tutti e due i termini."},
+      {label:"Passo 2: Raccogli 5ab",answer:["5ab(2a-3b)","5*a*b*(2a-3b)"],feedback:"5ab·2a=10a²b e 5ab·3b=15ab²."}
+    ], finalAnswer:["5ab(2a-3b)","5*a*b*(2a-3b)"] },
+  { expr:"ax + ay + bx + by", title:"Raccoglimento parziale", desc:"Raggruppa a coppie, poi raccogli di nuovo.",
+    tech:{name:"Raccoglimento parziale",desc:"Quando non c'è un fattore comune a tutti, si raggruppano i termini a coppie e si raccoglie da ciascuna coppia una parentesi UGUALE."},
+    hint:"Raccogli a dai primi due e b dagli ultimi due: comparirà (x+y) in entrambi.",
+    steps:[
+      {label:"Passo 1: Raccogli nelle due coppie",answer:["a(x+y)+b(x+y)","a*(x+y)+b*(x+y)"],feedback:"Da ax+ay esce a(x+y); da bx+by esce b(x+y)."},
+      {label:"Passo 2: Raccogli (x+y)",answer:["(x+y)(a+b)","(a+b)(x+y)"],feedback:"La parentesi comune (x+y) si mette fuori."}
+    ], finalAnswer:["(x+y)(a+b)","(a+b)(x+y)"] },
+  { expr:"x³ + x² + x + 1", title:"Raccoglimento parziale (2)", desc:"Raggruppa a due a due.",
+    tech:{name:"Raccoglimento parziale",desc:"Si raccoglie da ogni coppia in modo da far comparire lo stesso binomio."},
+    hint:"Dai primi due termini raccogli x²; dagli ultimi due raccogli 1. Comparirà (x+1).",
+    steps:[
+      {label:"Passo 1: Raccogli nelle coppie",answer:["x^2(x+1)+1(x+1)","x²(x+1)+(x+1)","x^2(x+1)+(x+1)"],feedback:"x²(x+1) dai primi due, (x+1) dagli ultimi due."},
+      {label:"Passo 2: Raccogli (x+1)",answer:["(x+1)(x^2+1)","(x+1)(x²+1)","(x^2+1)(x+1)"],feedback:"Resta il binomio (x²+1), che non si scompone oltre."}
+    ], finalAnswer:["(x+1)(x^2+1)","(x+1)(x²+1)","(x^2+1)(x+1)"] },
+  { expr:"x² − 9", title:"Differenza di quadrati", desc:"a² − b² = (a − b)(a + b).",
+    tech:{name:"Differenza di quadrati",desc:"a²−b²=(a−b)(a+b). Serve una differenza (il meno!) tra due quadrati perfetti."},
+    hint:"x² è il quadrato di x, 9 è il quadrato di 3.",
+    steps:[
+      {label:"Passo 1: Individua a e b",answer:["a=x,b=3","x e 3"],feedback:"a=x perché x²=x·x; b=3 perché 9=3²."},
+      {label:"Passo 2: Scrivi il prodotto",answer:["(x-3)(x+3)","(x+3)(x-3)"],feedback:"(x−3)(x+3): svolgendo torna x²−9."}
+    ], finalAnswer:["(x-3)(x+3)","(x+3)(x-3)"] },
+  { expr:"4x² − 25", title:"Differenza di quadrati (2)", desc:"Attento ai coefficienti.",
+    tech:{name:"Differenza di quadrati",desc:"a²−b²=(a−b)(a+b). Anche i coefficienti devono essere quadrati perfetti."},
+    hint:"4x² è il quadrato di 2x; 25 è il quadrato di 5.",
+    steps:[
+      {label:"Passo 1: Individua a e b",answer:["a=2x,b=5","2x e 5"],feedback:"(2x)²=4x² e 5²=25."},
+      {label:"Passo 2: Scrivi il prodotto",answer:["(2x-5)(2x+5)","(2x+5)(2x-5)"],feedback:"(2x−5)(2x+5): svolgendo torna 4x²−25."}
+    ], finalAnswer:["(2x-5)(2x+5)","(2x+5)(2x-5)"] },
+  { expr:"9x² − 1", title:"Differenza di quadrati (3)", desc:"Anche 1 è un quadrato perfetto!",
+    tech:{name:"Differenza di quadrati",desc:"a²−b²=(a−b)(a+b). Ricorda: 1=1², quindi 1 è un quadrato."},
+    hint:"9x²=(3x)², e 1=1².",
+    steps:[
+      {label:"Passo 1: Individua a e b",answer:["a=3x,b=1","3x e 1"],feedback:"(3x)²=9x² e 1²=1."},
+      {label:"Passo 2: Scrivi il prodotto",answer:["(3x-1)(3x+1)","(3x+1)(3x-1)"],feedback:"(3x−1)(3x+1): svolgendo torna 9x²−1."}
+    ], finalAnswer:["(3x-1)(3x+1)","(3x+1)(3x-1)"] },
+  { expr:"x² + 6x + 9", title:"Trinomio quadrato (quadrato di binomio)", desc:"a² + 2ab + b² = (a + b)².",
+    tech:{name:"Trinomio quadrato perfetto",desc:"Un trinomio è il quadrato di un binomio se due termini sono quadrati (a², b²) e il terzo è il doppio prodotto 2ab. Risultato: (a+b)²."},
+    hint:"x² e 9 sono quadrati (di x e 3). 6x è il doppio prodotto 2·x·3?",
+    steps:[
+      {label:"Passo 1: Riconosci a, b e il doppio prodotto",answer:["a=x,b=3","x e 3"],feedback:"a=x, b=3 e 2·x·3=6x: è un quadrato perfetto!"},
+      {label:"Passo 2: Scrivi il quadrato del binomio",answer:["(x+3)^2","(x+3)²","(x+3)(x+3)"],feedback:"(x+3)²: svolgendo torna x²+6x+9."}
+    ], finalAnswer:["(x+3)^2","(x+3)²","(x+3)(x+3)"] },
+  { expr:"x² − 10x + 25", title:"Trinomio quadrato (con meno)", desc:"a² − 2ab + b² = (a − b)².",
+    tech:{name:"Trinomio quadrato perfetto",desc:"Se il doppio prodotto è negativo, il binomio è una differenza: (a−b)²."},
+    hint:"x² e 25 sono quadrati (di x e 5). Il termine centrale −10x è −2·x·5.",
+    steps:[
+      {label:"Passo 1: Riconosci a, b e il doppio prodotto",answer:["a=x,b=5","x e 5"],feedback:"a=x, b=5 e 2·x·5=10x: col segno meno è (a−b)²."},
+      {label:"Passo 2: Scrivi il quadrato del binomio",answer:["(x-5)^2","(x-5)²","(x-5)(x-5)"],feedback:"(x−5)²: svolgendo torna x²−10x+25."}
+    ], finalAnswer:["(x-5)^2","(x-5)²","(x-5)(x-5)"] },
+  { expr:"x² − x − 12", title:"Trinomio caratteristico", desc:"x² + sx + p = (x + m)(x + n) con m+n=s e m·n=p.",
+    tech:{name:"Trinomio caratteristico",desc:"Per x²+sx+p cerca due numeri m e n la cui SOMMA sia s (coefficiente di x) e il cui PRODOTTO sia p (termine noto). Poi scrivi (x+m)(x+n)."},
+    hint:"Cerca due numeri con prodotto −12 e somma −1. Prova +3 e −4.",
+    steps:[
+      {label:"Passo 1: Trova i due numeri",answer:["3 e -4","-4 e 3","3,-4"],feedback:"3·(−4)=−12 (il termine noto) e 3+(−4)=−1 (il coefficiente di x)."},
+      {label:"Passo 2: Scrivi la scomposizione",answer:["(x+3)(x-4)","(x-4)(x+3)"],feedback:"(x+3)(x−4): svolgendo torna x²−x−12."}
+    ], finalAnswer:["(x+3)(x-4)","(x-4)(x+3)"] },
+],
+frazioni_algebriche: [
+  { expr:"1 / x", title:"Condizione di esistenza (facile)", desc:"Una frazione esiste solo se il denominatore è diverso da zero.",
+    tech:{name:"Condizione di esistenza",desc:"Numeratore = sopra la linea, denominatore = sotto. La condizione di esistenza (C.E.) impone denominatore ≠ 0, perché non si può dividere per zero."},
+    hint:"Quale valore di x renderebbe il denominatore uguale a zero? Quello è vietato.",
+    steps:[
+      {label:"Passo 1: Poni il denominatore diverso da zero",answer:["x≠0","x!=0","x diverso da 0"],feedback:"Se x fosse 0 la frazione non esisterebbe."}
+    ], finalAnswer:["x≠0","x!=0","x diverso da 0"] },
+  { expr:"5 / (x − 2)", title:"Condizione di esistenza (2)", desc:"Risolvi denominatore = 0 e poi escludi quel valore.",
+    tech:{name:"Condizione di esistenza",desc:"Si pone il denominatore = 0, si risolve, e i valori trovati vanno ESCLUSI (segno ≠)."},
+    hint:"Quando vale zero x−2? Quel valore va escluso.",
+    steps:[
+      {label:"Passo 1: Poni x−2 diverso da zero",answer:["x≠2","x!=2","x diverso da 2"],feedback:"x−2=0 dà x=2, quindi la C.E. è x≠2."}
+    ], finalAnswer:["x≠2","x!=2","x diverso da 2"] },
+  { expr:"(x + 1) / (x² − 9)", title:"Condizione con due valori", desc:"Il denominatore si annulla in più punti.",
+    tech:{name:"Condizione di esistenza",desc:"Se il denominatore è una differenza di quadrati, si scompone per trovare tutti i valori che lo annullano."},
+    hint:"x²−9=(x−3)(x+3): si annulla sia per x=3 sia per x=−3.",
+    steps:[
+      {label:"Passo 1: Scomponi il denominatore",answer:["(x-3)(x+3)","(x+3)(x-3)"],feedback:"x²−9=(x−3)(x+3)."},
+      {label:"Passo 2: Escludi i valori che lo annullano",answer:["x≠3 e x≠-3","x≠3,x≠-3","x!=3 e x!=-3","x≠±3"],feedback:"Il denominatore è zero per x=3 e x=−3: entrambi esclusi."}
+    ], finalAnswer:["x≠3 e x≠-3","x≠3,x≠-3","x!=3 e x!=-3","x≠±3"] },
+  { expr:"2x / (4x²)", title:"Semplificazione (fattore comune)", desc:"Dividi numeratore e denominatore per i fattori comuni.",
+    tech:{name:"Semplificazione",desc:"Semplificare = dividere numeratore e denominatore per gli stessi fattori comuni. Vale solo dove la frazione esiste (C.E. x≠0)."},
+    hint:"Sopra c'è 2x, sotto 4x². Semplifica il 2 col 4 e una x.",
+    steps:[
+      {label:"Passo 1: Scrivi i fattori",answer:["2x/(4x*x)","2x/(4x^2)"],feedback:"4x²=4·x·x, così si vede cosa semplificare."},
+      {label:"Passo 2: Semplifica",answer:["1/(2x)","1/2x"],feedback:"2/4=1/2 e resta una x sotto: 1/(2x). (C.E. x≠0)"}
+    ], finalAnswer:["1/(2x)","1/2x"] },
+  { expr:"(x² − 9) / (x − 3)", title:"Semplificazione con scomposizione", desc:"Scomponi, poi elimina il fattore comune.",
+    tech:{name:"Semplificazione",desc:"Per semplificare frazioni con polinomi bisogna prima SCOMPORRE numeratore e denominatore in fattori."},
+    hint:"x²−9 è una differenza di quadrati. Quale fattore compare anche sotto?",
+    steps:[
+      {label:"Passo 1: Scomponi il numeratore",answer:["(x-3)(x+3)","(x+3)(x-3)"],feedback:"x²−9=(x−3)(x+3)."},
+      {label:"Passo 2: Semplifica (x−3)",answer:["x+3","(x+3)"],feedback:"Il fattore (x−3) sopra e sotto si elimina. Resta x+3. (C.E. x≠3)"}
+    ], finalAnswer:["x+3","(x+3)"] },
+  { expr:"(x² + 2x) / (x² − 4)", title:"Semplificazione avanzata", desc:"Scomponi sopra e sotto, poi semplifica.",
+    tech:{name:"Semplificazione",desc:"Si scompongono numeratore e denominatore; poi si eliminano i fattori uguali. Non si semplifica MAI addendo con addendo, solo fattori interi."},
+    hint:"Sopra raccogli x. Sotto è una differenza di quadrati: (x−2)(x+2).",
+    steps:[
+      {label:"Passo 1: Scomponi numeratore e denominatore",answer:["x(x+2)/((x-2)(x+2))","x(x+2)/(x-2)(x+2)"],feedback:"Sopra x(x+2); sotto (x−2)(x+2)."},
+      {label:"Passo 2: Semplifica (x+2)",answer:["x/(x-2)"],feedback:"Il fattore (x+2) si elimina. Resta x/(x−2). (C.E. x≠2 e x≠−2)"}
+    ], finalAnswer:["x/(x-2)"] },
+  { expr:"3/x + 5/x", title:"Somma (stesso denominatore)", desc:"Denominatore uguale: si sommano solo i numeratori.",
+    tech:{name:"Somma di frazioni",desc:"Con lo stesso denominatore si sommano i numeratori e si tiene lo stesso denominatore."},
+    hint:"Il denominatore x resta uguale, somma solo 3 e 5.",
+    steps:[
+      {label:"Passo 1: Somma i numeratori",answer:["(3+5)/x","8/x"],feedback:"3+5=8, denominatore invariato."},
+      {label:"Passo 2: Risultato",answer:["8/x"],feedback:"8/x. (C.E. x≠0)"}
+    ], finalAnswer:["8/x"] },
+  { expr:"7/(x−1) − 3/(x−1)", title:"Differenza (stesso denominatore)", desc:"Sottrai i numeratori, tieni il denominatore.",
+    tech:{name:"Differenza di frazioni",desc:"Con lo stesso denominatore si sottraggono i numeratori mantenendo il denominatore comune."},
+    hint:"Il denominatore (x−1) resta uguale: fai 7−3.",
+    steps:[
+      {label:"Passo 1: Sottrai i numeratori",answer:["(7-3)/(x-1)","4/(x-1)"],feedback:"7−3=4."},
+      {label:"Passo 2: Risultato",answer:["4/(x-1)"],feedback:"4/(x−1). (C.E. x≠1)"}
+    ], finalAnswer:["4/(x-1)"] },
+  { expr:"1/x + 1/y", title:"Somma (denominatori diversi)", desc:"Serve il minimo comune multiplo dei denominatori.",
+    tech:{name:"Minimo comune multiplo (m.c.m.)",desc:"Con denominatori diversi si trova il m.c.m., cioè il denominatore comune più piccolo. Qui, non avendo fattori comuni, è il prodotto x·y."},
+    hint:"Il denominatore comune è xy. Riscrivi ogni frazione con denominatore xy.",
+    steps:[
+      {label:"Passo 1: Riscrivi con denominatore xy",answer:["y/(xy)+x/(xy)","(y+x)/(xy)"],feedback:"1/x=y/(xy) e 1/y=x/(xy)."},
+      {label:"Passo 2: Somma i numeratori",answer:["(x+y)/(xy)","(y+x)/(xy)"],feedback:"(x+y)/(xy). (C.E. x≠0 e y≠0)"}
+    ], finalAnswer:["(x+y)/(xy)","(y+x)/(xy)"] },
+  { expr:"1/x + 1/(x+1)", title:"Somma (denominatori diversi, 2)", desc:"m.c.m. = prodotto dei due denominatori.",
+    tech:{name:"Minimo comune multiplo (m.c.m.)",desc:"Se i denominatori non hanno fattori comuni, il m.c.m. è il loro prodotto: x(x+1)."},
+    hint:"Denominatore comune x(x+1). Numeratori: (x+1) e x.",
+    steps:[
+      {label:"Passo 1: Riscrivi col denominatore comune",answer:["(x+1)/(x(x+1))+x/(x(x+1))","((x+1)+x)/(x(x+1))"],feedback:"1/x=(x+1)/(x(x+1)) e 1/(x+1)=x/(x(x+1))."},
+      {label:"Passo 2: Somma i numeratori",answer:["(2x+1)/(x(x+1))","(2x+1)/(x^2+x)","(2x+1)/(x²+x)"],feedback:"(x+1)+x=2x+1. Risultato (2x+1)/(x(x+1)). (C.E. x≠0 e x≠−1)"}
+    ], finalAnswer:["(2x+1)/(x(x+1))","(2x+1)/(x^2+x)","(2x+1)/(x²+x)"] },
+  { expr:"(x/2) · (4/x²)", title:"Prodotto di frazioni", desc:"Numeratore per numeratore, denominatore per denominatore.",
+    tech:{name:"Prodotto di frazioni",desc:"Nel prodotto si moltiplicano i numeratori tra loro e i denominatori tra loro; conviene semplificare 'in croce' prima di moltiplicare."},
+    hint:"Moltiplica sopra x·4 e sotto 2·x², poi semplifica.",
+    steps:[
+      {label:"Passo 1: Moltiplica numeratori e denominatori",answer:["(4x)/(2x^2)","4x/(2x²)","(x*4)/(2*x^2)"],feedback:"x·4=4x sopra, 2·x²=2x² sotto."},
+      {label:"Passo 2: Semplifica",answer:["2/x"],feedback:"4/2=2 e x/x²=1/x: resta 2/x. (C.E. x≠0)"}
+    ], finalAnswer:["2/x"] },
+  { expr:"(x/2) : (x/4)", title:"Quoziente di frazioni", desc:"Dividere = moltiplicare per la frazione inversa (reciproca).",
+    tech:{name:"Quoziente di frazioni",desc:"Per dividere due frazioni si moltiplica la prima per il RECIPROCO della seconda (si 'gira' la seconda frazione)."},
+    hint:"x/2 : x/4 diventa x/2 · 4/x.",
+    steps:[
+      {label:"Passo 1: Trasforma in prodotto",answer:["(x/2)*(4/x)","x/2 * 4/x"],feedback:"Il reciproco di x/4 è 4/x."},
+      {label:"Passo 2: Moltiplica e semplifica",answer:["2","4x/(2x)"],feedback:"(x·4)/(2·x)=4x/(2x)=2. (C.E. x≠0)"}
+    ], finalAnswer:["2","4x/(2x)"] },
+],
+sistemi: [
+  { expr:"x + y = 5 ;  x − y = 1", title:"Metodo di riduzione", desc:"Somma le due equazioni per eliminare una incognita.",
+    tech:{name:"Sistema di due equazioni",desc:"Un sistema è un insieme di equazioni valide insieme. La soluzione è la coppia (x, y) che le soddisfa entrambe."},
+    hint:"Se sommi membro a membro, cosa succede alle y?",
+    steps:[
+      {label:"Passo 1: Somma le equazioni",answer:["2x=6"],feedback:"Sommando membro a membro, +y e −y si eliminano: 2x = 6."},
+      {label:"Passo 2: Trova x",answer:["x=3","3"],feedback:"x = 6/2 = 3."},
+      {label:"Passo 3: Trova y",answer:["y=2","2"],feedback:"In x+y=5: 3+y=5 → y = 2."}
+    ], finalAnswer:["x=3,y=2","(3,2)","3,2"] },
+  { expr:"y = x + 1 ;  x + y = 7", title:"Metodo di sostituzione", desc:"Una incognita è già isolata: sostituiscila.",
+    tech:{name:"Metodo di sostituzione",desc:"Si ricava una incognita da una equazione e la si sostituisce nell'altra, ottenendo una sola incognita."},
+    hint:"Metti x+1 al posto di y nella seconda equazione.",
+    steps:[
+      {label:"Passo 1: Sostituisci y",answer:["x+x+1=7","2x+1=7"],feedback:"x + (x+1) = 7 → 2x + 1 = 7."},
+      {label:"Passo 2: Trova x",answer:["x=3","3"],feedback:"2x = 6 → x = 3."},
+      {label:"Passo 3: Trova y",answer:["y=4","4"],feedback:"y = x+1 = 4."}
+    ], finalAnswer:["x=3,y=4","(3,4)","3,4"] },
+  { expr:"x + y = 10 ;  x − y = 4", title:"Riduzione per somma", desc:"Elimina la y sommando le equazioni.",
+    tech:{name:"Soluzione del sistema",desc:"La soluzione è la coppia di valori (x, y) che rende vere entrambe le equazioni contemporaneamente."},
+    hint:"+y e −y sono opposti: sommando spariscono.",
+    steps:[
+      {label:"Passo 1: Somma",answer:["2x=14"],feedback:"Le y si eliminano: 2x = 14."},
+      {label:"Passo 2: Trova x",answer:["x=7","7"],feedback:"x = 14/2 = 7."},
+      {label:"Passo 3: Trova y",answer:["y=3","3"],feedback:"10 − 7 = 3."}
+    ], finalAnswer:["x=7,y=3","(7,3)","7,3"] },
+  { expr:"2x + y = 7 ;  x − y = 2", title:"Riduzione (2)", desc:"Somma per eliminare la y, poi risali.",
+    tech:{name:"Incognite",desc:"x e y sono le incognite: i valori da trovare. In un sistema lineare compaiono al primo grado."},
+    hint:"+y e −y si annullano sommando.",
+    steps:[
+      {label:"Passo 1: Somma",answer:["3x=9"],feedback:"(2x+y)+(x−y) = 7+2 → 3x = 9."},
+      {label:"Passo 2: Trova x",answer:["x=3","3"],feedback:"x = 9/3 = 3."},
+      {label:"Passo 3: Trova y",answer:["y=1","1"],feedback:"x−y=2 → 3−y=2 → y = 1."}
+    ], finalAnswer:["x=3,y=1","(3,1)","3,1"] },
+  { expr:"y = 2x ;  x + y = 9", title:"Sostituzione con y=2x", desc:"Sostituisci 2x al posto di y.",
+    tech:{name:"Sostituzione diretta",desc:"Quando una incognita è già espressa in funzione dell'altra, la sostituzione è immediata."},
+    hint:"Nella seconda equazione, y vale 2x.",
+    steps:[
+      {label:"Passo 1: Sostituisci",answer:["x+2x=9","3x=9"],feedback:"x + 2x = 9 → 3x = 9."},
+      {label:"Passo 2: Trova x",answer:["x=3","3"],feedback:"x = 3."},
+      {label:"Passo 3: Trova y",answer:["y=6","6"],feedback:"y = 2·3 = 6."}
+    ], finalAnswer:["x=3,y=6","(3,6)","3,6"] },
+  { expr:"x + 2y = 8 ;  x − y = 2", title:"Riduzione per sottrazione", desc:"Sottrai le equazioni per eliminare la x.",
+    tech:{name:"Metodo di riduzione",desc:"Si sommano o sottraggono le equazioni per far sparire una incognita. Qui la x compare uguale in entrambe."},
+    hint:"Le x sono identiche: sottraendo si eliminano.",
+    steps:[
+      {label:"Passo 1: Sottrai (prima − seconda)",answer:["3y=6"],feedback:"(x+2y)−(x−y) = 8−2 → 3y = 6."},
+      {label:"Passo 2: Trova y",answer:["y=2","2"],feedback:"y = 6/3 = 2."},
+      {label:"Passo 3: Trova x",answer:["x=4","4"],feedback:"x−y=2 → x−2=2 → x = 4."}
+    ], finalAnswer:["x=4,y=2","(4,2)","4,2"] },
+  { expr:"3x + 2y = 16 ;  x = 2y", title:"Sostituzione con x=2y", desc:"Sostituisci 2y al posto di x.",
+    tech:{name:"Scelta del metodo",desc:"Se una incognita è isolata conviene la sostituzione; se i coefficienti sono opposti conviene la riduzione."},
+    hint:"Nella prima equazione, x vale 2y.",
+    steps:[
+      {label:"Passo 1: Sostituisci",answer:["3(2y)+2y=16","6y+2y=16","8y=16"],feedback:"3·(2y) + 2y = 16 → 8y = 16."},
+      {label:"Passo 2: Trova y",answer:["y=2","2"],feedback:"y = 16/8 = 2."},
+      {label:"Passo 3: Trova x",answer:["x=4","4"],feedback:"x = 2y = 4."}
+    ], finalAnswer:["x=4,y=2","(4,2)","4,2"] },
+  { expr:"y = 2x − 1 ;  y = x + 3", title:"Metodo del confronto", desc:"Le due equazioni danno y: uguagliale.",
+    tech:{name:"Metodo del confronto",desc:"Quando entrambe le equazioni esprimono la stessa incognita, si uguagliano le due espressioni (confronto)."},
+    hint:"Se y = questo e y = quello, allora questo = quello.",
+    steps:[
+      {label:"Passo 1: Confronta",answer:["2x-1=x+3"],feedback:"Uguaglio le due espressioni di y: 2x−1 = x+3."},
+      {label:"Passo 2: Trova x",answer:["x=4","4"],feedback:"2x−x = 3+1 → x = 4."},
+      {label:"Passo 3: Trova y",answer:["y=7","7"],feedback:"y = x+3 = 7."}
+    ], finalAnswer:["x=4,y=7","(4,7)","4,7"] },
+  { expr:"2x + 3y = 13 ;  x + y = 5", title:"Sostituzione da ricavare", desc:"Ricava x dalla seconda, poi sostituisci.",
+    tech:{name:"Ricavare l'incognita",desc:"Da x+y=5 si ottiene x = 5−y, che si sostituisce nell'altra equazione."},
+    hint:"Dalla seconda: x = 5 − y.",
+    steps:[
+      {label:"Passo 1: Sostituisci x=5−y",answer:["2(5-y)+3y=13","10-2y+3y=13","10+y=13"],feedback:"2(5−y)+3y = 13 → 10 + y = 13."},
+      {label:"Passo 2: Trova y",answer:["y=3","3"],feedback:"y = 13−10 = 3."},
+      {label:"Passo 3: Trova x",answer:["x=2","2"],feedback:"x = 5−3 = 2."}
+    ], finalAnswer:["x=2,y=3","(2,3)","2,3"] },
+  { expr:"3x − 2y = 4 ;  2x + y = 5", title:"Riduzione con moltiplicazione", desc:"Moltiplica la seconda per 2, poi somma.",
+    tech:{name:"Riduzione con multipli",desc:"Si moltiplica una equazione per un numero così da rendere opposti i coefficienti di una incognita."},
+    hint:"Se moltiplichi la seconda per 2, le y diventano opposte.",
+    steps:[
+      {label:"Passo 1: Moltiplica la seconda per 2",answer:["4x+2y=10"],feedback:"2·(2x+y=5) → 4x + 2y = 10."},
+      {label:"Passo 2: Somma con la prima",answer:["7x=14"],feedback:"(3x−2y)+(4x+2y) = 4+10 → 7x = 14."},
+      {label:"Passo 3: Trova x",answer:["x=2","2"],feedback:"x = 14/7 = 2."},
+      {label:"Passo 4: Trova y",answer:["y=1","1"],feedback:"2x+y=5 → 4+y=5 → y = 1."}
+    ], finalAnswer:["x=2,y=1","(2,1)","2,1"] },
+  { expr:"4x + 3y = 18 ;  2x − y = 4", title:"Sostituzione (avanzata)", desc:"Ricava y dalla seconda, poi sostituisci.",
+    tech:{name:"Sostituzione con segno",desc:"Da 2x−y=4 si ricava y = 2x−4. Attenzione ai segni durante la sostituzione."},
+    hint:"Dalla seconda: y = 2x − 4.",
+    steps:[
+      {label:"Passo 1: Sostituisci y=2x−4",answer:["4x+3(2x-4)=18","4x+6x-12=18","10x-12=18"],feedback:"4x + 3(2x−4) = 18 → 10x − 12 = 18."},
+      {label:"Passo 2: Trova x",answer:["x=3","3"],feedback:"10x = 30 → x = 3."},
+      {label:"Passo 3: Trova y",answer:["y=2","2"],feedback:"y = 2·3 − 4 = 2."}
+    ], finalAnswer:["x=3,y=2","(3,2)","3,2"] },
+  { expr:"5x − 2y = 8 ;  3x + 4y = 10", title:"Riduzione (avanzata)", desc:"Moltiplica la prima per 2, poi somma.",
+    tech:{name:"Sistema determinato",desc:"Quando le rette si incontrano in un punto, il sistema ha una sola soluzione: è determinato."},
+    hint:"Moltiplica la prima per 2 così le y diventano opposte.",
+    steps:[
+      {label:"Passo 1: Moltiplica la prima per 2",answer:["10x-4y=16"],feedback:"2·(5x−2y=8) → 10x − 4y = 16."},
+      {label:"Passo 2: Somma con la seconda",answer:["13x=26"],feedback:"(10x−4y)+(3x+4y) = 16+10 → 13x = 26."},
+      {label:"Passo 3: Trova x",answer:["x=2","2"],feedback:"x = 26/13 = 2."},
+      {label:"Passo 4: Trova y",answer:["y=1","1"],feedback:"3x+4y=10 → 6+4y=10 → y = 1."}
+    ], finalAnswer:["x=2,y=1","(2,1)","2,1"] },
+],
+disequazioni: [
+  { expr:"x + 3 > 5", title:"Disequazione semplice", desc:"Isola x come in una equazione.",
+    tech:{name:"Disequazione",desc:"Come una equazione, ma con un verso (> maggiore, < minore, ≥ maggiore o uguale, ≤ minore o uguale). La soluzione è un insieme di valori."},
+    hint:"Sposta il +3 dall'altra parte cambiando segno.",
+    steps:[
+      {label:"Passo 1: Sposta il 3",answer:["x>5-3","x>2","x > 2"],feedback:"+3 diventa −3: x > 5 − 3."},
+      {label:"Passo 2: Soluzione",answer:["x>2","x > 2"],feedback:"x > 2: tutti i numeri maggiori di 2."}
+    ], finalAnswer:["x>2","x > 2"] },
+  { expr:"x − 4 < 1", title:"Verso minore", desc:"Sposta il termine noto e leggi la soluzione.",
+    tech:{name:"Verso della disequazione",desc:"Il verso (< o >) indica se cerchi valori minori o maggiori. Sommare o sottrarre non lo cambia mai."},
+    hint:"−4 passa dall'altra parte come +4.",
+    steps:[
+      {label:"Passo 1: Sposta il −4",answer:["x<1+4","x<5","x < 5"],feedback:"−4 diventa +4: x < 1 + 4."},
+      {label:"Passo 2: Soluzione",answer:["x<5","x < 5"],feedback:"x < 5: tutti i valori minori di 5."}
+    ], finalAnswer:["x<5","x < 5"] },
+  { expr:"2x ≥ 6", title:"Dividere (positivo)", desc:"Dividi per un numero positivo: il verso resta.",
+    tech:{name:"Divisione per numero positivo",desc:"Se dividi o moltiplichi entrambi i membri per un numero positivo, il verso NON cambia."},
+    hint:"Dividi per 2, che è positivo.",
+    steps:[
+      {label:"Passo 1: Dividi per 2",answer:["x>=3","x >= 3","x≥3"],feedback:"6/2 = 3, verso invariato: x ≥ 3."},
+      {label:"Passo 2: Soluzione",answer:["x>=3","x >= 3","x≥3"],feedback:"x ≥ 3: incluso anche il 3."}
+    ], finalAnswer:["x>=3","x >= 3","x≥3"] },
+  { expr:"3x − 2 > 4", title:"Due passaggi", desc:"Sposta il termine noto, poi dividi.",
+    tech:{name:"Soluzione della disequazione",desc:"È l'insieme di tutti i valori dell'incognita che rendono vera la disuguaglianza."},
+    hint:"Prima porta −2 dall'altra parte, poi dividi.",
+    steps:[
+      {label:"Passo 1: Sposta il −2",answer:["3x>6"],feedback:"−2 diventa +2: 3x > 6."},
+      {label:"Passo 2: Dividi per 3",answer:["x>2","x > 2"],feedback:"3 è positivo: verso invariato, x > 2."}
+    ], finalAnswer:["x>2","x > 2"] },
+  { expr:"2x + 1 ≤ 7", title:"Minore o uguale", desc:"Isola x mantenendo il ≤.",
+    tech:{name:"Maggiore/minore o uguale",desc:"I simboli ≤ e ≥ includono anche il valore limite; < e > lo escludono."},
+    hint:"Sposta +1, poi dividi per 2 (positivo).",
+    steps:[
+      {label:"Passo 1: Sposta il +1",answer:["2x<=6","2x≤6"],feedback:"+1 diventa −1: 2x ≤ 6."},
+      {label:"Passo 2: Dividi per 2",answer:["x<=3","x <= 3","x≤3"],feedback:"Verso invariato: x ≤ 3."}
+    ], finalAnswer:["x<=3","x <= 3","x≤3"] },
+  { expr:"2x + 1 < 4", title:"Soluzione frazionaria", desc:"La soluzione può essere una frazione.",
+    tech:{name:"Soluzione non intera",desc:"Il valore limite non deve essere per forza intero: può essere una frazione o un decimale."},
+    hint:"Sposta +1, poi dividi per 2.",
+    steps:[
+      {label:"Passo 1: Sposta il +1",answer:["2x<3"],feedback:"+1 diventa −1: 2x < 3."},
+      {label:"Passo 2: Dividi per 2",answer:["x<3/2","x < 3/2","x<1.5","x < 1.5"],feedback:"x < 3/2 = 1.5."}
+    ], finalAnswer:["x<3/2","x < 3/2","x<1.5","x < 1.5"] },
+  { expr:"−x > 2", title:"Cambio di verso!", desc:"Moltiplicando per −1 il verso si INVERTE.",
+    tech:{name:"Regola del cambio di verso",desc:"Se moltiplichi o dividi entrambi i membri per un numero NEGATIVO, il verso della disequazione si inverte."},
+    hint:"Per liberare la x devi moltiplicare per −1: attento al verso!",
+    steps:[
+      {label:"Passo 1: Moltiplica per −1",answer:["x<-2","x < -2"],feedback:"Numero negativo → il verso cambia: da > diventa <, quindi x < −2."},
+      {label:"Passo 2: Soluzione",answer:["x<-2","x < -2"],feedback:"Verifica con x=−3: −(−3)=3 > 2. Corretto: x < −2."}
+    ], finalAnswer:["x<-2","x < -2"] },
+  { expr:"−2x ≤ 8", title:"Dividere per negativo", desc:"Dividi per −2: il verso si inverte.",
+    tech:{name:"Divisione per numero negativo",desc:"Dividere per −2 impone di ribaltare il verso: ≤ diventa ≥."},
+    hint:"Dividi per −2 e ricorda di girare il verso.",
+    steps:[
+      {label:"Passo 1: Dividi per −2 (verso inverso)",answer:["x>=-4","x >= -4","x≥-4"],feedback:"8/(−2) = −4 e il verso si inverte: x ≥ −4."},
+      {label:"Passo 2: Soluzione",answer:["x>=-4","x >= -4","x≥-4"],feedback:"Verifica con x=0: −2·0=0 ≤ 8. Corretto: x ≥ −4."}
+    ], finalAnswer:["x>=-4","x >= -4","x≥-4"] },
+  { expr:"5 − 2x > 1", title:"Termine noto e negativo", desc:"Sposta il 5, poi dividi per −2 girando il verso.",
+    tech:{name:"Coefficiente negativo dell'incognita",desc:"Quando il coefficiente della x è negativo, dopo aver isolato il termine con x bisogna girare il verso dividendo."},
+    hint:"Prima sposta +5, poi dividi per −2 (verso!).",
+    steps:[
+      {label:"Passo 1: Sposta il 5",answer:["-2x>-4"],feedback:"5 passa a destra: −2x > 1 − 5 = −4."},
+      {label:"Passo 2: Dividi per −2 (verso inverso)",answer:["x<2","x < 2"],feedback:"(−4)/(−2)=2 e il verso si inverte: x < 2."}
+    ], finalAnswer:["x<2","x < 2"] },
+  { expr:"3x + 2 < x + 8", title:"x su entrambi i lati", desc:"Porta le x a sinistra e i numeri a destra.",
+    tech:{name:"Raggruppamento",desc:"Come nelle equazioni: x da un lato, numeri dall'altro. Spostare termini non cambia il verso."},
+    hint:"Sposta x a sinistra e i numeri a destra.",
+    steps:[
+      {label:"Passo 1: Raggruppa",answer:["2x<6","3x-x<8-2"],feedback:"3x−x < 8−2 → 2x < 6."},
+      {label:"Passo 2: Dividi per 2",answer:["x<3","x < 3"],feedback:"2 è positivo: verso invariato, x < 3."}
+    ], finalAnswer:["x<3","x < 3"] },
+  { expr:"2x − 5 ≥ 4x + 1", title:"Raggruppamento con verso", desc:"Raggruppa: il coefficiente diventa negativo.",
+    tech:{name:"Verso dopo il raggruppamento",desc:"Se dopo aver raggruppato il coefficiente della x è negativo, dividendo si inverte il verso."},
+    hint:"Porta le x a sinistra: diventeranno negative.",
+    steps:[
+      {label:"Passo 1: Raggruppa",answer:["-2x>=6","2x-4x>=1+5","-2x≥6"],feedback:"2x−4x ≥ 1+5 → −2x ≥ 6."},
+      {label:"Passo 2: Dividi per −2 (verso inverso)",answer:["x<=-3","x <= -3","x≤-3"],feedback:"6/(−2)=−3 e il verso si inverte: x ≤ −3."}
+    ], finalAnswer:["x<=-3","x <= -3","x≤-3"] },
+  { expr:"−(x − 2) < 3x + 10", title:"Parentesi e cambio di verso", desc:"Distribuisci il segno, raggruppa, poi dividi per un negativo.",
+    tech:{name:"Disequazione con parentesi",desc:"Prima si toglie la parentesi (attenzione al segno −), poi si raggruppa e, se serve, si gira il verso."},
+    hint:"−(x−2) diventa −x+2. Poi raggruppa.",
+    steps:[
+      {label:"Passo 1: Togli la parentesi",answer:["-x+2<3x+10"],feedback:"−(x−2) = −x + 2."},
+      {label:"Passo 2: Raggruppa",answer:["-4x<8","-x-3x<10-2","-4x < 8"],feedback:"−x−3x < 10−2 → −4x < 8."},
+      {label:"Passo 3: Dividi per −4 (verso inverso)",answer:["x>-2","x > -2"],feedback:"8/(−4)=−2 e il verso si inverte: x > −2. Verifica x=0: −(−2)=2 < 10. Corretto!"}
+    ], finalAnswer:["x>-2","x > -2"] },
+],
+probabilita: [
+  { expr:"Problema", title:"Lancio di una moneta", problemText:"Lanci una moneta. Qual è la probabilità che esca testa? Scrivi il risultato come frazione e come numero decimale.",
+    desc:"P = casi favorevoli / casi possibili.",
+    tech:{name:"Probabilità classica",desc:"P(E) = casi favorevoli / casi possibili. I casi devono essere tutti ugualmente possibili."},
+    hints:["Quante facce ha la moneta? Sono i casi possibili.","I casi favorevoli sono le facce 'testa'."],
+    steps:[
+      {label:"Passo 1: Casi possibili",answer:["2"],feedback:"La moneta ha 2 facce: testa e croce."},
+      {label:"Passo 2: Casi favorevoli",answer:["1"],feedback:"C'è 1 sola faccia 'testa'."},
+      {label:"Passo 3: Probabilità",answer:["1/2","0,5","0.5"],feedback:"P = 1/2 = 0,5. Bravo!"}
+    ], finalAnswer:["1/2","0,5","0.5"] },
+  { expr:"Problema", title:"Lancio di un dado", problemText:"Lanci un dado a 6 facce. Qual è la probabilità di ottenere il numero 5? Scrivi la frazione.",
+    desc:"P = casi favorevoli / casi possibili.",
+    tech:{name:"Casi possibili",desc:"I casi possibili sono tutti i risultati che l'esperimento può dare: qui le 6 facce del dado."},
+    hints:["Quante facce ha il dado?","Quante facce mostrano il 5?"],
+    steps:[
+      {label:"Passo 1: Casi possibili",answer:["6"],feedback:"Il dado ha 6 facce."},
+      {label:"Passo 2: Casi favorevoli",answer:["1"],feedback:"Il 5 è su una sola faccia."},
+      {label:"Passo 3: Probabilità",answer:["1/6"],feedback:"P = 1/6."}
+    ], finalAnswer:["1/6"] },
+  { expr:"Problema", title:"Dado: numero pari", problemText:"Lanci un dado a 6 facce. Qual è la probabilità di ottenere un numero pari? Scrivi frazione ridotta e decimale.",
+    desc:"Conta quanti numeri pari ci sono da 1 a 6.",
+    tech:{name:"Evento",desc:"Un evento è l'insieme dei risultati che ci interessano. Qui l'evento 'numero pari' contiene 2, 4 e 6."},
+    hints:["I numeri pari da 1 a 6 sono 2, 4, 6.","3 favorevoli su 6 possibili, poi semplifica."],
+    steps:[
+      {label:"Passo 1: Casi favorevoli",answer:["3"],feedback:"I pari sono 2, 4, 6: sono 3."},
+      {label:"Passo 2: Probabilità",answer:["3/6","1/2","0,5","0.5"],feedback:"3/6 = 1/2 = 0,5."}
+    ], finalAnswer:["1/2","0,5","0.5"] },
+  { expr:"Problema", title:"Estrazione da un'urna", problemText:"In un'urna ci sono 3 palline rosse e 2 palline blu. Estrai una pallina a caso. Qual è la probabilità che sia blu? Scrivi frazione e decimale.",
+    desc:"I casi possibili sono tutte le palline.",
+    tech:{name:"Casi favorevoli",desc:"I casi favorevoli sono i risultati che realizzano l'evento: qui le palline blu."},
+    hints:["Quante palline in tutto? 3 + 2.","Quante blu? Sono i casi favorevoli."],
+    steps:[
+      {label:"Passo 1: Casi possibili",answer:["5"],feedback:"In tutto ci sono 3 + 2 = 5 palline."},
+      {label:"Passo 2: Casi favorevoli",answer:["2"],feedback:"Le palline blu sono 2."},
+      {label:"Passo 3: Probabilità",answer:["2/5","0,4","0.4"],feedback:"P = 2/5 = 0,4."}
+    ], finalAnswer:["2/5","0,4","0.4"] },
+  { expr:"Problema", title:"Carte da 40", problemText:"Da un mazzo di 40 carte da gioco ne peschi una a caso. Qual è la probabilità che sia un asso (ci sono 4 assi)? Scrivi frazione ridotta e decimale.",
+    desc:"4 assi su 40 carte.",
+    tech:{name:"Probabilità come frazione",desc:"La probabilità si può scrivere come frazione, come decimale o come percentuale: sono tre modi per dire la stessa cosa."},
+    hints:["Casi favorevoli: gli assi. Casi possibili: tutte le carte.","4/40, poi semplifica."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["4/40"],feedback:"4 assi su 40 carte: 4/40."},
+      {label:"Passo 2: Semplifica",answer:["1/10","0,1","0.1"],feedback:"4/40 = 1/10 = 0,1."}
+    ], finalAnswer:["1/10","0,1","0.1"] },
+  { expr:"Problema", title:"Evento certo ed evento impossibile", problemText:"Lanci un dado a 6 facce. Qual è la probabilità di ottenere un numero minore di 7? Scrivi il valore.",
+    desc:"Se un evento si verifica sempre è certo (P=1); se non si verifica mai è impossibile (P=0).",
+    tech:{name:"Evento certo / impossibile",desc:"Evento certo: accade sempre, P = 1. Evento impossibile: non accade mai, P = 0. La probabilità è sempre compresa tra 0 e 1."},
+    hints:["Tutti i numeri del dado (1,2,3,4,5,6) sono minori di 7.","Se tutti i casi sono favorevoli, l'evento è certo."],
+    steps:[
+      {label:"Passo 1: Casi favorevoli",answer:["6"],feedback:"Tutti i 6 numeri sono minori di 7."},
+      {label:"Passo 2: Probabilità",answer:["6/6","1"],feedback:"6/6 = 1: è un evento certo!"}
+    ], finalAnswer:["1"] },
+  { expr:"Problema", title:"Evento contrario", problemText:"Lanci un dado a 6 facce. Qual è la probabilità di NON ottenere il numero 3? Scrivi frazione e decimale.",
+    desc:"P(non E) = 1 − P(E).",
+    tech:{name:"Evento contrario",desc:"L'evento contrario di E si verifica quando E NON accade. Vale la regola: P(contrario) = 1 − P(E)."},
+    hints:["Prima trova P(esce 3) = 1/6.","Poi fai 1 − 1/6."],
+    steps:[
+      {label:"Passo 1: P(esce 3)",answer:["1/6"],feedback:"La probabilità che esca 3 è 1/6."},
+      {label:"Passo 2: Contrario",answer:["5/6","0,83","0.83"],feedback:"1 − 1/6 = 5/6 ≈ 0,83."}
+    ], finalAnswer:["5/6","0,83","0.83"] },
+  { expr:"Problema", title:"Probabilità in percentuale", problemText:"In un sacchetto ci sono 20 caramelle: 5 sono alla menta. Ne prendi una a caso. Qual è la probabilità che sia alla menta? Esprimila in percentuale.",
+    desc:"Trova la frazione, poi moltiplica per 100.",
+    tech:{name:"Probabilità come percentuale",desc:"Per passare da frazione a percentuale si moltiplica per 100: es. 1/4 = 0,25 = 25%."},
+    hints:["5 favorevoli su 20 possibili.","Semplifica, poi trasforma in %."],
+    steps:[
+      {label:"Passo 1: Frazione",answer:["5/20","1/4","0,25","0.25"],feedback:"5/20 = 1/4 = 0,25."},
+      {label:"Passo 2: Percentuale",answer:["25","25%"],feedback:"0,25 · 100 = 25%."}
+    ], finalAnswer:["25","25%"] },
+  { expr:"Problema", title:"Carte francesi: cuori", problemText:"Da un mazzo di 52 carte francesi ne peschi una a caso. I cuori sono 13. Qual è la probabilità di pescare un cuori? Scrivi frazione ridotta e decimale.",
+    desc:"13 cuori su 52 carte.",
+    tech:{name:"Casi ugualmente possibili",desc:"La formula P = favorevoli/possibili vale solo se tutti i casi hanno la stessa probabilità: ogni carta è pescabile allo stesso modo."},
+    hints:["Imposta 13/52.","Semplifica dividendo per 13."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["13/52"],feedback:"13 cuori su 52 carte."},
+      {label:"Passo 2: Semplifica",answer:["1/4","0,25","0.25"],feedback:"13/52 = 1/4 = 0,25."}
+    ], finalAnswer:["1/4","0,25","0.25"] },
+  { expr:"Problema", title:"Dado: maggiore di 4", problemText:"Lanci un dado a 6 facce. Qual è la probabilità di ottenere un numero maggiore di 4? Scrivi frazione ridotta e decimale approssimato.",
+    desc:"Quali numeri sono maggiori di 4?",
+    tech:{name:"Definire l'evento",desc:"Prima di calcolare, elenca con precisione i risultati che formano l'evento: qui i numeri 5 e 6."},
+    hints:["Maggiori di 4: solo 5 e 6.","2 favorevoli su 6, poi semplifica."],
+    steps:[
+      {label:"Passo 1: Casi favorevoli",answer:["2"],feedback:"I numeri maggiori di 4 sono 5 e 6: sono 2."},
+      {label:"Passo 2: Probabilità",answer:["2/6","1/3","0,33","0.33"],feedback:"2/6 = 1/3 ≈ 0,33."}
+    ], finalAnswer:["1/3","0,33","0.33"] },
+  { expr:"Problema", title:"Urna con tre colori", problemText:"In un'urna ci sono 4 palline rosse, 6 gialle e 2 verdi. Estrai una pallina a caso. Qual è la probabilità che sia rossa OPPURE verde? Scrivi frazione ridotta e decimale.",
+    desc:"Somma i casi favorevoli (rosse + verdi).",
+    tech:{name:"Unione di casi favorevoli",desc:"Se un evento è realizzato da più risultati (rossa o verde), si sommano i loro casi favorevoli."},
+    hints:["Casi possibili: 4 + 6 + 2.","Favorevoli: rosse + verdi = 4 + 2."],
+    steps:[
+      {label:"Passo 1: Casi possibili",answer:["12"],feedback:"4 + 6 + 2 = 12 palline."},
+      {label:"Passo 2: Casi favorevoli",answer:["6"],feedback:"Rosse + verdi = 4 + 2 = 6."},
+      {label:"Passo 3: Probabilità",answer:["6/12","1/2","0,5","0.5"],feedback:"6/12 = 1/2 = 0,5."}
+    ], finalAnswer:["1/2","0,5","0.5"] },
+  { expr:"Problema", title:"Due monete insieme", problemText:"Lanci due monete contemporaneamente. Qual è la probabilità di ottenere due teste? (Suggerimento: i casi possibili sono TT, TC, CT, CC.) Scrivi frazione e decimale.",
+    desc:"Elenca tutti i casi possibili delle due monete.",
+    tech:{name:"Casi possibili composti",desc:"Con due monete i risultati possibili sono le coppie ordinate: TT, TC, CT, CC. Sono 4 casi ugualmente possibili."},
+    hints:["Conta i casi possibili elencati nel testo.","Quanti danno due teste (TT)?"],
+    steps:[
+      {label:"Passo 1: Casi possibili",answer:["4"],feedback:"TT, TC, CT, CC: sono 4 casi."},
+      {label:"Passo 2: Casi favorevoli",answer:["1"],feedback:"Solo TT dà due teste."},
+      {label:"Passo 3: Probabilità",answer:["1/4","0,25","0.25"],feedback:"P = 1/4 = 0,25."}
+    ], finalAnswer:["1/4","0,25","0.25"] },
+],
+solidi: [
+  { expr:"Problema", title:"Superficie del cubo", problemText:"Un cubo ha lo spigolo di 5 cm. Calcola la sua superficie totale.",
+    desc:"Il cubo ha 6 facce quadrate uguali: S = 6 · spigolo².",
+    tech:{name:"Cubo: spigolo e faccia",desc:"Lo spigolo è il lato del cubo; ogni faccia è un quadrato. La superficie totale è l'area di tutte le 6 facce."},
+    hints:["Calcola l'area di una faccia: spigolo · spigolo.","Poi moltiplica per 6 facce."],
+    steps:[
+      {label:"Passo 1: Area di una faccia",answer:["25"],feedback:"5 · 5 = 25 cm²."},
+      {label:"Passo 2: Superficie totale",answer:["150"],feedback:"25 · 6 = 150 cm²."}
+    ], finalAnswer:["150"] },
+  { expr:"Problema", title:"Volume del cubo", problemText:"Un cubo ha lo spigolo di 4 cm. Calcola il suo volume.",
+    desc:"V = spigolo³ = spigolo · spigolo · spigolo.",
+    tech:{name:"Volume",desc:"Il volume misura lo spazio occupato dal solido; per il cubo è spigolo elevato al cubo."},
+    hints:["Moltiplica lo spigolo per se stesso tre volte.","4 · 4 · 4."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["4*4*4","4^3"],feedback:"V = 4³ = 4 · 4 · 4."},
+      {label:"Passo 2: Calcola",answer:["64"],feedback:"4 · 4 · 4 = 64 cm³."}
+    ], finalAnswer:["64"] },
+  { expr:"Problema", title:"Volume del parallelepipedo", problemText:"Un parallelepipedo rettangolo ha le dimensioni 5 cm, 3 cm e 4 cm. Calcola il suo volume.",
+    desc:"V = lunghezza · larghezza · altezza.",
+    tech:{name:"Parallelepipedo",desc:"Ha 6 facce rettangolari; le tre dimensioni sono lunghezza, larghezza e altezza. Il volume è il loro prodotto."},
+    hints:["Moltiplica le tre dimensioni.","5 · 3 · 4."],
+    steps:[
+      {label:"Passo 1: Base per profondità",answer:["15"],feedback:"5 · 3 = 15."},
+      {label:"Passo 2: Volume",answer:["60"],feedback:"15 · 4 = 60 cm³."}
+    ], finalAnswer:["60"] },
+  { expr:"Problema", title:"Superficie del parallelepipedo", problemText:"Un parallelepipedo rettangolo ha dimensioni 4 cm, 3 cm e 2 cm. Calcola la superficie totale.",
+    desc:"S = 2·(a·b + a·c + b·c).",
+    tech:{name:"Superficie totale",desc:"La superficie totale è l'area di tutte le facce. Le facce sono uguali a coppie, perciò si raddoppia la somma delle tre facce diverse."},
+    hints:["Trova le aree delle 3 facce diverse: 4·3, 4·2, 3·2.","Somma e moltiplica per 2."],
+    steps:[
+      {label:"Passo 1: Tre facce",answer:["26"],feedback:"4·3 + 4·2 + 3·2 = 12 + 8 + 6 = 26."},
+      {label:"Passo 2: Superficie totale",answer:["52"],feedback:"26 · 2 = 52 cm²."}
+    ], finalAnswer:["52"] },
+  { expr:"Problema", title:"Volume del prisma", problemText:"Un prisma retto ha per base un triangolo con base 4 cm e altezza 3 cm. L'altezza del prisma è 10 cm. Calcola il volume.",
+    desc:"V = Area di base · altezza del prisma.",
+    tech:{name:"Prisma: area di base e altezza",desc:"In un prisma il volume è l'area del poligono di base moltiplicata per l'altezza (la distanza tra le due basi)."},
+    hints:["Prima l'area del triangolo di base: (base · altezza)/2.","Poi moltiplica per l'altezza del prisma."],
+    steps:[
+      {label:"Passo 1: Area di base",answer:["6"],feedback:"(4 · 3)/2 = 6 cm²."},
+      {label:"Passo 2: Volume",answer:["60"],feedback:"6 · 10 = 60 cm³."}
+    ], finalAnswer:["60"] },
+  { expr:"Problema", title:"Volume del cilindro", problemText:"Un cilindro ha il raggio di base di 3 cm e l'altezza di 10 cm. Calcola il volume (usa π ≈ 3,14).",
+    desc:"V = π · raggio² · altezza.",
+    tech:{name:"Cilindro: raggio di base e altezza",desc:"Il raggio di base è il raggio del cerchio; l'altezza è la distanza tra le due basi. Il volume è area di base (π·r²) per l'altezza."},
+    hints:["Calcola il raggio al quadrato: 3².","Poi π · r² · altezza = 3,14 · 9 · 10."],
+    steps:[
+      {label:"Passo 1: Raggio²",answer:["9"],feedback:"3² = 9."},
+      {label:"Passo 2: Area di base",answer:["28,26","28.26"],feedback:"3,14 · 9 = 28,26 cm²."},
+      {label:"Passo 3: Volume",answer:["282,6","282.6"],feedback:"28,26 · 10 = 282,6 cm³."}
+    ], finalAnswer:["282,6","282.6"] },
+  { expr:"Problema", title:"Superficie totale del cilindro", problemText:"Un cilindro ha raggio di base 2 cm e altezza 5 cm. Calcola la superficie totale (usa π ≈ 3,14).",
+    desc:"S totale = superficie laterale + 2 basi = 2πrh + 2πr².",
+    tech:{name:"Superficie laterale e totale",desc:"La superficie laterale del cilindro è 2·π·r·h (il rettangolo 'srotolato'). La totale aggiunge le due basi circolari, ciascuna π·r²."},
+    hints:["Laterale: 2 · 3,14 · 2 · 5.","Due basi: 2 · (3,14 · 2²). Poi somma."],
+    steps:[
+      {label:"Passo 1: Superficie laterale",answer:["62,8","62.8"],feedback:"2 · 3,14 · 2 · 5 = 62,8 cm²."},
+      {label:"Passo 2: Due basi",answer:["25,12","25.12"],feedback:"2 · (3,14 · 4) = 2 · 12,56 = 25,12 cm²."},
+      {label:"Passo 3: Superficie totale",answer:["87,92","87.92"],feedback:"62,8 + 25,12 = 87,92 cm²."}
+    ], finalAnswer:["87,92","87.92"] },
+  { expr:"Problema", title:"Volume del cono", problemText:"Un cono ha il raggio di base di 3 cm e l'altezza di 4 cm. Calcola il volume (usa π ≈ 3,14).",
+    desc:"V = (1/3) · π · raggio² · altezza.",
+    tech:{name:"Cono: raggio, altezza e volume",desc:"Il volume del cono è un terzo di quello del cilindro con stessa base e altezza: V = (1/3)·π·r²·h."},
+    hints:["Calcola π · r² · h = 3,14 · 9 · 4.","Poi dividi per 3."],
+    steps:[
+      {label:"Passo 1: π · r² · h",answer:["113,04","113.04"],feedback:"3,14 · 9 · 4 = 113,04."},
+      {label:"Passo 2: Volume",answer:["37,68","37.68"],feedback:"113,04 / 3 = 37,68 cm³."}
+    ], finalAnswer:["37,68","37.68"] },
+  { expr:"Problema", title:"Superficie laterale del cono", problemText:"Un cono ha raggio di base 3 cm e apotema 5 cm. Calcola la superficie laterale (usa π ≈ 3,14).",
+    desc:"S laterale = π · raggio · apotema.",
+    tech:{name:"Apotema del cono",desc:"L'apotema del cono è la distanza dal vertice a un punto del bordo della base (il lato obliquo). La superficie laterale è π·r·apotema."},
+    hints:["Usa la formula π · r · apotema.","3,14 · 3 · 5."],
+    steps:[
+      {label:"Passo 1: Imposta",answer:["3.14*3*5"],feedback:"S = π · r · apotema = 3,14 · 3 · 5."},
+      {label:"Passo 2: Calcola",answer:["47,1","47.1"],feedback:"3,14 · 3 · 5 = 47,1 cm²."}
+    ], finalAnswer:["47,1","47.1"] },
+  { expr:"Problema", title:"Volume della piramide", problemText:"Una piramide ha base quadrata con lato 6 cm e altezza 10 cm. Calcola il volume.",
+    desc:"V = (1/3) · Area di base · altezza.",
+    tech:{name:"Piramide: area di base, altezza, vertice",desc:"La piramide ha un vertice e una base poligonale. Il volume è un terzo dell'area di base per l'altezza (distanza vertice-base)."},
+    hints:["Area di base del quadrato: 6 · 6.","Poi (Area · altezza)/3."],
+    steps:[
+      {label:"Passo 1: Area di base",answer:["36"],feedback:"6 · 6 = 36 cm²."},
+      {label:"Passo 2: Area · altezza",answer:["360"],feedback:"36 · 10 = 360."},
+      {label:"Passo 3: Volume",answer:["120"],feedback:"360 / 3 = 120 cm³."}
+    ], finalAnswer:["120"] },
+  { expr:"Problema", title:"Volume della sfera", problemText:"Una sfera ha il raggio di 3 cm. Calcola il volume (usa π ≈ 3,14).",
+    desc:"V = (4/3) · π · raggio³.",
+    tech:{name:"Sfera: raggio e volume",desc:"La sfera è definita dal suo raggio. Il volume è (4/3)·π·r³, dove r³ = r·r·r."},
+    hints:["Calcola il raggio al cubo: 3³ = 27.","Poi (4 · 3,14 · 27)/3."],
+    steps:[
+      {label:"Passo 1: Raggio³",answer:["27"],feedback:"3³ = 3 · 3 · 3 = 27."},
+      {label:"Passo 2: π · r³",answer:["84,78","84.78"],feedback:"3,14 · 27 = 84,78."},
+      {label:"Passo 3: Volume",answer:["113,04","113.04"],feedback:"(4 · 84,78)/3 = 339,12/3 = 113,04 cm³."}
+    ], finalAnswer:["113,04","113.04"] },
+  { expr:"Problema", title:"Superficie della sfera", problemText:"Una sfera ha il raggio di 5 cm. Calcola la sua superficie (usa π ≈ 3,14).",
+    desc:"S = 4 · π · raggio².",
+    tech:{name:"Superficie della sfera",desc:"La superficie della sfera si calcola con S = 4·π·r². Non ha facce piane: è tutta curva."},
+    hints:["Calcola il raggio al quadrato: 5².","Poi 4 · 3,14 · 25."],
+    steps:[
+      {label:"Passo 1: Raggio²",answer:["25"],feedback:"5² = 25."},
+      {label:"Passo 2: π · r²",answer:["78,5","78.5"],feedback:"3,14 · 25 = 78,5."},
+      {label:"Passo 3: Superficie",answer:["314"],feedback:"4 · 78,5 = 314 cm²."}
+    ], finalAnswer:["314"] },
+],
+
 };
 
 /* ────────── STATO APP ────────── */
@@ -2845,6 +3655,11 @@ let errorStats = {};
 /* Modalità allenamento misto */
 let mixedMode = false;
 let mixedExercises = []; // array di {topicId, exIdx}
+/* Guard anti doppio-completamento dell'esercizio corrente (resettato in loadExercise) */
+let exerciseCompleted = {};
+/* True solo dopo una lettura Firestore riuscita: evita di sovrascrivere il cloud
+   con progressi vuoti quando la lettura iniziale fallisce (rete/permessi). */
+let cloudLoaded = false;
 
 /* Carica progresso da Firestore (o localStorage se offline) */
 async function loadProgress() {
@@ -2852,6 +3667,7 @@ async function loadProgress() {
   streak = 0;
   totalXp = 0;
   errorStats = {};
+  cloudLoaded = false;
   if (currentUser) {
     try {
       const doc = await db.collection('progress').doc(currentUser.uid).get();
@@ -2865,7 +3681,12 @@ async function loadProgress() {
           else progress[k] = new Set(d[k]);
         }
       }
+      // Lettura riuscita (documento esistente o nuovo utente): ora è sicuro scrivere sul cloud.
+      cloudLoaded = true;
     } catch(e) {
+      // Lettura fallita: NON scrivere sul cloud (rischio di cancellare i progressi remoti).
+      // Si lavora sui dati locali finché una lettura non riesce.
+      cloudLoaded = false;
       loadFromLocal();
     }
   } else {
@@ -2893,8 +3714,10 @@ async function saveProgress() {
   d._xp = totalXp;
   d._errors = errorStats;
   localStorage.setItem('mathAtelier_progress', JSON.stringify(d));
-  if (currentUser) {
-    try { await db.collection('progress').doc(currentUser.uid).set(d); } catch(e) {}
+  // Scrive sul cloud SOLO se la lettura iniziale è riuscita, così non si sovrascrive
+  // mai il documento remoto con progressi vuoti. merge:true come rete di sicurezza.
+  if (currentUser && cloudLoaded) {
+    try { await db.collection('progress').doc(currentUser.uid).set(d, {merge:true}); } catch(e) {}
   }
 }
 
@@ -2937,10 +3760,30 @@ function norm(s) {
   return r;
 }
 
-/* Versione "loose" della normalizzazione: rimuove tutte le parentesi e i *
+/* Rimuove i * "cosmetici" (moltiplicazione implicita: 2*x → 2x, x*y → xy)
+   MA conserva il * tra due cifre, così "2*3" non collassa mai in "23"
+   (che altrimenti verrebbe accettato per errore). */
+function stripCosmeticMul(s) {
+  return s.replace(/\*/g, (m, off) => {
+    const a = s[off - 1], b = s[off + 1];
+    return (/\d/.test(a) && /\d/.test(b)) ? '*' : '';
+  });
+}
+
+/* Versione "loose" della normalizzazione: rimuove le parentesi e i * cosmetici
    per un confronto più tollerante (ignora struttura cosmetica). */
 function normLoose(s) {
-  return norm(s).replace(/\*/g,'').replace(/[()\[\]{}]/g,'');
+  return stripCosmeticMul(norm(s)).replace(/[()\[\]{}]/g,'');
+}
+
+/* Se la stringa (già normalizzata) è un numero puro o una frazione semplice a/b,
+   ne restituisce il valore numerico; altrimenti null. Serve per accettare risposte
+   numericamente equivalenti: "0.75" == "3/4", ".5" == "0.5", "12.560" == "12.56". */
+function numVal(s) {
+  if (/^[+-]?\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+  const f = s.match(/^([+-]?\d+(?:\.\d+)?)\/(\d+(?:\.\d+)?)$/);
+  if (f) { const d = parseFloat(f[2]); return d === 0 ? null : parseFloat(f[1]) / d; }
+  return null;
 }
 
 /* Confronta i termini di due espressioni dopo splitTerms (commutatività). */
@@ -2960,13 +3803,19 @@ function termsEqual(a, b) {
    3. Match "loose" (ignora parentesi e * - x+(5) == x+5) */
 function checkAns(input, accepted) {
   const ni = norm(input);
-  const niNoMul = ni.replace(/\*/g, '');
+  const niNoMul = stripCosmeticMul(ni);
   const niLoose = normLoose(input);
+  const niNum = numVal(ni);
 
   for (const a of accepted) {
     const na = norm(a);
-    const naNoMul = na.replace(/\*/g, '');
+    const naNoMul = stripCosmeticMul(na);
     const naLoose = normLoose(a);
+    // Livello 0: equivalenza numerica (decimali/frazioni con lo stesso valore)
+    if (niNum !== null) {
+      const naNum = numVal(na);
+      if (naNum !== null && Math.abs(niNum - naNum) < 1e-9) return true;
+    }
     // Livello 1: match diretto
     if (na === ni || na === niNoMul || naNoMul === niNoMul) return true;
     // Livello 2: stessi termini in ordine diverso
@@ -3039,6 +3888,13 @@ function navigate(screen, topicId, exIdx) {
   currentScreen = screen;
   const backBtn = document.getElementById('btn-back');
 
+  // Uscendo verso home/lista/stats si esce sempre dall'allenamento misto
+  // (l'avanzamento del misto usa loadExercise() diretto, non navigate()).
+  if (screen === 'home' || screen === 'list' || screen === 'stats' || screen === 'theory') {
+    mixedMode = false;
+    mixedExercises = [];
+  }
+
   if (screen === 'home') {
     document.getElementById('screen-home').classList.add('active');
     backBtn.classList.add('hidden');
@@ -3058,6 +3914,10 @@ function navigate(screen, topicId, exIdx) {
     document.getElementById('screen-stats').classList.add('active');
     backBtn.classList.add('hidden');
     renderStats();
+  } else if (screen === 'theory') {
+    document.getElementById('screen-theory').classList.add('active');
+    backBtn.classList.remove('hidden');
+    renderTheory(topicId);
   }
   updateHeaderUser();
   updateNav();
@@ -3129,6 +3989,162 @@ function renderHome() {
   // Allenamento misto: collega bottone (idempotente)
   const mixedBtn = document.getElementById('mixed-card');
   if (mixedBtn) mixedBtn.onclick = startMixedMode;
+  // Teoria & Termini: collega bottone (idempotente)
+  const theoryBtn = document.getElementById('theory-card');
+  if (theoryBtn) theoryBtn.onclick = () => navigate('theory');
+}
+
+/* ────────── TEORIA & TERMINI (nomenclatura) ────────── */
+let theoryTopicId = 'all';
+let theoryMode = 'cards';   // 'cards' | 'quiz'
+let theoryDeck = [];        // [{term, def, topic}]
+let theoryIdx = 0;
+let theoryFlipped = false;
+
+/* Costruisce il glossario da EXERCISES: raccoglie le coppie tech.name/tech.desc,
+   deduplicate per nome. topicId='all' unisce tutti gli argomenti. */
+function buildTheoryDeck(topicId) {
+  const seen = new Set();
+  const deck = [];
+  const ids = topicId === 'all' ? Object.keys(EXERCISES) : [topicId];
+  ids.forEach(tid => {
+    (EXERCISES[tid] || []).forEach(ex => {
+      if (ex.tech && ex.tech.name && ex.tech.desc) {
+        const key = ex.tech.name.trim().toLowerCase();
+        if (!seen.has(key)) {
+          seen.add(key);
+          deck.push({ term: ex.tech.name, def: ex.tech.desc, topic: tid });
+        }
+      }
+    });
+  });
+  return deck;
+}
+
+function renderTheory(topicId) {
+  if (topicId) theoryTopicId = topicId;
+  // Chip degli argomenti (Tutti + solo quelli con esercizi)
+  const chips = document.getElementById('theory-topic-chips');
+  chips.innerHTML = '';
+  const entries = [{ id: 'all', name: 'Tutti' }].concat(
+    TOPICS.filter(t => (EXERCISES[t.id] || []).length > 0).map(t => ({ id: t.id, name: t.name }))
+  );
+  entries.forEach(e => {
+    const b = document.createElement('button');
+    const active = e.id === theoryTopicId;
+    b.className = 'px-3 py-1.5 rounded-full text-xs font-label font-bold transition-all ' +
+      (active ? 'bg-tertiary text-white' : 'bg-surface-container-high text-on-surface-variant');
+    b.textContent = e.name;
+    b.onclick = () => { theoryTopicId = e.id; theoryIdx = 0; theoryFlipped = false; renderTheory(); };
+    chips.appendChild(b);
+  });
+  // Selettore modalità
+  const setModeBtns = () => {
+    const c = document.getElementById('theory-mode-cards');
+    const q = document.getElementById('theory-mode-quiz');
+    const on = 'bg-tertiary text-white';
+    const off = 'bg-surface-container-high text-on-surface-variant';
+    c.className = 'flex-1 py-2 rounded-xl font-label font-bold text-sm transition-all ' + (theoryMode === 'cards' ? on : off);
+    q.className = 'flex-1 py-2 rounded-xl font-label font-bold text-sm transition-all ' + (theoryMode === 'quiz' ? on : off);
+    c.onclick = () => { theoryMode = 'cards'; theoryIdx = 0; theoryFlipped = false; renderTheory(); };
+    q.onclick = () => { theoryMode = 'quiz'; renderTheory(); };
+  };
+  setModeBtns();
+  // Costruisci il mazzo
+  theoryDeck = buildTheoryDeck(theoryTopicId);
+  if (theoryIdx >= theoryDeck.length) theoryIdx = 0;
+
+  const cardArea = document.getElementById('theory-card-area');
+  const quizArea = document.getElementById('theory-quiz-area');
+  if (theoryMode === 'cards') {
+    cardArea.classList.remove('hidden');
+    quizArea.classList.add('hidden');
+    renderFlashcard();
+  } else {
+    cardArea.classList.add('hidden');
+    quizArea.classList.remove('hidden');
+    renderTheoryQuiz();
+  }
+  // Mescola
+  document.getElementById('theory-shuffle').onclick = () => {
+    for (let i = theoryDeck.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [theoryDeck[i], theoryDeck[j]] = [theoryDeck[j], theoryDeck[i]];
+    }
+    theoryIdx = 0; theoryFlipped = false;
+    if (theoryMode === 'cards') renderFlashcard(); else renderTheoryQuiz();
+  };
+}
+
+function renderFlashcard() {
+  const counter = document.getElementById('theory-counter');
+  const label = document.getElementById('theory-face-label');
+  const text = document.getElementById('theory-face-text');
+  const card = document.getElementById('theory-flashcard');
+  if (!theoryDeck.length) { text.textContent = 'Nessun termine.'; counter.textContent = ''; return; }
+  const c = theoryDeck[theoryIdx];
+  counter.textContent = `Carta ${theoryIdx + 1} / ${theoryDeck.length}`;
+  if (!theoryFlipped) {
+    label.textContent = 'Termine';
+    text.className = 'text-xl md:text-2xl font-headline font-bold text-on-surface';
+    text.textContent = c.term;
+  } else {
+    label.textContent = 'Definizione';
+    text.className = 'text-base md:text-lg font-body text-on-surface leading-relaxed';
+    text.textContent = c.def;
+  }
+  card.classList.remove('anim-enter'); void card.offsetWidth; card.classList.add('anim-enter');
+  card.onclick = () => { theoryFlipped = !theoryFlipped; renderFlashcard(); };
+  document.getElementById('theory-next').onclick = () => {
+    theoryIdx = (theoryIdx + 1) % theoryDeck.length; theoryFlipped = false; renderFlashcard();
+  };
+  document.getElementById('theory-prev').onclick = () => {
+    theoryIdx = (theoryIdx - 1 + theoryDeck.length) % theoryDeck.length; theoryFlipped = false; renderFlashcard();
+  };
+}
+
+function renderTheoryQuiz() {
+  const counter = document.getElementById('theory-counter');
+  const defEl = document.getElementById('theory-quiz-def');
+  const optsEl = document.getElementById('theory-quiz-options');
+  const fbEl = document.getElementById('theory-quiz-feedback');
+  fbEl.textContent = '';
+  optsEl.innerHTML = '';
+  if (theoryDeck.length < 2) { defEl.textContent = 'Servono almeno 2 termini per il quiz. Scegli un altro argomento.'; counter.textContent = ''; return; }
+  const c = theoryDeck[theoryIdx];
+  counter.textContent = `Domanda ${theoryIdx + 1} / ${theoryDeck.length}`;
+  defEl.textContent = c.def;
+  // Distrattori: altri termini del mazzo (o dal pool globale se pochi)
+  let pool = theoryDeck.map(d => d.term).filter(t => t !== c.term);
+  if (pool.length < 3) {
+    const global = buildTheoryDeck('all').map(d => d.term).filter(t => t !== c.term);
+    pool = Array.from(new Set(pool.concat(global)));
+  }
+  // Mescola i distrattori e prendi 3
+  for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
+  const options = pool.slice(0, 3).concat([c.term]);
+  for (let i = options.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [options[i], options[j]] = [options[j], options[i]]; }
+  let answered = false;
+  options.forEach(opt => {
+    const b = document.createElement('button');
+    b.className = 'w-full text-left p-3 rounded-xl bg-surface-container-low border-2 border-transparent font-label font-bold text-sm text-on-surface active:scale-[0.99] transition-all';
+    b.textContent = opt;
+    b.onclick = () => {
+      if (answered) return;
+      answered = true;
+      const correct = opt === c.term;
+      Array.from(optsEl.children).forEach(ch => {
+        if (ch.textContent === c.term) ch.className = 'w-full text-left p-3 rounded-xl bg-secondary-fixed border-2 border-secondary font-label font-bold text-sm text-on-surface';
+        else if (ch === b) ch.className = 'w-full text-left p-3 rounded-xl bg-error-container border-2 border-error font-label font-bold text-sm text-on-error-container';
+        else ch.className = 'w-full text-left p-3 rounded-xl bg-surface-container-low border-2 border-transparent font-label font-bold text-sm text-outline opacity-60';
+      });
+      fbEl.textContent = correct ? '✓ Esatto!' : '✗ Il termine giusto è evidenziato in verde.';
+      fbEl.className = 'mt-4 text-center font-headline font-bold text-lg ' + (correct ? 'text-secondary' : 'text-error');
+      // Avanza dopo una pausa
+      setTimeout(() => { theoryIdx = (theoryIdx + 1) % theoryDeck.length; renderTheoryQuiz(); }, correct ? 900 : 1800);
+    };
+    optsEl.appendChild(b);
+  });
 }
 
 /* Avvia la modalità allenamento misto: 10 esercizi a caso da TUTTI i topic */
@@ -3270,6 +4286,7 @@ function loadExercise() {
   // Reset tracking per nuovo esercizio
   stepAttempts = {};
   perfectExercise = true;
+  exerciseCompleted = {};
 
   // Fade-in del workspace per transizione fluida
   const ws = document.getElementById('screen-work');
@@ -3312,6 +4329,29 @@ function loadExercise() {
   } else {
     exprEl.className = 'text-2xl md:text-3xl font-headline font-bold tracking-wide text-primary text-center';
     exprEl.textContent = ex.expr;
+  }
+
+  // Promemoria domanda dentro il workspace (sempre visibile accanto ai passi).
+  // Uso textContent perché alcune espressioni contengono < o > (es. disequazioni).
+  const wq = document.getElementById('w-work-question');
+  if (wq) {
+    wq.innerHTML = '';
+    const lbl = document.createElement('div');
+    lbl.className = 'font-label text-xs font-bold text-primary uppercase tracking-widest mb-1';
+    lbl.textContent = 'La domanda';
+    wq.appendChild(lbl);
+    if (hasFormula) {
+      const f = document.createElement('div');
+      f.className = 'text-xl md:text-2xl font-headline font-bold text-primary break-words';
+      f.textContent = ex.expr;
+      wq.appendChild(f);
+    }
+    if (hasProblem) {
+      const p = document.createElement('div');
+      p.className = 'text-sm font-body text-on-surface leading-relaxed' + (hasFormula ? ' mt-2' : '');
+      p.textContent = ex.problemText;
+      wq.appendChild(p);
+    }
   }
 
   // SVG geometria
@@ -3440,7 +4480,11 @@ function renderSteps() {
       const attempts = stepAttempts[i] || 0;
       const showSolBtn = attempts >= 3 ?
         `<button type="button" onclick="revealStepAnswer(${i})" class="mt-2 text-xs font-label font-bold text-tertiary bg-tertiary-fixed/40 px-3 py-1.5 rounded-full active:scale-95 transition-all"><span class="material-symbols-outlined text-xs align-middle">lightbulb</span> Vedi soluzione di questo passo</button>` : '';
-      cont = `<div class="flex-1"><div class="mb-1"><span class="font-label text-xs text-primary uppercase font-bold tracking-widest">${step.label}</span></div><div class="relative"><input id="input-${i}" data-step="${i}" class="step-input w-full text-xl md:text-2xl font-headline font-bold text-primary bg-primary-fixed/30 border-none rounded-2xl px-4 py-3 focus:ring-4 focus:ring-primary/10 transition-all outline-none" placeholder="Scrivi la risposta..." type="text" autocomplete="off" inputmode="text"/></div>${kbHtml}<p id="fb-${i}" class="mt-2 text-xs text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-xs">lightbulb</span>Scrivi e premi Invio (o usa i bottoni per i simboli).</p>${showSolBtn}</div>`;
+      // Se la risposta attesa è solo numerica (niente lettere/√/^), su iPad apre la tastiera numerica
+      const numericOnly = Array.isArray(step.answer) && step.answer.length > 0 &&
+        step.answer.every(a => /^[\d.,/()+\-\s]+$/.test(String(a)));
+      const im = numericOnly ? 'decimal' : 'text';
+      cont = `<div class="flex-1"><div class="mb-1"><span class="font-label text-xs text-primary uppercase font-bold tracking-widest">${step.label}</span></div><div class="relative"><input id="input-${i}" data-step="${i}" class="step-input w-full text-xl md:text-2xl font-headline font-bold text-primary bg-primary-fixed/30 border-none rounded-2xl px-4 py-3 focus:ring-4 focus:ring-primary/10 transition-all outline-none" placeholder="Scrivi la risposta..." type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" inputmode="${im}"/></div>${kbHtml}<button type="button" onclick="submitStep(${i})" class="mt-2 w-full bg-primary text-on-primary font-headline font-bold px-6 py-3 rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-2 text-sm shadow"><span class="material-symbols-outlined text-base">check</span> Conferma questo passo</button><p id="fb-${i}" class="mt-2 text-xs text-on-surface-variant flex items-center gap-1"><span class="material-symbols-outlined text-xs">lightbulb</span>Scrivi la risposta, poi premi <b class="text-primary">Conferma</b> (o Invio).</p>${showSolBtn}</div>`;
     } else {
       cont = `<div class="flex-1"><div class="mb-1"><span class="font-label text-xs text-outline uppercase font-bold tracking-widest">${step.label}</span></div><div class="w-full h-14 border-2 border-dashed border-outline-variant rounded-2xl flex items-center px-4"><span class="text-outline-variant font-headline italic text-sm">In attesa del passo precedente...</span></div></div>`;
     }
@@ -3458,10 +4502,18 @@ function renderSteps() {
 
 function onStepKey(e) {
   if (e.key !== 'Enter') return;
-  const i = parseInt(e.target.dataset.step);
+  e.preventDefault();
+  submitStep(parseInt(e.target.dataset.step));
+}
+
+/* Conferma la risposta di uno step (chiamata sia da Invio sia dal bottone "Conferma"). */
+function submitStep(i) {
   const ex = (EXERCISES[currentTopicId]||[])[currentExIdx];
+  if (!ex) return;
   const step = ex.steps[i];
-  const val = e.target.value.trim();
+  const inp = document.getElementById('input-' + i);
+  if (!inp) return;
+  const val = inp.value.trim();
   if (!val) return;
 
   if (checkAns(val, step.answer)) {
@@ -3486,12 +4538,12 @@ function onStepKey(e) {
     stepAttempts[i] = (stepAttempts[i] || 0) + 1;
     perfectExercise = false;
     recordError(currentTopicId, currentExIdx);
-    e.target.classList.add('anim-err');
+    inp.classList.add('anim-err');
     const fb = document.getElementById(`fb-${i}`);
     const closeHint = getCloseHint(val, step.answer);
     const msg = closeHint || 'Non è corretto. Riprova!';
     if (fb) fb.innerHTML = '<span class="material-symbols-outlined text-xs text-error">close</span><span class="text-error">' + msg + '</span>';
-    setTimeout(() => e.target.classList.remove('anim-err'), 400);
+    setTimeout(() => inp.classList.remove('anim-err'), 400);
     // Se l'utente ha sbagliato 3 volte, ri-renderizza per mostrare il bottone "Vedi soluzione"
     if (stepAttempts[i] === 3) {
       setTimeout(() => renderSteps(), 500);
@@ -3557,8 +4609,9 @@ function showConfetti() {
 function insertSymbol(stepIdx, sym) {
   const inp = document.getElementById('input-' + stepIdx);
   if (!inp) return;
-  const start = inp.selectionStart || inp.value.length;
-  const end = inp.selectionEnd || inp.value.length;
+  // ?? invece di || così la posizione 0 (cursore a inizio campo) non viene scartata
+  const start = inp.selectionStart ?? inp.value.length;
+  const end = inp.selectionEnd ?? inp.value.length;
   inp.value = inp.value.slice(0, start) + sym + inp.value.slice(end);
   inp.focus();
   // Riposiziona il cursore dopo il simbolo inserito
@@ -3832,6 +4885,15 @@ function renderStats() {
 /* ────────── INIT ────────── */
 /* L'app parte dalla schermata auth.
    Se l'utente è già loggato, onAuthStateChanged chiama enterApp automaticamente. */
+
+/* ────────── PWA: service worker per uso offline (iPad/PC) ────────── */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch((e) => {
+      console.warn('Service worker non registrato:', e);
+    });
+  });
+}
 </script>
 </body>
 </html>
