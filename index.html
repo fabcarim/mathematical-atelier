@@ -138,6 +138,8 @@ svg.geo { max-width:100%; height:auto; }
     <h2 id="home-greeting" class="text-2xl md:text-3xl font-headline font-extrabold text-on-surface mb-2">Ciao! 👋</h2>
     <p class="text-on-surface-variant">Scegli un argomento per esercitarti.</p>
   </div>
+  <!-- Dashboard genitore: card dei figli collegati (popolata da renderHome) -->
+  <div id="parent-dash" class="mb-4"></div>
   <!-- Streak + XP + Oggi card -->
   <div class="mb-4 grid grid-cols-3 gap-3">
     <div class="bg-primary-fixed/50 p-3 rounded-2xl flex items-center gap-3">
@@ -458,7 +460,9 @@ function enterApp(user) {
   document.getElementById('app-header').classList.remove('hidden');
   document.getElementById('bottom-nav').classList.remove('hidden');
   updateHeaderUser();
-  loadProgress().then(() => navigate('home'));
+  loadProgress()
+    .then(() => loadParentChildren())
+    .then(() => navigate('home'));
 }
 
 function updateHeaderUser() {
@@ -3665,6 +3669,11 @@ let exerciseCompleted = {};
 let cloudLoaded = false;
 /* Contatore giornaliero di esercizi completati: { "AAAA-MM-GG": numero } */
 let dailyCounts = {};
+/* Dashboard genitore: figli collegati (documenti letti dal cloud) e figlio
+   attualmente visualizzato (uid). Quando viewingChildUid è valorizzato, i globali
+   contengono i dati del figlio e i salvataggi sono disabilitati. */
+let parentChildren = [];
+let viewingChildUid = null;
 
 /* Chiave della data odierna in ora LOCALE (AAAA-MM-GG), per il contatore giornaliero. */
 function todayKey() {
@@ -3724,18 +3733,91 @@ function loadFromLocal() {
   } catch(e) {}
 }
 async function saveProgress() {
+  // Mentre il genitore visualizza il figlio, i globali contengono i dati del
+  // figlio: NON salvare nulla (né locale né cloud), altrimenti si sovrascrive.
+  if (viewingChildUid) return;
   const d = {};
   for (const k in progress) d[k] = [...progress[k]];
   d._streak = streak;
   d._xp = totalXp;
   d._errors = errorStats;
   d._daily = dailyCounts;
+  // Nome/email per farsi identificare dal genitore nella dashboard.
+  if (currentUser) {
+    d._name = currentUser.displayName || (currentUser.email ? currentUser.email.split('@')[0] : '');
+    d._email = currentUser.email || '';
+  }
   localStorage.setItem('mathAtelier_progress', JSON.stringify(d));
   // Scrive sul cloud SOLO se la lettura iniziale è riuscita, così non si sovrascrive
   // mai il documento remoto con progressi vuoti. merge:true come rete di sicurezza.
   if (currentUser && cloudLoaded) {
     try { await db.collection('progress').doc(currentUser.uid).set(d, {merge:true}); } catch(e) {}
   }
+}
+
+/* ────────── DASHBOARD GENITORE ────────── */
+/* Applica un documento di progresso (dal cloud) alle variabili globali,
+   così renderStats/renderHome mostrano quei dati. */
+function applyDataToGlobals(d) {
+  progress = {}; streak = 0; totalXp = 0; errorStats = {}; dailyCounts = {};
+  for (const k in d) {
+    if (k === '_streak') streak = d[k] || 0;
+    else if (k === '_xp') totalXp = d[k] || 0;
+    else if (k === '_errors') errorStats = d[k] || {};
+    else if (k === '_daily') dailyCounts = d[k] || {};
+    else if (k.startsWith('_')) {}
+    else progress[k] = new Set(d[k]);
+  }
+}
+
+/* Il figlio collega la email del genitore al proprio documento (arrayUnion). */
+async function linkParentEmail(email) {
+  email = (email || '').trim().toLowerCase();
+  if (!email || !currentUser) return false;
+  try {
+    await db.collection('progress').doc(currentUser.uid).set(
+      { _parentEmails: firebase.firestore.FieldValue.arrayUnion(email),
+        _name: currentUser.displayName || (currentUser.email||'').split('@')[0],
+        _email: currentUser.email || '' },
+      { merge: true }
+    );
+    return true;
+  } catch(e) { return false; }
+}
+
+/* Il genitore cerca i figli che lo hanno autorizzato (email in _parentEmails). */
+async function loadParentChildren() {
+  parentChildren = [];
+  if (!currentUser || !currentUser.email) return;
+  try {
+    const snap = await db.collection('progress')
+      .where('_parentEmails', 'array-contains', currentUser.email.toLowerCase())
+      .get();
+    snap.forEach(doc => {
+      if (doc.id !== currentUser.uid) parentChildren.push({ uid: doc.id, data: doc.data() });
+    });
+  } catch(e) { parentChildren = []; }
+}
+
+/* Il genitore apre la dashboard di un figlio (dati in sola lettura). */
+async function viewChild(uid) {
+  const child = parentChildren.find(c => c.uid === uid);
+  if (!child) return;
+  let data = child.data;
+  try {
+    const fresh = await db.collection('progress').doc(uid).get();
+    if (fresh.exists) data = fresh.data();
+  } catch(e) {}
+  viewingChildUid = uid;
+  applyDataToGlobals(data);
+  navigate('stats');
+}
+
+/* Esce dalla vista figlio e ricarica i dati del genitore. */
+async function exitChildView() {
+  viewingChildUid = null;
+  await loadProgress();
+  navigate('home');
 }
 
 /* Registra un errore su uno specifico esercizio */
@@ -3911,6 +3993,10 @@ function splitTerms(expr) {
 
 /* ────────── NAVIGAZIONE ────────── */
 function navigate(screen, topicId, exIdx) {
+  // Se il genitore sta vedendo un figlio e va altrove (non 'stats'), esce prima
+  // dalla vista figlio (ricarica i propri dati) per non mostrare dati altrui.
+  if (viewingChildUid && screen !== 'stats') { exitChildView(); return; }
+
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   currentScreen = screen;
   const backBtn = document.getElementById('btn-back');
@@ -4014,6 +4100,27 @@ function renderHome() {
   document.getElementById('xp-num').textContent = totalXp;
   const todayEl = document.getElementById('today-num');
   if (todayEl) todayEl.textContent = dailyCounts[todayKey()] || 0;
+
+  // Dashboard genitore: una card per ogni figlio collegato
+  const pd = document.getElementById('parent-dash');
+  if (pd) {
+    if (parentChildren.length) {
+      pd.innerHTML = parentChildren.map(c => {
+        const nome = (c.data && (c.data._name || (c.data._email||'').split('@')[0])) || 'Figlio';
+        const oggi = (c.data && c.data._daily && c.data._daily[todayKey()]) || 0;
+        return `<button onclick="viewChild('${c.uid}')" class="w-full mb-3 p-4 rounded-2xl bg-gradient-to-r from-secondary to-secondary-fixed-dim text-on-surface text-left active:scale-[0.98] transition-all flex items-center gap-4 shadow-lg">
+          <div class="w-12 h-12 bg-white/30 rounded-xl flex items-center justify-center text-2xl">👧</div>
+          <div class="flex-1">
+            <div class="font-headline font-bold text-base">Progressi di ${nome}</div>
+            <div class="text-xs opacity-90">Oggi: ${oggi} esercizi · tocca per il dettaglio</div>
+          </div>
+          <span class="material-symbols-outlined">insights</span>
+        </button>`;
+      }).join('');
+    } else {
+      pd.innerHTML = '';
+    }
+  }
 
   // Allenamento misto: collega bottone (idempotente)
   const mixedBtn = document.getElementById('mixed-card');
@@ -4939,7 +5046,32 @@ function renderStats() {
       </div>
     </div>`;
 
+  // Banner quando il genitore visualizza un figlio
+  let childName = '';
+  if (viewingChildUid) {
+    const cc = parentChildren.find(x => x.uid === viewingChildUid);
+    childName = cc ? (cc.data._name || (cc.data._email || '').split('@')[0]) : 'tuo figlio';
+  }
+  const childBanner = viewingChildUid ? `
+    <div class="mb-4 p-3 rounded-2xl bg-secondary-container flex items-center gap-3">
+      <span class="material-symbols-outlined text-secondary">supervisor_account</span>
+      <div class="flex-1 text-sm">Stai vedendo i progressi di <b>${esc(childName)}</b></div>
+      <button onclick="exitChildView()" class="text-xs font-label font-bold text-primary underline">Esci</button>
+    </div>` : '';
+  // Casella per collegare un genitore (solo nella vista dei propri progressi)
+  const parentLinkBox = (!viewingChildUid && currentUser) ? `
+    <div class="mt-6 p-4 rounded-2xl bg-surface-container-low">
+      <p class="font-headline font-bold text-sm mb-1 flex items-center gap-2"><span class="material-symbols-outlined text-primary text-base">family_restroom</span>Fai vedere i progressi a un genitore</p>
+      <p class="text-xs text-on-surface-variant mb-2">Inserisci l'email del genitore: dalla sua app potrà seguire i tuoi progressi.</p>
+      <div class="flex gap-2">
+        <input id="parent-email-input" type="email" inputmode="email" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="email@esempio.com" class="flex-1 px-3 py-2 rounded-xl bg-surface-container-lowest border border-outline-variant/40 text-sm outline-none focus:ring-2 focus:ring-primary/20"/>
+        <button onclick="handleLinkParent()" class="px-4 py-2 rounded-xl bg-primary text-on-primary font-label font-bold text-sm active:scale-95">Collega</button>
+      </div>
+      <p id="parent-link-msg" class="text-xs mt-2"></p>
+    </div>` : '';
+
   c.innerHTML = `
+    ${childBanner}
     <!-- Hero card progresso totale -->
     <div class="bg-primary-fixed p-5 rounded-3xl mb-4 text-center">
       <p class="text-4xl font-headline font-black text-primary mb-1">${gPct}%</p>
@@ -4975,9 +5107,28 @@ function renderStats() {
     <h3 class="font-headline font-bold text-base mt-6 mb-3">Progresso per argomento</h3>
     ${topicHtml}
 
-    <button onclick="if(confirm('Vuoi davvero azzerare tutto il progresso?')){localStorage.removeItem('mathAtelier_progress');progress={};errorStats={};streak=0;totalXp=0;saveProgress();navigate('home');}" class="mt-6 w-full p-3 rounded-xl bg-error-container text-on-error-container font-label font-bold text-sm active:scale-95 transition-all">
+    ${parentLinkBox}
+
+    ${viewingChildUid ? '' : `<button onclick="if(confirm('Vuoi davvero azzerare tutto il progresso?')){localStorage.removeItem('mathAtelier_progress');progress={};errorStats={};streak=0;totalXp=0;dailyCounts={};saveProgress();navigate('home');}" class="mt-6 w-full p-3 rounded-xl bg-error-container text-on-error-container font-label font-bold text-sm active:scale-95 transition-all">
       Azzera progresso
-    </button>`;
+    </button>`}`;
+}
+
+/* Il figlio collega la email del genitore dalla casella nella schermata Progressi. */
+async function handleLinkParent() {
+  const inp = document.getElementById('parent-email-input');
+  const msg = document.getElementById('parent-link-msg');
+  const email = inp ? inp.value.trim() : '';
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    if (msg) { msg.textContent = 'Inserisci un indirizzo email valido.'; msg.className = 'text-xs mt-2 text-error'; }
+    return;
+  }
+  if (msg) { msg.textContent = 'Collegamento in corso...'; msg.className = 'text-xs mt-2 text-on-surface-variant'; }
+  const ok = await linkParentEmail(email);
+  if (msg) {
+    if (ok) { msg.textContent = '✓ Genitore collegato! Ora può vedere i tuoi progressi dalla sua app.'; msg.className = 'text-xs mt-2 text-secondary font-bold'; if (inp) inp.value = ''; }
+    else { msg.textContent = 'Errore nel collegamento. Riprova quando sei online.'; msg.className = 'text-xs mt-2 text-error'; }
+  }
 }
 
 /* ────────── INIT ────────── */
