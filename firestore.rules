@@ -1,0 +1,23 @@
+rules_version = '2';
+
+// Regole di sicurezza per Mathematical Atelier.
+// Collezione "progress": un documento per utente (id = uid dell'utente).
+// - Ogni utente legge/scrive SOLO il proprio documento.
+// - Un genitore la cui email è elencata in _parentEmails del figlio può
+//   LEGGERE (non scrivere) il documento del figlio.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /progress/{userId} {
+
+      // L'utente proprietario: lettura e scrittura del proprio documento.
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // Il genitore: sola lettura del documento del figlio, se la sua email
+      // (dell'account con cui è loggato) è presente nell'array _parentEmails.
+      allow read: if request.auth != null
+                  && request.auth.token.email != null
+                  && '_parentEmails' in resource.data
+                  && request.auth.token.email.lower() in resource.data._parentEmails;
+    }
+  }
+}
