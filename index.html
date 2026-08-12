@@ -138,8 +138,15 @@ svg.geo { max-width:100%; height:auto; }
     <h2 id="home-greeting" class="text-2xl md:text-3xl font-headline font-extrabold text-on-surface mb-2">Ciao! 👋</h2>
     <p class="text-on-surface-variant">Scegli un argomento per esercitarti.</p>
   </div>
-  <!-- Streak + XP card -->
-  <div class="mb-4 grid grid-cols-2 gap-3">
+  <!-- Streak + XP + Oggi card -->
+  <div class="mb-4 grid grid-cols-3 gap-3">
+    <div class="bg-primary-fixed/50 p-3 rounded-2xl flex items-center gap-3">
+      <div class="w-10 h-10 bg-primary-fixed rounded-xl flex items-center justify-center text-xl">📅</div>
+      <div>
+        <div id="today-num" class="font-headline font-extrabold text-primary text-xl leading-tight">0</div>
+        <div class="font-label text-[10px] text-primary uppercase tracking-wider">Oggi</div>
+      </div>
+    </div>
     <div class="bg-tertiary-fixed/50 p-3 rounded-2xl flex items-center gap-3">
       <div class="w-10 h-10 bg-tertiary-fixed rounded-xl flex items-center justify-center text-xl">🔥</div>
       <div>
@@ -3656,6 +3663,16 @@ let exerciseCompleted = {};
 /* True solo dopo una lettura Firestore riuscita: evita di sovrascrivere il cloud
    con progressi vuoti quando la lettura iniziale fallisce (rete/permessi). */
 let cloudLoaded = false;
+/* Contatore giornaliero di esercizi completati: { "AAAA-MM-GG": numero } */
+let dailyCounts = {};
+
+/* Chiave della data odierna in ora LOCALE (AAAA-MM-GG), per il contatore giornaliero. */
+function todayKey() {
+  const d = new Date();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const g = String(d.getDate()).padStart(2, '0');
+  return d.getFullYear() + '-' + m + '-' + g;
+}
 
 /* Carica progresso da Firestore (o localStorage se offline) */
 async function loadProgress() {
@@ -3663,6 +3680,7 @@ async function loadProgress() {
   streak = 0;
   totalXp = 0;
   errorStats = {};
+  dailyCounts = {};
   cloudLoaded = false;
   if (currentUser) {
     try {
@@ -3673,6 +3691,7 @@ async function loadProgress() {
           if (k === '_streak') streak = d[k] || 0;
           else if (k === '_xp') totalXp = d[k] || 0;
           else if (k === '_errors') errorStats = d[k] || {};
+          else if (k === '_daily') dailyCounts = d[k] || {};
           else if (k.startsWith('_')) {}
           else progress[k] = new Set(d[k]);
         }
@@ -3698,6 +3717,7 @@ function loadFromLocal() {
         if (k === '_streak') streak = d[k] || 0;
         else if (k === '_xp') totalXp = d[k] || 0;
         else if (k === '_errors') errorStats = d[k] || {};
+        else if (k === '_daily') dailyCounts = d[k] || {};
         else if (!k.startsWith('_')) progress[k] = new Set(d[k]);
       }
     }
@@ -3709,6 +3729,7 @@ async function saveProgress() {
   d._streak = streak;
   d._xp = totalXp;
   d._errors = errorStats;
+  d._daily = dailyCounts;
   localStorage.setItem('mathAtelier_progress', JSON.stringify(d));
   // Scrive sul cloud SOLO se la lettura iniziale è riuscita, così non si sovrascrive
   // mai il documento remoto con progressi vuoti. merge:true come rete di sicurezza.
@@ -3981,6 +4002,8 @@ function renderHome() {
   // Streak + XP
   document.getElementById('streak-num').textContent = streak;
   document.getElementById('xp-num').textContent = totalXp;
+  const todayEl = document.getElementById('today-num');
+  if (todayEl) todayEl.textContent = dailyCounts[todayKey()] || 0;
 
   // Allenamento misto: collega bottone (idempotente)
   const mixedBtn = document.getElementById('mixed-card');
@@ -4624,6 +4647,9 @@ function autoCompleteExercise(finalVal) {
   exerciseCompleted[currentExIdx] = true;
   if (!progress[currentTopicId]) progress[currentTopicId] = new Set();
   progress[currentTopicId].add(currentExIdx);
+  // Contatore giornaliero: conta ogni esercizio completato oggi (anche i ripassi)
+  const tk = todayKey();
+  dailyCounts[tk] = (dailyCounts[tk] || 0) + 1;
 
   // === Calcolo XP e streak ===
   let xpGained = 10; // base
@@ -4838,6 +4864,30 @@ function renderStats() {
   });
   const toughName = toughestTopic ? (TOPICS.find(t=>t.id===toughestTopic)||{}).name : null;
 
+  // === Andamento ultimi 7 giorni (esercizi al giorno) ===
+  const giorniSett = ['Do','Lu','Ma','Me','Gi','Ve','Sa'];
+  const days = [];
+  const _now = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const dd = new Date(_now);
+    dd.setDate(_now.getDate() - i);
+    const key = dd.getFullYear() + '-' + String(dd.getMonth()+1).padStart(2,'0') + '-' + String(dd.getDate()).padStart(2,'0');
+    days.push({ key, label: giorniSett[dd.getDay()], count: dailyCounts[key] || 0, isToday: key === todayKey() });
+  }
+  const maxCount = Math.max(1, ...days.map(d => d.count));
+  const weekTotal = days.reduce((a, d) => a + d.count, 0);
+  const dailyHtml = `
+    <h3 class="font-headline font-bold text-base mt-2 mb-3 flex items-center gap-2"><span class="material-symbols-outlined text-primary">calendar_month</span>Ultimi 7 giorni <span class="text-xs font-label font-normal text-on-surface-variant">(${weekTotal} esercizi)</span></h3>
+    <div class="bg-surface-container-low p-4 rounded-2xl mb-6">
+      <div class="flex items-end justify-between gap-2 h-32">
+        ${days.map(d => `<div class="flex-1 flex flex-col items-center justify-end gap-1 h-full">
+          <span class="text-[11px] font-headline font-bold ${d.count>0?'text-primary':'text-outline'}">${d.count}</span>
+          <div class="w-full ${d.isToday?'bg-primary':'bg-primary-fixed-dim'} rounded-lg transition-all" style="height:${Math.max(4, Math.round(d.count / maxCount * 90))}%"></div>
+          <span class="text-[10px] font-label ${d.isToday?'text-primary font-bold':'text-on-surface-variant'}">${d.label}</span>
+        </div>`).join('')}
+      </div>
+    </div>`;
+
   c.innerHTML = `
     <!-- Hero card progresso totale -->
     <div class="bg-primary-fixed p-5 rounded-3xl mb-4 text-center">
@@ -4859,6 +4909,7 @@ function renderStats() {
         <div class="text-[10px] font-label text-error uppercase tracking-wider">⚠ Errori</div>
       </div>
     </div>
+    ${dailyHtml}
     ${toughName?`<div class="mb-4 p-3 bg-surface-container-low rounded-2xl flex items-center gap-3">
       <span class="material-symbols-outlined text-tertiary">emoji_objects</span>
       <div class="text-sm"><b>Argomento più difficile:</b> ${toughName} (${maxErr} errori)</div>
